@@ -1,0 +1,43 @@
+import express from 'express';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import { registerUser, loginUser } from '../controllers/auth.controller.js';
+
+const router = express.Router();
+
+// Email + Password
+// router.post('/register', registerUser);
+router.post('/login', loginUser);
+
+// Google OAuth - Start login flow
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+// Google OAuth - Callback after login
+router.get('/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: '/api/auth/failure' }),
+  (req, res) => {
+    // Generate JWT on successful login
+    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1d'
+    });
+
+    res.json({
+      message: 'Google login successful',
+      token,
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email
+      }
+    });
+  }
+);
+
+// Optional failure route
+router.get('/failure', (req, res) => {
+  res.status(401).json({ message: 'Google login failed' });
+});
+
+export default router;
