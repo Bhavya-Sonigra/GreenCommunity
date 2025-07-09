@@ -23,15 +23,7 @@ router.get('/google/callback',
       expiresIn: '1d'
     });
 
-    res.json({
-      message: 'Google login successful',
-      token,
-      user: {
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email
-      }
-    });
+    res.redirect(`http://localhost:3000/dashboard?token=${token}`);
   }
 );
 
