@@ -15,12 +15,10 @@ export default function LoginPage() {
     setIsSubmitting(true);
     setIsSuccess(false);
 
-    // Simulate API call delay
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
 
-      // Optional: Reset success after 2 seconds
       setTimeout(() => {
         setIsSuccess(false);
       }, 2000);
@@ -35,10 +33,13 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-white px-4">
       <form onSubmit={handleContinue} className="w-full max-w-sm space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-2">Welcome back!</h1>
-          <p className=" leaf-cursor text-gray-600 mb-6">
-            Enter your email and password to log in.
-          </p>
+
+          <img
+            src="/logo.jpg"
+            alt="App Logo"
+            className="mx-auto h-15 w-80 mb-5"
+          />
+          
         </div>
 
         <div>
@@ -52,7 +53,7 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="leaf-cursor w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
           />
         </div>
 
@@ -71,7 +72,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Animated Submit Button */}
         <button
           type="submit"
           className={`w-full flex items-center justify-center py-2 rounded-md font-semibold text-white transition-all ${
@@ -90,7 +90,6 @@ export default function LoginPage() {
             </div>
           ) : isSuccess ? (
             <div className="flex items-center gap-2">
-              
               <span>Success</span>
             </div>
           ) : (
@@ -98,7 +97,7 @@ export default function LoginPage() {
           )}
         </button>
 
-        <div className="my-4 text-center text-gray-400 text-sm">or</div>
+        <div className="my-3 text-center text-gray-400 text-sm">or</div>
 
         <button
           type="button"
