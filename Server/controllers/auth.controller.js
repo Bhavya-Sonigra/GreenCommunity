@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email }
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Server error. Please try again later."});
   }
 };
 

@@ -4,9 +4,6 @@ import jwt from 'jsonwebtoken';
 import { registerUser, loginUser } from '../controllers/auth.controller.js';
 
 const router = express.Router();
-
-// Email + Password
-// router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // Google OAuth - Start login flow
