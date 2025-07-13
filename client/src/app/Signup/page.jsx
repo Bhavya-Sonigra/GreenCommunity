@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { useRouter } from 'next/navigation';
+import { authAPI } from '../../lib/api';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ export default function SignUpPage() {
 
   const router = useRouter(); // 👈 Add this
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -25,19 +26,26 @@ export default function SignUpPage() {
     setIsSubmitting(true);
     setIsSuccess(false);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const data = await authAPI.register({ email, password });
+      
       setIsSuccess(true);
-
-      // Redirect to user details page after a brief success message
+      console.log('Registration successful:', data);
+      
+      // Redirect to user details page after successful registration
       setTimeout(() => {
-        router.push('/user-details'); // 👈 Redirect here
+        router.push('/user-details');
       }, 1000);
-    }, 2000);
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert(`Registration failed: ${error.message}`);
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleSignUp = () => {
-    alert('Google sign-up clicked');
+    authAPI.googleLogin();
   };
 
   return (
@@ -45,7 +53,7 @@ export default function SignUpPage() {
       <form onSubmit={handleSignUp} className="w-full max-w-sm space-y-4">
         <div className="text-center">
           <img
-            src="/logo.jpg"
+            src="/logo1.jpg"
             alt="App Logo"
             className="mx-auto h-15 w-80 mb-5"
           />

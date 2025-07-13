@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
+import { authAPI } from '../../lib/api';
 
 
 export default function LoginPage() {
@@ -18,41 +19,26 @@ export default function LoginPage() {
     setIsSubmitting(true);
     setIsSuccess(false);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
+      const data = await authAPI.login({ email, password });
       
       setIsSuccess(true);
-      
       console.log('Login successful:', data);
+      
+      // Redirect to home after successful login
       setTimeout(() => {
-        setIsSuccess(false);
-        setEmail('');
-        setPassword('');
-        setIsSubmitting(false);
-      }, 2000); // Reset after 2 seconds
+        router.push('/');
+      }, 1000);
+      
     } catch (error) {
-      alert(`Error: ${error.message}`);
-    } finally {
+      console.error('Login error:', error);
+      alert(`Login failed: ${error.message}`);
       setIsSubmitting(false);
     }
   };
       
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    authAPI.googleLogin();
   };
 
   return (
@@ -61,7 +47,7 @@ export default function LoginPage() {
         <div className="text-center">
 
           <img
-            src="/logo.jpg"
+            src="/logo1.jpg"
             alt="App Logo"
             className="mx-auto h-15 w-80 mb-5"
           />
@@ -136,7 +122,7 @@ export default function LoginPage() {
 
         <p className="text-sm text-center text-gray-600 mt-6">
           Don’t have an account?{' '}
-          <Link href="/signup" className="text-blue-600 hover:underline">
+          <Link href="/Signup" className="text-blue-600 hover:underline">
             Get started
           </Link>
         </p>

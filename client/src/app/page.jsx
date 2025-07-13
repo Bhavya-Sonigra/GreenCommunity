@@ -3,21 +3,35 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Particles from '../components/Particles';
+import { authAPI } from '../lib/api';
 
 export default function DashboardLayout({ children }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const logoPath = '/logo.png';
   const defaultUserIcon = '/user-icon.png';
 
+  // Handle Google OAuth token from URL
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (token) {
+      // Store token in localStorage or cookie
+      localStorage.setItem('token', token);
+      // Clean up URL
+      router.replace('/');
+    }
+  }, [searchParams, router]);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('/api/user');
-        const data = await res.json();
-        if (data && data.isLoggedIn) {
+        const data = await authAPI.getCurrentUser();
+        if (data && data.user) {
           setUser(data.user);
         } else {
           setUser(null);
@@ -29,6 +43,17 @@ export default function DashboardLayout({ children }) {
     };
     fetchUser();
   }, []);
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isProfileOpen && !event.target.closest('.profile-dropdown')) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isProfileOpen]);
 
   // Helper to get user icon
   const getUserIcon = () => {
@@ -49,12 +74,12 @@ export default function DashboardLayout({ children }) {
         </div>
         {/* Nav Links - Centered */}
         <nav className="flex items-center justify-center space-x-8 text-white font-medium text-base absolute left-1/2 transform -translate-x-1/2">
-          <Link href="#" className="hover:text-green-400 transition-colors">Dashboard</Link>
+          <Link href="/" className="hover:text-green-400 transition-colors">Home</Link>
           <Link href="#" className="hover:text-green-400 transition-colors">Reports</Link>
           <Link href="#" className="hover:text-green-400 transition-colors">Settings</Link>
         </nav>
         {/* User Avatar */}
-        <div className="relative flex items-center pr-4">
+        <div className="relative flex items-center pr-4 profile-dropdown">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="focus:outline-none"
@@ -88,10 +113,10 @@ export default function DashboardLayout({ children }) {
                 </>
               ) : (
                 <>
-                  <Link href="/login">
+                  <Link href="/login" onClick={() => setIsProfileOpen(false)}>
                     <p className="px-4 py-2 hover:bg-gray-100 text-blue-600 cursor-pointer">Login</p>
                   </Link>
-                  <Link href="/Signup">
+                  <Link href="/Signup" onClick={() => setIsProfileOpen(false)}>
                     <p className="px-4 py-2 hover:bg-gray-100 text-blue-600 cursor-pointer">Signup</p>
                   </Link>
                 </>
