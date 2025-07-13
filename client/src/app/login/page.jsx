@@ -33,7 +33,6 @@ export default function LoginPage() {
       setIsSuccess(true);
       
       console.log('Login successful:', data);
-      router.push('/dashboard');
       setTimeout(() => {
         setIsSuccess(false);
         setEmail('');
