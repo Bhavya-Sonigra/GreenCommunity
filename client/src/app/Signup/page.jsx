@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
+import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,8 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const router = useRouter(); // 👈 Add this
 
   const handleSignUp = (e) => {
     e.preventDefault();
@@ -26,9 +29,10 @@ export default function SignUpPage() {
       setIsSubmitting(false);
       setIsSuccess(true);
 
+      // Redirect to user details page after a brief success message
       setTimeout(() => {
-        setIsSuccess(false);
-      }, 2000);
+        router.push('/user-details'); // 👈 Redirect here
+      }, 1000);
     }, 2000);
   };
 
@@ -40,10 +44,11 @@ export default function SignUpPage() {
     <main className="min-h-screen flex items-center justify-center bg-white px-4">
       <form onSubmit={handleSignUp} className="w-full max-w-sm space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-2">Create an account</h1>
-          <p className="text-gray-600 mb-6">
-            Enter your email and password to sign up.
-          </p>
+          <img
+            src="/logo.jpg"
+            alt="App Logo"
+            className="mx-auto h-15 w-80 mb-5"
+          />
         </div>
 
         <div>
@@ -116,7 +121,7 @@ export default function SignUpPage() {
           )}
         </button>
 
-        <div className="my-4 text-center text-gray-400 text-sm">or</div>
+        <div className="my-3 text-center text-gray-400 text-sm">or</div>
 
         <button
           type="button"
