@@ -1,2 +1,5 @@
 node_modules
 .env
+SECURITY.md
+.DS_Store
+.env.example
