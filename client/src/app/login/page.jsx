@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 
+
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
-  const handleContinue = (e) => {
+  
+  const handleContinue = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setIsSuccess(false);
@@ -19,14 +22,37 @@ export default function LoginPage() {
       setIsSubmitting(false);
       setIsSuccess(true);
 
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      setIsSuccess(true);
+      
+      console.log('Login successful:', data);
       setTimeout(() => {
         setIsSuccess(false);
-      }, 2000);
-    }, 2000);
+        setEmail('');
+        setPassword('');
+        setIsSubmitting(false);
+      }, 2000); // Reset after 2 seconds
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
+      
   const handleGoogleLogin = () => {
-    alert('Google login clicked');
+    window.location.href = 'http://localhost:5000/api/auth/google';
   };
 
   return (
@@ -110,7 +136,7 @@ export default function LoginPage() {
 
         <p className="text-sm text-center text-gray-600 mt-6">
           Don’t have an account?{' '}
-          <Link href="/Signup" className="text-blue-600 hover:underline">
+          <Link href="/signup" className="text-blue-600 hover:underline">
             Get started
           </Link>
         </p>
