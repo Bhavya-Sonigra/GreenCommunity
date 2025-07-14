@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Top Navbar */}
       <header className="flex items-center justify-between bg-transparent shadow-md h-16 px-6 relative z-10">
         {/* Logo */}
@@ -73,10 +73,13 @@ export default function DashboardLayout({ children }) {
           <Image src={logoPath} alt="Logo" width={120} height={32} className="h-8 w-auto object-contain" priority />
         </div>
         {/* Nav Links - Centered */}
-        <nav className="flex items-center justify-center space-x-8 text-white font-medium text-base absolute left-1/2 transform -translate-x-1/2">
+        <nav className="flex items-center justify-center space-x-8 text-black font-medium text-base absolute left-1/2 transform -translate-x-1/2">
           <Link href="/" className="hover:text-green-400 transition-colors">Home</Link>
           <Link href="#" className="hover:text-green-400 transition-colors">Reports</Link>
           <Link href="#" className="hover:text-green-400 transition-colors">Settings</Link>
+          {user && (
+            <Link href="/profile" className="hover:text-green-400 transition-colors">Profile</Link>
+          )}
         </nav>
         {/* User Avatar */}
         <div className="relative flex items-center pr-4 profile-dropdown">
@@ -105,7 +108,7 @@ export default function DashboardLayout({ children }) {
                   </div>
                   <hr />
                   <Link href="/profile">
-                    <p className="px-4 py-2 hover:bg-gray-100 cursor-pointer">View Profile</p>
+                    <p className="px-4 py-2 hover:bg-gray-100 cursor-pointer">More Details</p>
                   </Link>
                   <Link href="/login">
                     <p className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500">Logout</p>
@@ -126,22 +129,58 @@ export default function DashboardLayout({ children }) {
         </div>
       </header>
 
-      {/* Particles Background - now below navbar */}
-      <div style={{ width: '100%', height: '100%', position: 'absolute', top: '4rem', left: 0, zIndex: 0 }}>
-        <Particles
-          particleColors={['#ffffff', '#ffffff']}
-          particleCount={300}
-          particleSpread={10}
-          speed={0.1}
-          particleBaseSize={120}
-          moveParticlesOnHover={false}
-          alphaParticles={true}
-          disableRotation={false}
-        />
-      </div>
-      
       {/* Main Content */}
-      <main className="p-6 relative z-10">{children}</main>
+      <main className="p-6 relative z-10">
+        {user ? (
+          <div className="max-w-4xl mx-auto mt-8">
+            <h1 className="text-3xl font-bold text-white mb-4">Welcome, {user.name}!</h1>
+            <p className="text-lg text-gray-200 mb-8">Here is your dashboard overview.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Link href="#" className="bg-green-600 rounded-lg p-6 text-white shadow hover:bg-green-700 transition-colors">
+                <h2 className="text-xl font-semibold mb-2">Reports</h2>
+                <p>View your activity and reports.</p>
+              </Link>
+              <Link href="#" className="bg-blue-600 rounded-lg p-6 text-white shadow hover:bg-blue-700 transition-colors">
+                <h2 className="text-xl font-semibold mb-2">Settings</h2>
+                <p>Manage your preferences.</p>
+              </Link>
+              <Link href="/profile" className="bg-gray-800 rounded-lg p-6 text-white shadow hover:bg-gray-900 transition-colors">
+                <h2 className="text-xl font-semibold mb-2">Profile</h2>
+                <p>View and edit your profile details.</p>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <RotatingSlogan />
+        )}
+      </main>
     </div>
   );
 }
+
+function RotatingSlogan() {
+  const slogans = [
+    'Nurture Nature.',
+    'Plant Trees, Plant Hope.',
+    'Earth is Home — Let’s Keep It Clean.',
+    'Protect What Gives Us Life.'
+  ];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % slogans.length);
+    }, 3000); // Change slogan every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center h-[70vh]">
+      <div className="text-left">
+        <h1 className="text-5xl font-bold text-black mb-4">Welcome to GreenCommunity!</h1>
+        <p className="text-2xl md:text-3xl text-green-300 transition-all duration-500 font-semibold">{slogans[index]}</p>
+      </div>
+    </div>
+  );
+}
+
