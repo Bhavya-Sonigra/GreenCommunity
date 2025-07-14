@@ -1,171 +1,367 @@
-'use client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Target, 
+  Plus, 
+  Zap, 
+  Users,
+  Calendar,
+  Car,
+  Home,
+  Utensils,
+  Plane,
+  Award,
+  Leaf,
+  BarChart3,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
+import AnimatedCounter from '@/components/AnimatedCounter';
+import ProfessionalProgress from '@/components/ProfessionalProgress';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { authAPI } from '../lib/api';
+const Dashboard = () => {
+  // Mock data - in a real app, this would come from an API
+  const currentFootprint = 2.4; // tons CO2 per month
+  const targetFootprint = 2.0;
+  const dailyEmissions = [1.2, 2.1, 1.8, 2.5, 1.9, 2.3, 1.7]; // Last 7 days
+  const weeklyTotal = dailyEmissions.reduce((a, b) => a + b, 0);
 
-export default function HomePage() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const footprintBreakdown = [
+    { category: 'Transportation', amount: 0.8, percentage: 33, icon: Car, color: 'text-blue-500' },
+    { category: 'Energy', amount: 0.7, percentage: 29, icon: Home, color: 'text-yellow-500' },
+    { category: 'Food', amount: 0.6, percentage: 25, icon: Utensils, color: 'text-green-500' },
+    { category: 'Travel', amount: 0.3, percentage: 13, icon: Plane, color: 'text-purple-500' },
+  ];
 
-  // Handle Google OAuth token from URL
-  useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      localStorage.setItem('token', token);
-      router.replace('/');
-    }
-  }, [searchParams, router]);
+  const recentActivities = [
+    { type: 'Transportation', description: 'Commute to work (15 miles)', co2: 0.8, date: 'Today' },
+    { type: 'Energy', description: 'Home electricity usage', co2: 0.6, date: 'Yesterday' },
+    { type: 'Food', description: 'Groceries - mostly organic', co2: 0.4, date: 'Yesterday' },
+  ];
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const data = await authAPI.getCurrentUser();
-          if (data && data.user) {
-            setUser(data.user);
-          } else {
-            localStorage.removeItem('token');
-            setUser(null);
-          }
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        localStorage.removeItem('token');
-        setUser(null);
-      }
-      setLoading(false);
-    };
-    checkAuth();
-  }, []);
-
-  // Logout function
-  const handleLogout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('token');
-      setUser(null);
-      router.push('/login');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const achievements = [
+    { title: 'Week Streak', description: '7 days of logging', icon: Award, earned: true },
+    { title: 'Green Commuter', description: 'Used public transport 5x', icon: Car, earned: true },
+    { title: 'Plant-Based', description: 'Ate vegetarian for 3 days', icon: Leaf, earned: false },
+  ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">GreenCommunity</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <>
-                  <span className="text-sm text-gray-700">Welcome, {user.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-green-600 hover:text-green-700 font-medium"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/Signup"
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+    <div className="p-8 space-y-8 bg-gradient-to-br from-background via-accent/5 to-primary/5 min-h-screen relative">
+      {/* Enhanced Header */}
+      <div className="space-y-4 animate-fade-in">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-8 bg-gradient-primary rounded-full animate-pulse-eco" />
+          <div>
+            <h1 className="text-4xl font-bold text-gradient">Good morning, Alex!</h1>
+            <p className="text-lg text-muted-foreground">Here's your environmental impact overview</p>
+          </div>
+          
+        </div>
+      </div>
+
+      {/* Key Metrics Cards with Staggered Animation */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Monthly Footprint */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <Card className="card-premium hover-glow group cursor-pointer">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-primary transition-colors">
+                <BarChart3 className="h-5 w-5" />
+                Monthly Footprint
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-3xl font-bold text-foreground">
+                  <AnimatedCounter end={currentFootprint} decimals={1} />
+                  <span className="text-base font-normal text-muted-foreground ml-1">tons CO₂</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-success animate-bounce" />
+                  <span className="text-sm text-success font-semibold">12% below target</span>
+                </div>
+                <ProfessionalProgress value={80} className="mt-3" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Weekly Total */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Card className="card-floating hover-lift group">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-primary transition-colors">
+                <Calendar className="h-5 w-5" />
+                This Week
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-3xl font-bold text-foreground">
+                  <AnimatedCounter end={weeklyTotal} decimals={1} />
+                  <span className="text-base font-normal text-muted-foreground ml-1">kg CO₂</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-warning animate-bounce" />
+                  <span className="text-sm text-warning font-semibold">5% above last week</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Goal Progress */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <Card className="card-floating hover-lift group">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-primary transition-colors">
+                <Target className="h-5 w-5" />
+                Goal Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-3xl font-bold text-foreground">
+                  <AnimatedCounter end={75} />%
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Target: {targetFootprint} tons/month
+                </div>
+                <ProfessionalProgress value={75} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Offset Credits */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <Card className="card-premium hover-glow group cursor-pointer">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-success transition-colors">
+                <Leaf className="h-5 w-5" />
+                Offset Credits
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="text-3xl font-bold text-foreground">
+                  <AnimatedCounter end={1.2} decimals={1} />
+                  <span className="text-base font-normal text-muted-foreground ml-1">tons</span>
+                </div>
+                <Badge variant="secondary" className="bg-success/15 text-success border-success/30 font-semibold animate-pulse-eco">
+                  50% offset this month
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Enhanced Footprint Breakdown */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
+            <Card className="card-premium hover-lift">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <BarChart3 className="h-6 w-6 text-primary" />
+                  Carbon Footprint Breakdown
+                </CardTitle>
+                <CardDescription>Your emissions by category this month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-5">
+                  {footprintBreakdown.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                      <div 
+                        key={item.category} 
+                        className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:border-primary/20 hover:bg-primary/5 transition-all duration-300 group animate-fade-in"
+                        style={{ animationDelay: `${0.6 + (index * 0.1)}s` }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 ${item.color} group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-foreground text-lg">{item.category}</div>
+                            <div className="text-sm text-muted-foreground">
+                              <AnimatedCounter end={item.amount} decimals={1} /> tons CO₂
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-foreground mb-2">
+                            <AnimatedCounter end={item.percentage} />%
+                          </div>
+                          <div className="w-24 h-3 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-primary rounded-full transition-all duration-1000 ease-out"
+                              style={{ 
+                                width: `${item.percentage}%`,
+                                animationDelay: `${0.8 + (index * 0.1)}s`
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Enhanced Recent Activities */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
+            <Card className="card-floating hover-lift">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Calendar className="h-6 w-6 text-primary" />
+                  Recent Activities
+                </CardTitle>
+                <CardDescription>Your latest carbon footprint entries</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentActivities.map((activity, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-accent/20 hover:shadow-lg transition-all duration-300 animate-fade-in hover-lift group"
+                      style={{ animationDelay: `${0.7 + (index * 0.1)}s` }}
+                    >
+                      <div className="flex-1">
+                        <div className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
+                          {activity.description}
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {activity.type} • {activity.date}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                          +<AnimatedCounter end={activity.co2} decimals={1} /> kg
+                        </div>
+                        <div className="text-xs text-muted-foreground">CO₂</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
-          {user ? (
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Welcome back, {user.name}!
-              </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                You are successfully logged in to GreenCommunity.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-blue-800 mb-2">Reports</h3>
-                  <p className="text-blue-600 mb-4">View your activity reports</p>
-                  <button className="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
-                    Coming Soon
-                  </button>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Settings</h3>
-                  <p className="text-gray-600 mb-4">Configure your preferences</p>
-                  <button className="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
-                    Coming Soon
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Welcome to GreenCommunity
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Join our community and make a difference for the environment.
-              </p>
-              <div className="space-x-4">
-                <Link
-                  href="/Signup"
-                  className="inline-block bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-green-600 transition-colors"
-                >
-                  Get Started
-                </Link>
-                <Link
-                  href="/login"
-                  className="inline-block border border-green-500 text-green-500 px-6 py-3 rounded-lg text-lg font-medium hover:bg-green-50 transition-colors"
-                >
-                  Sign In
-                </Link>
-              </div>
-            </div>
-          )}
+        {/* Right Column with Enhanced Styling */}
+        <div className="space-y-6">
+          {/* Enhanced Quick Actions */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
+            <Card className="card-premium hover-glow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Zap className="h-6 w-6 text-primary animate-pulse-eco" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>Track your impact today</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
+                  <Plus className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                  Log Activity
+                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button className="w-full justify-start h-12 border-2 border-success/30 text-success hover:bg-success/10 hover:border-success/50 transition-all duration-300 group">
+                  <Zap className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                  Offset Emissions
+                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button className="w-full justify-start h-12 border-2 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 group">
+                  <Users className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                  Join Challenge
+                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Enhanced Achievements */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
+            <Card className="card-floating hover-lift">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Award className="h-6 w-6 text-warning" />
+                  Achievements
+                </CardTitle>
+                <CardDescription>Your eco-friendly milestones</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {achievements.map((achievement, index) => {
+                  const Icon = achievement.icon;
+                  return (
+                    <div 
+                      key={index} 
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-500 hover-lift ${
+                        achievement.earned 
+                          ? 'border-success/40 bg-gradient-to-r from-success/10 to-success/5 shadow-lg' 
+                          : 'border-border/30 bg-muted/10 hover:border-primary/20'
+                      }`}
+                    >
+                      <div className={`p-3 rounded-xl transition-all duration-300 ${
+                        achievement.earned 
+                          ? 'bg-success/20 text-success animate-pulse-eco' 
+                          : 'bg-muted text-muted-foreground'
+                      }`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <div className={`font-semibold text-lg ${
+                          achievement.earned ? 'text-foreground' : 'text-muted-foreground'
+                        }`}>
+                          {achievement.title}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {achievement.description}
+                        </div>
+                      </div>
+                      {achievement.earned && (
+                        <Badge className="bg-success/20 text-success border-success/30 font-bold animate-pulse-eco">
+                          ✓ Earned
+                        </Badge>
+                      )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Enhanced Tip of the Day */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
+            <Card className="card-premium hover-glow border-2 border-primary/20 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-primary opacity-10 rounded-full -translate-y-10 translate-x-10" />
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <span className="text-2xl animate-pulse">💡</span>
+                  Eco Tip of the Day
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-base text-muted-foreground leading-relaxed">
+                  Try meal prepping with seasonal, local ingredients this week. It can reduce your food-related emissions by up to 
+                  <span className="font-bold text-success"> 20%</span> while saving time and money!
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
