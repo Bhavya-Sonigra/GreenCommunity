@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { authAPI } from '../../lib/api';
 
 export default function SignUpPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,14 +28,19 @@ export default function SignUpPage() {
     setIsSuccess(false);
 
     try {
-      const data = await authAPI.register({ email, password });
+      const data = await authAPI.register({ name, email, password });
+      
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
       
       setIsSuccess(true);
       console.log('Registration successful:', data);
       
-      // Redirect to user details page after successful registration
+      // Redirect to home page after successful registration
       setTimeout(() => {
-        router.push('/user-details');
+        router.push('/');
       }, 1000);
       
     } catch (error) {
@@ -56,6 +62,21 @@ export default function SignUpPage() {
             src="/logo1.jpg"
             alt="App Logo"
             className="mx-auto h-15 w-80 mb-5"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium mb-1">
+            Full Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            required
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="leaf-cursor w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
           />
         </div>
 

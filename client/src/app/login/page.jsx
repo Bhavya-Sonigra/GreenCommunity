@@ -22,6 +22,11 @@ export default function LoginPage() {
     try {
       const data = await authAPI.login({ email, password });
       
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      
       setIsSuccess(true);
       console.log('Login successful:', data);
       
