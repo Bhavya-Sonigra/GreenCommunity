@@ -6,9 +6,16 @@ import ProfessionalProgress from './ProfessionalProgress';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Leaf, Menu, X, User, TrendingUp } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const user = useUser();
+  const isDemo = !user;
+  const name = isDemo ? 'Demo User' : user?.name || 'Alex';
+  const city = user?.city || 'Demo City';
+  const country = user?.country || 'Demo Country';
+  const monthlyGoal = isDemo ? 0 : 75;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -43,16 +50,16 @@ export default function Layout({ children }) {
           {/* User Info */}
           <div className="flex items-center gap-6">
             <div className="hidden md:flex flex-col items-end">
-              <span className="text-sm font-semibold text-foreground">Alex Johnson</span>
+              <span className="text-sm font-semibold text-foreground">{name}</span>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <span>San Francisco, CA</span>
+                <span>{city}, {country}</span>
                 <TrendingUp className="h-3 w-3 text-success" />
               </div>
             </div>
             {/* Enhanced Goal Progress */}
             <div className="hidden lg:flex flex-col gap-2 min-w-36">
               <ProfessionalProgress 
-                value={75} 
+                value={monthlyGoal} 
                 label="Monthly Goal"
                 className="animate-fade-in"
               />

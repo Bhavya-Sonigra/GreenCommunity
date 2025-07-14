@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -22,8 +24,14 @@ import {
 } from 'lucide-react';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import ProfessionalProgress from '@/components/ProfessionalProgress';
+import { useUser } from '@/context/UserContext';
 
 const Dashboard = () => {
+  const user = useUser();
+  const isDemo = !user;
+  const name = isDemo ? 'Demo User' : user?.name || 'Alex';
+  const goalProgress = isDemo ? 0 : 75;
+
   // Mock data - in a real app, this would come from an API
   const currentFootprint = 2.4; // tons CO2 per month
   const targetFootprint = 2.0;
@@ -56,10 +64,10 @@ const Dashboard = () => {
         <div className="flex items-center gap-3">
           <div className="w-2 h-8 bg-gradient-primary rounded-full animate-pulse-eco" />
           <div>
-            <h1 className="text-4xl font-bold text-gradient">Good morning, Alex!</h1>
+            <h1 className="text-4xl font-bold text-gradient">Good morning, {name}!</h1>
             <p className="text-lg text-muted-foreground">Here's your environmental impact overview</p>
           </div>
-          
+          <Sparkles className="h-6 w-6 text-primary animate-pulse ml-auto" />
         </div>
       </div>
 
@@ -126,12 +134,12 @@ const Dashboard = () => {
             <CardContent>
               <div className="space-y-3">
                 <div className="text-3xl font-bold text-foreground">
-                  <AnimatedCounter end={75} />%
+                  <AnimatedCounter end={goalProgress} />%
                 </div>
                 <div className="text-sm text-muted-foreground">
                   Target: {targetFootprint} tons/month
                 </div>
-                <ProfessionalProgress value={75} />
+                <ProfessionalProgress value={goalProgress} />
               </div>
             </CardContent>
           </Card>
