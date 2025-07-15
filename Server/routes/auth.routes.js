@@ -1,6 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import { 
   registerUser, 
   loginUser, 
@@ -9,33 +10,67 @@ import {
   resetPassword, 
   getCurrentUser, 
   logout, 
-  changePassword 
+  changePassword,
+  verifyResetCode,
+  updatePasswordWithCode,
+  updatePassword
 } from '../controllers/auth.controller.js';
 import { 
   validateRegister, 
   validateLogin, 
   validatePasswordResetRequest, 
-  validatePasswordReset 
+  validatePasswordReset,
+  validateVerifyResetCode,
+  validateUpdatePasswordWithCode,
+  validateUpdatePassword
 } from '../middleware/validation.js';
 import { authenticate } from '../middleware/auth.js';
+
+// Rate limiters
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login attempts per windowMs
+  message: {
+    error: 'Too many login attempts, please try again later.',
+    retryAfter: 15 * 60 * 1000 // 15 minutes in milliseconds
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true // Don't count successful requests
+});
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 3, // Limit each IP to 3 forgot password requests per windowMs
+  message: {
+    error: 'Too many password reset requests, please try again later.',
+    retryAfter: 15 * 60 * 1000 // 15 minutes in milliseconds
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true // Don't count successful requests
+});
 
 const router = express.Router();
 
 // Authentication Routes
 router.post('/register', validateRegister, registerUser);
-router.post('/login', validateLogin, loginUser);
+router.post('/login', loginLimiter, validateLogin, loginUser);
 router.post('/logout', logout);
 
 // Email Verification
 router.post('/verify-email', verifyEmail);
 
 // Password Reset
-router.post('/forgot-password', validatePasswordResetRequest, requestPasswordReset);
+router.post('/forgot-password', forgotPasswordLimiter, validatePasswordResetRequest, requestPasswordReset);
 router.post('/reset-password', validatePasswordReset, resetPassword);
+router.post('/verify-reset-code', validateVerifyResetCode, verifyResetCode);
+router.post('/update-password-with-code', validateUpdatePasswordWithCode, updatePasswordWithCode);
 
 // Protected Routes
 router.get('/me', authenticate, getCurrentUser);
 router.post('/change-password', authenticate, changePassword);
+router.post('/update-password', authenticate, validateUpdatePassword, updatePassword);
 
 // Google OAuth - Start login flow
 router.get('/google', passport.authenticate('google', {

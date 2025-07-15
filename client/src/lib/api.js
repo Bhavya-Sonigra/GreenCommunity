@@ -59,6 +59,13 @@ export const authAPI = {
     return apiRequest('/api/auth/me');
   },
 
+  updatePassword: async (newPassword) => {
+    return apiRequest('/api/auth/update-password', {
+      method: 'POST',
+      body: JSON.stringify({ newPassword }),
+    });
+  },
+
   googleLogin: () => {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
   },

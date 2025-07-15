@@ -45,6 +45,8 @@ const userSchema = new mongoose.Schema({
   emailVerificationExpires: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  passwordResetCode: String,
+  passwordResetCodeExpires: Date,
   loginAttempts: {
     type: Number,
     default: 0
@@ -125,6 +127,36 @@ userSchema.methods.generatePasswordResetToken = function() {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   
   return token;
+};
+
+// Method to generate password reset code (6-digit)
+userSchema.methods.generatePasswordResetCode = function() {
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+  
+  this.passwordResetCode = crypto.createHash('sha256').update(code).digest('hex');
+  this.passwordResetCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  
+  return code;
+};
+
+// Method to verify password reset code
+userSchema.methods.verifyPasswordResetCode = function(code) {
+  if (!this.passwordResetCode || !this.passwordResetCodeExpires) {
+    return false;
+  }
+  
+  if (this.passwordResetCodeExpires < Date.now()) {
+    return false; // Code expired
+  }
+  
+  const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+  return hashedCode === this.passwordResetCode;
+};
+
+// Method to clear password reset code
+userSchema.methods.clearPasswordResetCode = function() {
+  this.passwordResetCode = undefined;
+  this.passwordResetCodeExpires = undefined;
 };
 
 // Method to generate email verification token

@@ -39,15 +39,6 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Auth specific rate limiting
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
-  message: 'Too many login attempts, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 app.use(limiter);
 
 // CORS configuration
@@ -98,9 +89,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Apply auth rate limiting only to login attempts
-app.use('/api/auth/login', authLimiter);
 
 app.use('/api/auth', authRoutes);
 
