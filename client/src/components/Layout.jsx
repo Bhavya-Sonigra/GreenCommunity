@@ -44,7 +44,7 @@ export default function Layout({ children }) {
               />
             </div>
             {/* Navigation Buttons */}
-            <nav className="hidden lg:flex gap-1 ml-30">
+            <nav className="hidden lg:flex gap-1 ml-15">
               {sidebarItems.map((item) => (
                 <Link
                   key={item.path}

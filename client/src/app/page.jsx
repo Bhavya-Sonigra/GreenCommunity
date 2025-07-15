@@ -25,6 +25,9 @@ import {
 import AnimatedCounter from '@/components/AnimatedCounter';
 import ProfessionalProgress from '@/components/ProfessionalProgress';
 import { useUser } from '@/context/UserContext';
+import { useState } from 'react';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -182,12 +185,12 @@ const Dashboard = () => {
                 <CardDescription>Your emissions by category this month</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {footprintBreakdown.map((item, index) => {
                     const Icon = item.icon;
                     return (
-                      <div 
-                        key={item.category} 
+                      <div
+                        key={item.category}
                         className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:border-primary/20 hover:bg-primary/5 transition-all duration-300 group animate-fade-in"
                         style={{ animationDelay: `${0.6 + (index * 0.1)}s` }}
                       >
@@ -202,17 +205,17 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-foreground mb-2">
-                            <AnimatedCounter end={item.percentage} />%
-                          </div>
-                          <div className="w-24 h-3 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-primary rounded-full transition-all duration-1000 ease-out"
-                              style={{ 
-                                width: `${item.percentage}%`,
-                                animationDelay: `${0.8 + (index * 0.1)}s`
-                              }}
+                        <div className="flex flex-col items-center justify-center min-w-[60px]">
+                          <div className="w-12 h-12">
+                            <CircularProgressbar
+                              value={item.percentage}
+                              text={`${item.percentage}%`}
+                              styles={buildStyles({
+                                textSize: '24px',
+                                pathColor: '#22c55e',
+                                textColor: '#1a2e22',
+                                trailColor: '#e5e7eb',
+                              })}
                             />
                           </div>
                         </div>
