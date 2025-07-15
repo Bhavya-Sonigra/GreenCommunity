@@ -13,11 +13,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
   
   const handleContinue = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setIsSuccess(false);
+    setError('');
 
     try {
       const data = await authAPI.login({ email, password });
@@ -37,7 +39,7 @@ export default function LoginPage() {
       
     } catch (error) {
       console.error('Login error:', error);
-      alert(`Login failed: ${error.message}`);
+      setError(error.message || 'Login failed. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -58,6 +60,12 @@ export default function LoginPage() {
           />
           
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+            {error}
+          </div>
+        )}
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1 text-foreground">
