@@ -7,6 +7,7 @@ export default function AuthLayoutWrapper({ children }) {
   const authRoutes = [
     "/login",
     "/signup",
+    "/Signup",
     "/forgot-password",
     "/update-password",
   ];
