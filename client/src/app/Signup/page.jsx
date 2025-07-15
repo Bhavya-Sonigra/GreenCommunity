@@ -13,14 +13,16 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const router = useRouter(); // 👈 Add this
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setError('');
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
       return;
     }
 
@@ -45,7 +47,7 @@ export default function SignUpPage() {
       
     } catch (error) {
       console.error('Registration error:', error);
-      alert(`Registration failed: ${error.message}`);
+      setError(error.message || 'Registration failed. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -64,6 +66,13 @@ export default function SignUpPage() {
             className="mx-auto h-15 w-80 mb-5"
           />
         </div>
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+        
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-1 text-foreground">
             Full Name

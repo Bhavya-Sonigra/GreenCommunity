@@ -4,7 +4,6 @@ import Layout from "@/components/Layout";
 
 export default function AuthLayoutWrapper({ children }) {
   const pathname = usePathname();
-  console.log('Current pathname:', pathname); // Debug log
   const authRoutes = [
     "/login",
     "/signup",
