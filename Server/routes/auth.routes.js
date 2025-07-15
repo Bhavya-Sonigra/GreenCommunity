@@ -58,9 +58,17 @@ router.get('/google/callback',
       req.user.userAgent = req.get('User-Agent');
       req.user.save();
 
-      // Redirect with token
+      // Set HTTP-only cookie for security
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+
+      // Redirect to clean URL without token
       const redirectUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-      res.redirect(`${redirectUrl}/?token=${token}`);
+      res.redirect(`${redirectUrl}/?auth=success`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=oauth_failed`);

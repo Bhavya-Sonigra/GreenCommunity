@@ -80,7 +80,12 @@ export const registerUser = async (req, res) => {
   } catch (err) {
     console.error('Registration error:', err);
     if (err.code === 11000) {
-      res.status(400).json({ message: 'Email already exists' });
+      const duplicateField = Object.keys(err.keyValue)[0];
+      if (duplicateField === 'email') {
+        res.status(400).json({ message: 'An account with this email already exists. Please try logging in instead.' });
+      } else {
+        res.status(400).json({ message: 'This account already exists' });
+      }
     } else {
       res.status(500).json({ message: 'Server error' });
     }
@@ -261,6 +266,13 @@ export const getCurrentUser = async (req, res) => {
 
 // Logout (client-side token removal)
 export const logout = async (req, res) => {
+  // Clear the auth cookie
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  });
+  
   res.status(200).json({ message: 'Logged out successfully' });
 };
 

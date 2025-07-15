@@ -20,7 +20,7 @@ const sidebarItems = [
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const user = useUser();
+  const { user } = useUser();
   const isDemo = !user;
   const name = isDemo ? 'Demo User' : user?.name || 'Alex';
   const city = user?.city || 'Demo City';

@@ -1,0 +1,90 @@
+
+> server@1.0.0 start
+> node server.js
+
+[dotenv@17.1.0] injecting env (17) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+[dotenv@17.1.0] injecting env (0) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+MONGO_URI from .env: mongodb+srv://sonigrabhavya28:BZyoH4ahCXXc7z3X@auth.6r54itl.mongodb.net/auth-db?retryWrites=true&w=majority&appName=auth
+[dotenv@17.1.0] injecting env (0) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+[dotenv@17.1.0] injecting env (0) from .env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+MONGO_URI from .env: mongodb+srv://sonigrabhavya28:BZyoH4ahCXXc7z3X@auth.6r54itl.mongodb.net/auth-db?retryWrites=true&w=majority&appName=auth
+🚀 Server running on http://localhost:5000
+✅ MongoDB connected
+Google profile: {
+  id: '116408171663095864700',
+  displayName: 'Bhavya Sonigra',
+  name: { familyName: 'Sonigra', givenName: 'Bhavya' },
+  emails: [ { value: 'sonigrabhavya28@gmail.com', verified: true } ],
+  photos: [
+    {
+      value: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c'
+    }
+  ],
+  provider: 'google',
+  _raw: '{\n' +
+    '  "sub": "116408171663095864700",\n' +
+    '  "name": "Bhavya Sonigra",\n' +
+    '  "given_name": "Bhavya",\n' +
+    '  "family_name": "Sonigra",\n' +
+    '  "picture": "https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ\\u003ds96-c",\n' +
+    '  "email": "sonigrabhavya28@gmail.com",\n' +
+    '  "email_verified": true\n' +
+    '}',
+  _json: {
+    sub: '116408171663095864700',
+    name: 'Bhavya Sonigra',
+    given_name: 'Bhavya',
+    family_name: 'Sonigra',
+    picture: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c',
+    email: 'sonigrabhavya28@gmail.com',
+    email_verified: true
+  }
+}
+Google profile: {
+  id: '116408171663095864700',
+  displayName: 'Bhavya Sonigra',
+  name: { familyName: 'Sonigra', givenName: 'Bhavya' },
+  emails: [ { value: 'sonigrabhavya28@gmail.com', verified: true } ],
+  photos: [
+    {
+      value: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c'
+    }
+  ],
+  provider: 'google',
+  _raw: '{\n' +
+    '  "sub": "116408171663095864700",\n' +
+    '  "name": "Bhavya Sonigra",\n' +
+    '  "given_name": "Bhavya",\n' +
+    '  "family_name": "Sonigra",\n' +
+    '  "picture": "https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ\\u003ds96-c",\n' +
+    '  "email": "sonigrabhavya28@gmail.com",\n' +
+    '  "email_verified": true\n' +
+    '}',
+  _json: {
+    sub: '116408171663095864700',
+    name: 'Bhavya Sonigra',
+    given_name: 'Bhavya',
+    family_name: 'Sonigra',
+    picture: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c',
+    email: 'sonigrabhavya28@gmail.com',
+    email_verified: true
+  }
+}
+Email sending error: Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-31c3e958090sm11732921a91.7 - gsmtp
+    at SMTPConnection._formatError (/Users/bhavyasonigra/IMPORTANT/SGP/GreenCommunity/server/node_modules/nodemailer/lib/smtp-connection/index.js:809:19)
+    at SMTPConnection._actionAUTHComplete (/Users/bhavyasonigra/IMPORTANT/SGP/GreenCommunity/server/node_modules/nodemailer/lib/smtp-connection/index.js:1588:34)
+    at SMTPConnection.<anonymous> (/Users/bhavyasonigra/IMPORTANT/SGP/GreenCommunity/server/node_modules/nodemailer/lib/smtp-connection/index.js:556:26)
+    at SMTPConnection._processResponse (/Users/bhavyasonigra/IMPORTANT/SGP/GreenCommunity/server/node_modules/nodemailer/lib/smtp-connection/index.js:993:20)
+    at SMTPConnection._onData (/Users/bhavyasonigra/IMPORTANT/SGP/GreenCommunity/server/node_modules/nodemailer/lib/smtp-connection/index.js:774:14)
+    at SMTPConnection._onSocketData (/Users/bhavyasonigra/IMPORTANT/SGP/GreenCommunity/server/node_modules/nodemailer/lib/smtp-connection/index.js:195:44)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5) {
+  code: 'EAUTH',
+  response: '535-5.7.8 Username and Password not accepted. For more information, go to\n' +
+    '535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-31c3e958090sm11732921a91.7 - gsmtp',
+  responseCode: 535,
+  command: 'AUTH PLAIN'
+}
