@@ -25,14 +25,82 @@ import {
 import AnimatedCounter from '@/components/AnimatedCounter';
 import ProfessionalProgress from '@/components/ProfessionalProgress';
 import { useUser } from '@/context/UserContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { Calendar as DateRangeCalendar } from 'react-date-range';
+import { addDays } from 'date-fns';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
+import { usePreferences, useTranslation } from "@/context/PreferencesContext";
+
+const translations = {
+  en: {
+    welcome: "Welcome back!",
+    emissions: "Your emissions by category this month",
+    achievements: "Your eco-friendly milestones",
+    // ... add more as needed
+  },
+  hi: {
+    welcome: "वापसी पर स्वागत है!",
+    emissions: "इस महीने श्रेणी के अनुसार आपके उत्सर्जन",
+    achievements: "आपकी पर्यावरण-अनुकूल उपलब्धियाँ",
+    // ...
+  },
+  gu: {
+    welcome: "પાછા આવવા માટે સ્વાગત છે!",
+    emissions: "આ મહિને કેટેગરી પ્રમાણે તમારા ઉત્સર્જન",
+    achievements: "તમારી પર્યાવરણ-મૈત્રીપૂર્ણ સિદ્ધિઓ",
+    // ...
+  },
+};
+
+const currencySymbols = {
+  usd: "$",
+  eur: "€",
+  inr: "₹",
+};
+
+const unitLabels = {
+  metric: { distance: "km", weight: "kg" },
+  imperial: { distance: "mi", weight: "lb" },
+};
+
+const getGreetingKey = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'greeting_morning';
+  if (hour < 18) return 'greeting_afternoon';
+  return 'greeting_evening';
+};
 
 const Dashboard = () => {
   const { user } = useUser();
+  const [loading, setLoading] = useState(true);
+  const { preferences } = usePreferences();
+  const { t } = useTranslation();
+  const currency = currencySymbols[preferences.currency] || "$";
+  const units = unitLabels[preferences.units] || unitLabels.metric;
+
+  useEffect(() => {
+    // If user is null, check if token exists (fetch in progress)
+    if (user === null && typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        setLoading(true);
+      } else {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  if (loading) {
+    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+  }
+
   const isDemo = !user;
-  const name = isDemo ? 'Demo User' : user?.name || 'Alex';
+  const name = isDemo ? 'Demo User' : user?.name || 'User';
   const goalProgress = isDemo ? 0 : 75;
 
   // Mock data - in a real app, this would come from an API
@@ -60,6 +128,8 @@ const Dashboard = () => {
     { title: 'Plant-Based', description: 'Ate vegetarian for 3 days', icon: Leaf, earned: false },
   ];
 
+  const greetingKey = getGreetingKey();
+
   return (
     <div className="p-8 space-y-8 bg-gradient-to-br from-background via-accent/5 to-primary/5 min-h-screen relative">
       {/* Enhanced Header */}
@@ -67,7 +137,7 @@ const Dashboard = () => {
         <div className="flex items-center gap-3">
           <div className="w-2 h-8 bg-gradient-primary rounded-full animate-pulse-eco" />
           <div>
-            <h1 className="text-4xl font-bold text-gradient">Good morning, {name}!</h1>
+            <h1 className="text-4xl font-bold text-gradient">{t(greetingKey)}, {name}!</h1>
             <p className="text-lg text-muted-foreground">Here's your environmental impact overview</p>
           </div>
         </div>
@@ -178,10 +248,7 @@ const Dashboard = () => {
           <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
             <Card className="card-premium hover-lift">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                  Carbon Footprint Breakdown
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl">{t.emissions}</CardTitle>
                 <CardDescription>Your emissions by category this month</CardDescription>
               </CardHeader>
               <CardContent>
@@ -265,48 +332,12 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Right Column with Enhanced Styling */}
-        <div className="space-y-6">
-          {/* Enhanced Quick Actions */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
-            <Card className="card-premium hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Zap className="h-6 w-6 text-primary animate-pulse-eco" />
-                  Quick Actions
-                </CardTitle>
-                <CardDescription>Track your impact today</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
-                  <Plus className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Log Activity
-                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
-                  <Zap className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Offset Emissions
-                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
-                  <Users className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Join Challenge
-                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Enhanced Achievements */}
           <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
             <Card className="card-floating hover-lift">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Award className="h-6 w-6 text-warning" />
-                  Achievements
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl">{t.achievements}</CardTitle>
                 <CardDescription>Your eco-friendly milestones</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -349,7 +380,96 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
 
+        {/* Right Column with Enhanced Styling */}
+        <div className="space-y-6">
+          {/* Enhanced Quick Actions */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
+            <Card className="card-premium hover-glow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Zap className="h-6 w-6 text-primary animate-pulse-eco" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>Track your impact today</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
+                  <Plus className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                  Log Activity
+                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
+                  <Zap className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                  Offset Emissions
+                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
+                  <Users className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                  Join Challenge
+                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          {/* Calendar Streak */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.75s' }}>
+            <Card className="card-premium hover-glow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Calendar className="h-6 w-6 text-primary" />
+                  Streak Calendar
+                </CardTitle>
+                <CardDescription>Your activity streak this month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Highlight streak days: 5, 6, 7, 8, 9, 10, 11, 12, 13 June 2025 */}
+                <DateRangeCalendar
+                  showMonthAndYearPickers={true}
+                  showDateDisplay={false}
+                  showSelectionPreview={false}
+                  staticRanges={[]}
+                  inputRanges={[]}
+                  weekdayDisplayFormat="EEEEE"
+                  monthDisplayFormat="MMMM yyyy"
+                  className="rounded-xl shadow-md border-none"
+                  disabledDates={[]}
+                  editableDateInputs={false}
+                  moveRangeOnFirstSelection={false}
+                  dragSelectionEnabled={false}
+                  calendarFocus="forwards"
+                  months={1}
+                  direction="vertical"
+                  minDate={new Date(2025, 5, 1)}
+                  maxDate={new Date(2025, 5, 30)}
+                  dayContentRenderer={(date) => {
+                    const streakDays = [5,6,7,8,9,10,11,12,13];
+                    if (
+                      date.getFullYear() === 2025 &&
+                      date.getMonth() === 5 &&
+                      streakDays.includes(date.getDate())
+                    ) {
+                      return (
+                        <div style={{
+                          background: '#22c55e',
+                          color: 'white',
+                          borderRadius: '8px',
+                          width: 32,
+                          height: 32,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: 'auto',
+                        }}>{date.getDate()}</div>
+                      );
+                    }
+                    return <div>{date.getDate()}</div>;
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
           {/* Enhanced Tip of the Day */}
           <div className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
             <Card className="card-premium hover-glow border-2 border-primary/20 relative overflow-hidden">

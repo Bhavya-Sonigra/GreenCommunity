@@ -2,6 +2,12 @@
 
 import { Progress } from '@/components/ui/progress';
 import { useEffect, useState } from 'react';
+import { usePreferences } from "@/context/PreferencesContext";
+
+const unitLabels = {
+  metric: { distance: "km", weight: "kg" },
+  imperial: { distance: "mi", weight: "lb" },
+};
 
 const ProfessionalProgress = ({ 
   value, 
@@ -10,6 +16,8 @@ const ProfessionalProgress = ({
   className = '',
   showAnimation = true 
 }) => {
+  const { preferences } = usePreferences();
+  const units = unitLabels[preferences.units] || unitLabels.metric;
   const [animatedValue, setAnimatedValue] = useState(0);
   const percentage = Math.min((value / max) * 100, 100);
 

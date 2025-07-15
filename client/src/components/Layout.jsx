@@ -78,12 +78,14 @@ export default function Layout({ children }) {
                 className="animate-fade-in"
               />
             </div>
-            <Avatar className="h-12 w-12 border-3 border-primary/30 hover:border-primary/60 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-              <AvatarImage src="" alt="User" />
-              <AvatarFallback className="bg-gradient-primary text-black font-bold text-lg">
-                <User className="h-6 w-6" />
-              </AvatarFallback>
-            </Avatar>
+            <Link href="/settings" className="focus:outline-none">
+              <Avatar className="h-12 w-12 border-3 border-primary/30 hover:border-primary/60 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                <AvatarImage src="" alt="User" />
+                <AvatarFallback className="bg-gradient-primary text-black font-bold text-lg">
+                  <User className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           </div>
         </div>
       </header>
