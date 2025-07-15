@@ -1,12 +1,22 @@
 'use client';
 import { useState } from 'react';
-import Sidebar from '@/components/ui/sidebar';
 import FloatingParticles from './FloatingParticles';
 import ProfessionalProgress from './ProfessionalProgress';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Leaf, Menu, X, User, TrendingUp } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const sidebarItems = [
+  { name: 'Dashboard', path: '/' },
+  { name: 'Footprint Log', path: '/footprint' },
+  { name: 'Marketplace', path: '/marketplace' },
+  { name: 'Projects', path: '/projects' },
+  { name: 'Community', path: '/community' },
+  { name: 'Settings', path: '/settings' },
+];
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,6 +26,7 @@ export default function Layout({ children }) {
   const city = user?.city || 'Demo City';
   const country = user?.country || 'Demo Country';
   const monthlyGoal = isDemo ? 0 : 75;
+  const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -23,23 +34,32 @@ export default function Layout({ children }) {
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-border/30 backdrop-blur-xl">
         <div className="flex items-center justify-between px-6 h-16">
-          {/* Logo and Mobile Menu */}
+          {/* Logo and Navigation */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden hover:bg-primary/10 transition-colors"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
             <div className="flex items-center gap-3 group cursor-pointer">
               <img
-            src="/logo.png"
-            alt="App Logo"
-            className="mx-auto h-10 w-60 mb-1.2"
-          />
+                src="/logo.png"
+                alt="App Logo"
+                className="mx-auto h-10 w-60 mb-1.2"
+              />
             </div>
+            {/* Navigation Buttons */}
+            <nav className="hidden lg:flex gap-1 ml-30">
+              {sidebarItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm
+                    ${pathname === item.path
+                      ? 'bg-primary/90 text-white shadow-sm'
+                      : 'text-foreground hover:bg-primary/10 hover:text-primary'}
+                  `}
+                  style={{ fontWeight: 500, letterSpacing: '0.01em' }}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
           </div>
           {/* User Info */}
           <div className="flex items-center gap-6">
@@ -67,22 +87,12 @@ export default function Layout({ children }) {
           </div>
         </div>
       </header>
-      <div className="flex relative">
-        <Sidebar />
-        {/* Enhanced Mobile Overlay */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden animate-fade-in"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-        {/* Main Content */}
-        <main className="flex-1 min-h-screen relative z-10">
-          <div className="animate-fade-in">
-            {children}
-          </div>
-        </main>
-      </div>
+      {/* Main Content */}
+      <main className="flex-1 min-h-screen relative z-10">
+        <div className="animate-fade-in">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
