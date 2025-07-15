@@ -67,7 +67,7 @@ const Dashboard = () => {
             <h1 className="text-4xl font-bold text-gradient">Good morning, {name}!</h1>
             <p className="text-lg text-muted-foreground">Here's your environmental impact overview</p>
           </div>
-          <Sparkles className="h-6 w-6 text-primary animate-pulse ml-auto" />
+          
         </div>
       </div>
 
@@ -283,12 +283,12 @@ const Dashboard = () => {
                   Log Activity
                   <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button className="w-full justify-start h-12 border-2 border-success/30 text-success hover:bg-success/10 hover:border-success/50 transition-all duration-300 group">
+                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
                   <Zap className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
                   Offset Emissions
                   <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button className="w-full justify-start h-12 border-2 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 group">
+                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
                   <Users className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
                   Join Challenge
                   <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
