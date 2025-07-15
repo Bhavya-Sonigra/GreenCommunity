@@ -34,17 +34,11 @@ export default function Layout({ children }) {
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-transform duration-300">
-                <Leaf className="h-6 w-6 text-black animate-pulse-eco" />
-              </div>
-              <div className="hidden sm:block">
-                <span className="font-bold text-xl text-gradient">
-                  EcoAction
-                </span>
-                <div className="text-xs text-muted-foreground font-medium">
-                  Climate Platform
-                </div>
-              </div>
+              <img
+            src="/logo.png"
+            alt="App Logo"
+            className="mx-auto h-10 w-60 mb-1.2"
+          />
             </div>
           </div>
           {/* User Info */}

@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
       <form onSubmit={step === 1 ? handleSendCode : handleVerify} className="w-full max-w-sm space-y-4">
         <div className="text-center">
           <img
-            src="/logo1.jpg"
+            src="/logo.png"
             alt="App Logo"
             className="mx-auto h-15 w-80 mb-5"
           />
