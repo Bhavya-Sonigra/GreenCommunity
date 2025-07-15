@@ -27,7 +27,16 @@ export default function UpdatePasswordPage() {
     <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 text-foreground">Update Password</h1>
+
+          <img
+            src="/logo1.jpg"
+            alt="App Logo"
+            className="mx-auto h-15 w-80 mb-5"
+          />
+          
+        </div>
+        <div className="text-center">
+          
           <p className="text-muted-foreground text-sm mb-4">
             Enter your new password below.
           </p>

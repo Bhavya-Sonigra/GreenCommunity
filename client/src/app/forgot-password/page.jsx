@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
             alt="App Logo"
             className="mx-auto h-15 w-80 mb-5"
           />
-          <h1 className="text-2xl font-bold mb-2 text-foreground">Forgot Password</h1>
+         
           {step === 1 ? (
             <p className="text-muted-foreground text-sm mb-4">
               Enter your email address and we will send you a code to reset your password.
