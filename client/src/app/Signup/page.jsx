@@ -55,7 +55,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <form onSubmit={handleSignUp} className="w-full max-w-sm space-y-4">
         <div className="text-center">
           <img
@@ -160,6 +160,6 @@ export default function SignUpPage() {
           </Link>
         </p>
       </form>
-    </main>
+    </div>
   );
 }
