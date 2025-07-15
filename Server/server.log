@@ -1,0 +1,72 @@
+
+> server@1.0.0 start
+> node server.js
+
+[dotenv@17.1.0] injecting env (17) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+[dotenv@17.1.0] injecting env (0) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+MONGO_URI from .env: mongodb+srv://sonigrabhavya28:BZyoH4ahCXXc7z3X@auth.6r54itl.mongodb.net/auth-db?retryWrites=true&w=majority&appName=auth
+[dotenv@17.1.0] injecting env (0) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+[dotenv@17.1.0] injecting env (0) from .env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+MONGO_URI from .env: mongodb+srv://sonigrabhavya28:BZyoH4ahCXXc7z3X@auth.6r54itl.mongodb.net/auth-db?retryWrites=true&w=majority&appName=auth
+🚀 Server running on http://localhost:5000
+✅ MongoDB connected
+Google profile: {
+  id: '116408171663095864700',
+  displayName: 'Bhavya Sonigra',
+  name: { familyName: 'Sonigra', givenName: 'Bhavya' },
+  emails: [ { value: 'sonigrabhavya28@gmail.com', verified: true } ],
+  photos: [
+    {
+      value: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c'
+    }
+  ],
+  provider: 'google',
+  _raw: '{\n' +
+    '  "sub": "116408171663095864700",\n' +
+    '  "name": "Bhavya Sonigra",\n' +
+    '  "given_name": "Bhavya",\n' +
+    '  "family_name": "Sonigra",\n' +
+    '  "picture": "https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ\\u003ds96-c",\n' +
+    '  "email": "sonigrabhavya28@gmail.com",\n' +
+    '  "email_verified": true\n' +
+    '}',
+  _json: {
+    sub: '116408171663095864700',
+    name: 'Bhavya Sonigra',
+    given_name: 'Bhavya',
+    family_name: 'Sonigra',
+    picture: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c',
+    email: 'sonigrabhavya28@gmail.com',
+    email_verified: true
+  }
+}
+Google profile: {
+  id: '116408171663095864700',
+  displayName: 'Bhavya Sonigra',
+  name: { familyName: 'Sonigra', givenName: 'Bhavya' },
+  emails: [ { value: 'sonigrabhavya28@gmail.com', verified: true } ],
+  photos: [
+    {
+      value: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c'
+    }
+  ],
+  provider: 'google',
+  _raw: '{\n' +
+    '  "sub": "116408171663095864700",\n' +
+    '  "name": "Bhavya Sonigra",\n' +
+    '  "given_name": "Bhavya",\n' +
+    '  "family_name": "Sonigra",\n' +
+    '  "picture": "https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ\\u003ds96-c",\n' +
+    '  "email": "sonigrabhavya28@gmail.com",\n' +
+    '  "email_verified": true\n' +
+    '}',
+  _json: {
+    sub: '116408171663095864700',
+    name: 'Bhavya Sonigra',
+    given_name: 'Bhavya',
+    family_name: 'Sonigra',
+    picture: 'https://lh3.googleusercontent.com/a/ACg8ocLCSmUdQ17S2gc2bK-99NM8sAfMvySZ0CTrLNRRR7jfM-tRvFQ=s96-c',
+    email: 'sonigrabhavya28@gmail.com',
+    email_verified: true
+  }
+}

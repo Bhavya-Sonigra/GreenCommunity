@@ -4,6 +4,7 @@ import User from '../models/User.model.js';
 export const authenticate = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '') || 
+                  req.cookies?.authToken ||
                   req.cookies?.token ||
                   req.body?.token ||
                   req.query?.token;
@@ -36,6 +37,7 @@ export const authenticate = async (req, res, next) => {
 export const optionalAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '') || 
+                  req.cookies?.authToken ||
                   req.cookies?.token ||
                   req.body?.token ||
                   req.query?.token;

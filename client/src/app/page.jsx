@@ -27,7 +27,7 @@ import ProfessionalProgress from '@/components/ProfessionalProgress';
 import { useUser } from '@/context/UserContext';
 
 const Dashboard = () => {
-  const user = useUser();
+  const { user } = useUser();
   const isDemo = !user;
   const name = isDemo ? 'Demo User' : user?.name || 'Alex';
   const goalProgress = isDemo ? 0 : 75;
@@ -67,7 +67,6 @@ const Dashboard = () => {
             <h1 className="text-4xl font-bold text-gradient">Good morning, {name}!</h1>
             <p className="text-lg text-muted-foreground">Here's your environmental impact overview</p>
           </div>
-          
         </div>
       </div>
 
