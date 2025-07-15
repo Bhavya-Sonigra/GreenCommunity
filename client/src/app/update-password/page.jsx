@@ -29,7 +29,7 @@ export default function UpdatePasswordPage() {
         <div className="text-center">
 
           <img
-            src="/logo1.jpg"
+            src="/logo.png"
             alt="App Logo"
             className="mx-auto h-15 w-80 mb-5"
           />
