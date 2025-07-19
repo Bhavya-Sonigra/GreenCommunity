@@ -34,6 +34,7 @@ import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const translations = {
   en: {
@@ -106,7 +107,7 @@ const Dashboard = () => {
   }, [user, isClient]);
 
   if (loading || !isClient) {
-    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+    return <DashboardSkeleton />;
   }
 
   const isDemo = !user;

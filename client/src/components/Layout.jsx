@@ -8,6 +8,7 @@ import { Leaf, Menu, X, User, TrendingUp } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 const sidebarItems = [
   { name: 'Dashboard', path: '/' },
@@ -78,14 +79,39 @@ export default function Layout({ children }) {
                 className="animate-fade-in"
               />
             </div>
-            <Link href="/settings" className="focus:outline-none">
-              <Avatar className="h-12 w-12 border-3 border-primary/30 hover:border-primary/60 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                <AvatarImage src="" alt="User" />
-                <AvatarFallback className="bg-gradient-primary text-black font-bold text-lg">
-                  <User className="h-6 w-6" />
-                </AvatarFallback>
-              </Avatar>
-            </Link>
+            {/* User Profile Dropdown */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="focus:outline-none">
+                  <Avatar className="h-12 w-12 border-3 border-primary/30 hover:border-primary/60 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                    <AvatarImage src={user?.photo || ""} alt={name} />
+                    <AvatarFallback className="bg-gradient-primary text-black font-bold text-lg">
+                      <User className="h-6 w-6" />
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4 flex flex-col gap-3" align="end">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-primary/30">
+                    <AvatarImage src={user?.photo || ""} alt={name} />
+                    <AvatarFallback className="bg-gradient-primary text-black font-bold text-lg">
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-semibold text-lg text-foreground">{name}</div>
+                    <div className="text-xs text-muted-foreground">{city}, {country}</div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 mt-2">
+                  <Link href="/settings">
+                    <Button variant="outline" className="w-full">More details</Button>
+                  </Link>
+                  <Button variant="destructive" className="w-full" onClick={() => {/* TODO: implement logout */}}>Log out</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </header>
