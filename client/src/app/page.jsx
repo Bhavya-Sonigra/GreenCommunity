@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -33,7 +34,6 @@ import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
-import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const translations = {
   en: {
@@ -77,27 +77,36 @@ const getGreetingKey = () => {
 const Dashboard = () => {
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  const [greetingKey, setGreetingKey] = useState('greeting_morning'); // Default fallback
   const { preferences } = usePreferences();
   const { t } = useTranslation();
   const currency = currencySymbols[preferences.currency] || "$";
   const units = unitLabels[preferences.units] || unitLabels.metric;
 
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true);
+    // Set the correct greeting after hydration
+    setGreetingKey(getGreetingKey());
+  }, []);
+
   useEffect(() => {
     // If user is null, check if token exists (fetch in progress)
-    if (user === null && typeof window !== 'undefined') {
+    if (user === null && isClient) {
       const token = localStorage.getItem('token');
       if (token) {
         setLoading(true);
       } else {
-        setTimeout(() => setLoading(false), 200); // Show skeleton for 0.8 seconds
+        setTimeout(() => setLoading(false), 200);
       }
     } else {
-      setTimeout(() => setLoading(false), 200); // Show skeleton for 0.8 seconds
+      setTimeout(() => setLoading(false), 200);
     }
-  }, [user]);
+  }, [user, isClient]);
 
-  if (loading) {
-    return <DashboardSkeleton />;
+  if (loading || !isClient) {
+    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
   }
 
   const isDemo = !user;
@@ -128,8 +137,6 @@ const Dashboard = () => {
     { title: 'Green Commuter', description: 'Used public transport 5x', icon: Car, earned: true },
     { title: 'Plant-Based', description: 'Ate vegetarian for 3 days', icon: Leaf, earned: false },
   ];
-
-  const greetingKey = getGreetingKey();
 
   return (
     <div className="p-8 space-y-8 bg-gradient-to-br from-background via-accent/5 to-primary/5 min-h-screen relative">
@@ -249,7 +256,7 @@ const Dashboard = () => {
           <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
             <Card className="card-premium hover-lift">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">{t.emissions}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl">{t('emissions')}</CardTitle>
                 <CardDescription>Your emissions by category this month</CardDescription>
               </CardHeader>
               <CardContent>
@@ -338,7 +345,7 @@ const Dashboard = () => {
           <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
             <Card className="card-floating hover-lift">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">{t.achievements}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl">{t('achievements')}</CardTitle>
                 <CardDescription>Your eco-friendly milestones</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
