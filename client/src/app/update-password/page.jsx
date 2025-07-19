@@ -2,25 +2,40 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { authAPI } from '../../lib/api';
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+    
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
-    setSubmitted(true);
-    setTimeout(() => {
-      router.push('/login');
-    }, 1500);
+
+    try {
+      // Update the password for authenticated user
+      await authAPI.updatePassword(password);
+
+      setSubmitted(true);
+      setTimeout(() => {
+        router.push('/'); // Redirect to dashboard instead of login
+      }, 2000);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,7 +96,7 @@ export default function UpdatePasswordPage() {
         </button>
         {submitted && (
           <div className="text-green-600 text-center text-sm mt-2">
-            Password updated successfully! Redirecting to login...
+            Password updated successfully! Redirecting to dashboard...
           </div>
         )}
       </form>

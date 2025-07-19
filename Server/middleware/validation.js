@@ -69,3 +69,46 @@ export const validateEmailChange = [
     .notEmpty()
     .withMessage('Current password is required')
 ];
+
+// Verify reset code validation
+export const validateVerifyResetCode = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+
+  body('code')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Code must be exactly 6 digits')
+    .matches(/^[0-9]{6}$/)
+    .withMessage('Code must contain only numbers')
+];
+
+// Update password with code validation
+export const validateUpdatePasswordWithCode = [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+
+  body('code')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Code must be exactly 6 digits')
+    .matches(/^[0-9]{6}$/)
+    .withMessage('Code must contain only numbers'),
+
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long')
+    .matches(/^(?=.*[a-zA-Z])(?=.*\d).*$/)
+    .withMessage('Password must contain at least one letter and one number')
+];
+
+// Update password for authenticated users validation
+export const validateUpdatePassword = [
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long')
+    .matches(/^(?=.*[a-zA-Z])(?=.*\d).*$/)
+    .withMessage('Password must contain at least one letter and one number')
+];

@@ -11,21 +11,40 @@ export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
 
-  const handleSendCode = (e) => {
+const handleSendCode = async (e) => {
     e.preventDefault();
     setSubmitted(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!response.ok) throw new Error('Failed to send code');
       setStep(2);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
       setSubmitted(false);
-    }, 1000);
+    }
   };
 
-  const handleVerify = (e) => {
+const handleVerify = async (e) => {
     e.preventDefault();
     setSubmitted(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/auth/verify-reset-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      if (!response.ok) throw new Error('Failed to verify code');
       router.push('/update-password');
-    }, 1000);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setSubmitted(false);
+    }
   };
 
   return (
