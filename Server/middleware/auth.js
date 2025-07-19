@@ -3,7 +3,15 @@ import User from '../models/User.model.js';
 
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.cookies?.authToken;
+    // Check for token in cookies first, then in Authorization header
+    let token = req.cookies?.authToken;
+    
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      }
+    }
 
     if (!token) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
@@ -32,7 +40,15 @@ export const authenticate = async (req, res, next) => {
 
 export const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.cookies?.authToken;
+    // Check for token in cookies first, then in Authorization header
+    let token = req.cookies?.authToken;
+    
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7); // Remove 'Bearer ' prefix
+      }
+    }
 
     if (!token) {
       return next();

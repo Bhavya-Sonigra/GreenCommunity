@@ -92,16 +92,24 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    // If user is null, check if token exists (fetch in progress)
-    if (user === null && isClient) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        setLoading(true);
+    if (isClient) {
+      // If user is null, check if token exists (fetch in progress)
+      if (user === null) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          // User is being fetched, keep loading
+          setLoading(true);
+          // Set a timeout to stop loading if user fetch takes too long
+          const timeout = setTimeout(() => setLoading(false), 3000);
+          return () => clearTimeout(timeout);
+        } else {
+          // No token, show demo mode
+          setLoading(false);
+        }
       } else {
-        setTimeout(() => setLoading(false), 200);
+        // User is loaded, stop loading
+        setLoading(false);
       }
-    } else {
-      setTimeout(() => setLoading(false), 200);
     }
   }, [user, isClient]);
 
@@ -112,6 +120,11 @@ const Dashboard = () => {
   const isDemo = !user;
   const name = isDemo ? 'Demo User' : user?.name || 'User';
   const goalProgress = isDemo ? 0 : 75;
+  
+  // Debug logging
+  console.log('🏠 Dashboard - user:', user);
+  console.log('🏠 Dashboard - isDemo:', isDemo);
+  console.log('🏠 Dashboard - name:', name);
 
   // Mock data - in a real app, this would come from an API
   const currentFootprint = 2.4; // tons CO2 per month
