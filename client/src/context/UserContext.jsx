@@ -16,8 +16,10 @@ export function UserProvider({ children }) {
   // Function to clear user on logout
   const clearUser = () => {
     setUser(null);
-    if (isClient) {
+    if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
+      // Clear any other user-related data from localStorage if needed
+      // localStorage.removeItem('userPreferences');
     }
   };
 
@@ -47,7 +49,6 @@ export function UserProvider({ children }) {
             error.message?.includes('Unauthorized') ||
             error.message?.includes('401') ||
             error.message?.includes('403')) {
-          console.log('🧹 Removing invalid token from localStorage');
           localStorage.removeItem('token');
         }
         setUser(null);

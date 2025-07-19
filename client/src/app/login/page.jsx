@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { authAPI } from '../../lib/api';
+import { useUser } from '@/context/UserContext';
 
 
 export default function LoginPage() {
   const router = useRouter();
+  const { updateUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,8 +31,12 @@ export default function LoginPage() {
         localStorage.setItem('token', data.token);
       }
       
+      // Update user context with user data
+      if (data.user) {
+        updateUser(data.user);
+      }
+      
       setIsSuccess(true);
-      console.log('Login successful:', data);
       
       // Redirect to home after successful login
       setTimeout(() => {
@@ -38,7 +44,6 @@ export default function LoginPage() {
       }, 1000);
       
     } catch (error) {
-      console.error('Login error:', error);
       setError(error.message || 'Login failed. Please try again.');
       setIsSubmitting(false);
     }

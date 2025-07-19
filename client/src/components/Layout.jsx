@@ -1,11 +1,13 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import FloatingParticles from './FloatingParticles';
 import ProfessionalProgress from './ProfessionalProgress';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Leaf, Menu, X, User, TrendingUp } from 'lucide-react';
+import { Leaf, Menu, X, User, TrendingUp, LogOut } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
+import { authAPI } from '@/lib/api';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -21,13 +23,52 @@ const sidebarItems = [
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useUser();
-  const isDemo = !user;
-  const name = isDemo ? 'Demo User' : user?.name || 'Alex';
-  const city = user?.city || 'Demo City';
-  const country = user?.country || 'Demo Country';
-  const monthlyGoal = isDemo ? 0 : 75;
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { user, clearUser } = useUser();
+  const router = useRouter();
+  const isAuthenticated = !!user;
+  const name = user?.name || 'Guest';
+  const city = user?.city || 'Unknown';
+  const country = user?.country || 'Location';
+  const monthlyGoal = isAuthenticated ? 75 : 0;
   const pathname = usePathname();
+  
+  // Don't render the layout if logging out to prevent flash
+  if (isLoggingOut) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <span>Logging out...</span>
+        </div>
+      </div>
+    );
+  }
+  
+  // Logout functionality
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      
+      // Call server logout endpoint to clear cookies
+      await authAPI.logout();
+      
+      // Clear user data and localStorage token
+      clearUser();
+      
+      // Redirect to login page immediately
+      router.replace('/login');
+      
+      console.log('✅ Logged out successfully');
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+      
+      // Even if server logout fails, clear local data
+      clearUser();
+      router.replace('/login');
+    }
+    // Don't reset isLoggingOut here to prevent flash
+  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -108,7 +149,24 @@ export default function Layout({ children }) {
                   <Link href="/settings">
                     <Button variant="outline" className="w-full">More details</Button>
                   </Link>
-                  <Button variant="destructive" className="w-full" onClick={() => {/* TODO: implement logout */}}>Log out</Button>
+                  <Button 
+                    variant="destructive" 
+                    className="w-full flex items-center gap-2" 
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? (
+                      <>
+                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Logging out...
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="h-4 w-4" />
+                        Log out
+                      </>
+                    )}
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>

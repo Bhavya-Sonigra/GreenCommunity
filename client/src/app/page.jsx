@@ -34,7 +34,6 @@ import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
-import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const translations = {
   en: {
@@ -97,7 +96,6 @@ const Dashboard = () => {
     const auth = urlParams.get('auth');
     
     if (auth === 'success' && token) {
-      console.log('🔐 OAuth token received, saving to localStorage');
       localStorage.setItem('token', token);
       // Clean up the URL
       window.history.replaceState({}, document.title, '/');
@@ -118,7 +116,7 @@ const Dashboard = () => {
           const timeout = setTimeout(() => setLoading(false), 3000);
           return () => clearTimeout(timeout);
         } else {
-          // No token, show demo mode
+          // No token, show guest mode
           setLoading(false);
         }
       } else {
@@ -129,12 +127,19 @@ const Dashboard = () => {
   }, [user, isClient]);
 
   if (loading || !isClient) {
-    return <DashboardSkeleton />;
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        <div className="flex items-center justify-center gap-3">
+          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <span>Loading dashboard...</span>
+        </div>
+      </div>
+    );
   }
 
-  const isDemo = !user;
-  const name = isDemo ? 'Demo User' : user?.name || 'User';
-  const goalProgress = isDemo ? 0 : 75;
+  const isAuthenticated = !!user;
+  const name = user?.name || 'Guest';
+  const goalProgress = isAuthenticated ? 75 : 0;
   
 
   // Mock data - in a real app, this would come from an API
