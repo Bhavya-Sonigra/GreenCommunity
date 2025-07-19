@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 
 const sidebarItems = [
   { name: 'Dashboard', path: '/' },
-  { name: 'Footprint Log', path: '/footprint' },
+  { name: 'Footprint Log', path: '/footprintlog' },
   { name: 'Marketplace', path: '/marketplace' },
   { name: 'Projects', path: '/projects' },
   { name: 'Community', path: '/community' },
