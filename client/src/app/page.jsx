@@ -89,6 +89,20 @@ const Dashboard = () => {
     setIsClient(true);
     // Set the correct greeting after hydration
     setGreetingKey(getGreetingKey());
+    
+    // Handle OAuth callback token
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const auth = urlParams.get('auth');
+    
+    if (auth === 'success' && token) {
+      console.log('🔐 OAuth token received, saving to localStorage');
+      localStorage.setItem('token', token);
+      // Clean up the URL
+      window.history.replaceState({}, document.title, '/');
+      // Force re-render to fetch user data
+      window.location.reload();
+    }
   }, []);
 
   useEffect(() => {
@@ -121,10 +135,6 @@ const Dashboard = () => {
   const name = isDemo ? 'Demo User' : user?.name || 'User';
   const goalProgress = isDemo ? 0 : 75;
   
-  // Debug logging
-  console.log('🏠 Dashboard - user:', user);
-  console.log('🏠 Dashboard - isDemo:', isDemo);
-  console.log('🏠 Dashboard - name:', name);
 
   // Mock data - in a real app, this would come from an API
   const currentFootprint = 2.4; // tons CO2 per month

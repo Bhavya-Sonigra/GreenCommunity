@@ -58,6 +58,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     message: 'User registered successfully. Please check your email for verification.',
+    token: token,
     user: { 
       id: user._id, 
       name: user.name, 
@@ -111,6 +112,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     message: 'Login successful',
+    token: token,
     user: { 
       id: user._id, 
       name: user.name, 
