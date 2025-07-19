@@ -33,6 +33,7 @@ import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const translations = {
   en: {
@@ -88,15 +89,15 @@ const Dashboard = () => {
       if (token) {
         setLoading(true);
       } else {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 200); // Show skeleton for 0.8 seconds
       }
     } else {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 200); // Show skeleton for 0.8 seconds
     }
   }, [user]);
 
   if (loading) {
-    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+    return <DashboardSkeleton />;
   }
 
   const isDemo = !user;

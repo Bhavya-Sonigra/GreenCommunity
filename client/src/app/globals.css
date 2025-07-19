@@ -107,6 +107,25 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@keyframes progress-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+.animate-progress-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: progress-bar 1.2s linear infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
