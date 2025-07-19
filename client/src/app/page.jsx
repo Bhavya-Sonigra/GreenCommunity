@@ -90,19 +90,41 @@ const Dashboard = () => {
     setIsClient(true);
     // Set the correct greeting after hydration
     setGreetingKey(getGreetingKey());
+    
+    // Handle OAuth callback token
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const auth = urlParams.get('auth');
+    
+    if (auth === 'success' && token) {
+      console.log('🔐 OAuth token received, saving to localStorage');
+      localStorage.setItem('token', token);
+      // Clean up the URL
+      window.history.replaceState({}, document.title, '/');
+      // Force re-render to fetch user data
+      window.location.reload();
+    }
   }, []);
 
   useEffect(() => {
-    // If user is null, check if token exists (fetch in progress)
-    if (user === null && isClient) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        setLoading(true);
+    if (isClient) {
+      // If user is null, check if token exists (fetch in progress)
+      if (user === null) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          // User is being fetched, keep loading
+          setLoading(true);
+          // Set a timeout to stop loading if user fetch takes too long
+          const timeout = setTimeout(() => setLoading(false), 3000);
+          return () => clearTimeout(timeout);
+        } else {
+          // No token, show demo mode
+          setLoading(false);
+        }
       } else {
-        setTimeout(() => setLoading(false), 200);
+        // User is loaded, stop loading
+        setLoading(false);
       }
-    } else {
-      setTimeout(() => setLoading(false), 200);
     }
   }, [user, isClient]);
 
@@ -113,6 +135,7 @@ const Dashboard = () => {
   const isDemo = !user;
   const name = isDemo ? 'Demo User' : user?.name || 'User';
   const goalProgress = isDemo ? 0 : 75;
+  
 
   // Mock data - in a real app, this would come from an API
   const currentFootprint = 2.4; // tons CO2 per month

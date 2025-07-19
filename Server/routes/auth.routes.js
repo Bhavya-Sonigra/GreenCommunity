@@ -101,9 +101,9 @@ router.get('/google/callback',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
       });
 
-      // Redirect to clean URL without token
+      // Redirect with token as URL parameter for client-side storage
       const redirectUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-      res.redirect(`${redirectUrl}/?auth=success`);
+      res.redirect(`${redirectUrl}/?auth=success&token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/login?error=oauth_failed`);

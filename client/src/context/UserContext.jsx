@@ -6,6 +6,7 @@ const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isClient, setIsClient] = useState(false);
   
   // Function to update user after login
   const updateUser = (userData) => {
@@ -15,15 +16,22 @@ export function UserProvider({ children }) {
   // Function to clear user on logout
   const clearUser = () => {
     setUser(null);
-    if (typeof window !== 'undefined') {
+    if (isClient) {
       localStorage.removeItem('token');
     }
   };
 
+  // Handle client-side hydration
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+    
     async function fetchUser() {
       // Only try to fetch user if there's a token
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = localStorage.getItem('token');
       
       if (!token) {
         setUser(null);
@@ -34,16 +42,19 @@ export function UserProvider({ children }) {
         const data = await authAPI.getCurrentUser();
         setUser(data.user); // The API returns { user: userData }
       } catch (error) {
-        console.log('Failed to fetch user:', error.message);
-        // If token is invalid, remove it
-        if (typeof window !== 'undefined') {
+        // If token is invalid or any auth error occurs, clear the token and user
+        if (error.message?.includes('Invalid credentials') || 
+            error.message?.includes('Unauthorized') ||
+            error.message?.includes('401') ||
+            error.message?.includes('403')) {
+          console.log('🧹 Removing invalid token from localStorage');
           localStorage.removeItem('token');
         }
         setUser(null);
       }
     }
     fetchUser();
-  }, []);
+  }, [isClient]);
 
   return (
     <UserContext.Provider value={{ user, updateUser, clearUser }}>
