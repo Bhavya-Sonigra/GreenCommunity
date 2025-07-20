@@ -28,11 +28,11 @@ import { authenticate } from '../middleware/auth.js';
 
 // Rate limiters
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 5 * 60 * 1000, // 5 minutes
   max: 5, // Limit each IP to 5 login attempts per windowMs
   message: {
     error: 'Too many login attempts, please try again later.',
-    retryAfter: 15 * 60 * 1000 // 15 minutes in milliseconds
+    retryAfter: 5 * 60 * 1000 // 5 minutes in milliseconds
   },
   standardHeaders: true,
   legacyHeaders: false,
