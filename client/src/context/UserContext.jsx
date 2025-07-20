@@ -44,6 +44,9 @@ export function UserProvider({ children }) {
         const data = await authAPI.getCurrentUser();
         setUser(data.user); // The API returns { user: userData }
       } catch (error) {
+        // Silently handle authentication errors to avoid console spam
+        console.warn('User authentication failed. Token may have expired.');
+        
         // If token is invalid or any auth error occurs, clear the token and user
         if (error.message?.includes('Invalid credentials') || 
             error.message?.includes('Unauthorized') ||

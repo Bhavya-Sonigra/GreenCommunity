@@ -5,6 +5,7 @@ import { UserProvider } from "@/context/UserContext";
 import AuthLayoutWrapper from "@/components/AuthLayoutWrapper";
 import { PreferencesProvider } from "@/context/PreferencesContext";
 import LenisProvider from "@/components/LenisProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +32,15 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <LenisProvider>
-          <PreferencesProvider>
-            <UserProvider>
-              <AuthLayoutWrapper>{children}</AuthLayoutWrapper>
-            </UserProvider>
-          </PreferencesProvider>
-        </LenisProvider>
+        <ErrorBoundary>
+          <LenisProvider>
+            <PreferencesProvider>
+              <UserProvider>
+                <AuthLayoutWrapper>{children}</AuthLayoutWrapper>
+              </UserProvider>
+            </PreferencesProvider>
+          </LenisProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
