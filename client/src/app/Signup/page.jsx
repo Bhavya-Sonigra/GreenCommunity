@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FcGoogle } from 'react-icons/fc';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '../../lib/api';
+import { useUser } from '@/context/UserContext';
 
 export default function SignUpPage() {
   const [name, setName] = useState('');
@@ -15,7 +16,8 @@ export default function SignUpPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const router = useRouter(); // 👈 Add this
+  const router = useRouter();
+  const { updateUser } = useUser();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -37,8 +39,12 @@ export default function SignUpPage() {
         localStorage.setItem('token', data.token);
       }
       
+      // Update user context with user data
+      if (data.user) {
+        updateUser(data.user);
+      }
+      
       setIsSuccess(true);
-      console.log('Registration successful:', data);
       
       // Redirect to home page after successful registration
       setTimeout(() => {
@@ -46,7 +52,6 @@ export default function SignUpPage() {
       }, 1000);
       
     } catch (error) {
-      console.error('Registration error:', error);
       setError(error.message || 'Registration failed. Please try again.');
       setIsSubmitting(false);
     }
