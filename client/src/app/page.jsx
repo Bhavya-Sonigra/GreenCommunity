@@ -34,6 +34,8 @@ import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
+import { authAPI } from '@/lib/api';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const translations = {
   en: {
@@ -75,66 +77,62 @@ const getGreetingKey = () => {
 };
 
 const Dashboard = () => {
-  const { user } = useUser();
+  const { user, updateUser } = useUser();
   const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
   const [greetingKey, setGreetingKey] = useState('greeting_morning'); // Default fallback
   const { preferences } = usePreferences();
   const { t } = useTranslation();
   const currency = currencySymbols[preferences.currency] || "$";
   const units = unitLabels[preferences.units] || unitLabels.metric;
 
-  // Handle client-side hydration
+  // Handle client-side tasks
   useEffect(() => {
-    setIsClient(true);
-    // Set the correct greeting after hydration
+    // Set the correct greeting when component mounts
     setGreetingKey(getGreetingKey());
-    
+
     // Handle OAuth callback token
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const auth = urlParams.get('auth');
-    
+
     if (auth === 'success' && token) {
       localStorage.setItem('token', token);
-      // Clean up the URL
       window.history.replaceState({}, document.title, '/');
-      // Force re-render to fetch user data
-      window.location.reload();
+      // Instead of reload, fetch user data and update context
+      (async () => {
+        try {
+          const userData = await authAPI.getCurrentUser();
+          updateUser(userData.user);
+        } catch (error) {
+          console.error('Failed to fetch user after OAuth login', error);
+          updateUser(null);
+        }
+      })();
     }
   }, []);
 
   useEffect(() => {
-    if (isClient) {
-      // If user is null, check if token exists (fetch in progress)
-      if (user === null) {
-        const token = localStorage.getItem('token');
-        if (token) {
-          // User is being fetched, keep loading
-          setLoading(true);
-          // Set a timeout to stop loading if user fetch takes too long
-          const timeout = setTimeout(() => setLoading(false), 3000);
-          return () => clearTimeout(timeout);
-        } else {
-          // No token, show guest mode
-          setLoading(false);
-        }
+    // If user is null, check if token exists (fetch in progress)
+    if (user === null) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        // User is being fetched, keep loading
+        setLoading(true);
+        // Set a timeout to stop loading if user fetch takes too long
+        const timeout = setTimeout(() => setLoading(false), 3000);
+        return () => clearTimeout(timeout);
       } else {
-        // User is loaded, stop loading
+        // No token, show guest mode
         setLoading(false);
       }
+    } else {
+      // User is loaded, stop loading
+      setLoading(false);
     }
-  }, [user, isClient]);
+  }, [user]);
 
-  if (loading || !isClient) {
-    return (
-      <div className="p-8 text-center text-muted-foreground">
-        <div className="flex items-center justify-center gap-3">
-          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <span>Loading dashboard...</span>
-        </div>
-      </div>
-    );
+  if (loading) {
+    return <DashboardSkeleton />;
   }
 
   const isAuthenticated = !!user;

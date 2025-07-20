@@ -34,31 +34,33 @@ const apiRequest = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
-      const errorMessage = data.message || getFriendlyErrorMessage(response.status);
+      // Check for specific server error messages and convert them to user-friendly ones
+      let errorMessage = data.message || getFriendlyErrorMessage(response.status);
+      
+      // Convert server error messages to user-friendly messages
+      if (errorMessage === 'Invalid credentials') {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (errorMessage === 'Email already in use') {
+        errorMessage = 'An account with this email already exists. Please try logging in instead.';
+      }
+      
       throw new Error(errorMessage);
     }
 
     return data;
   } catch (error) {
-    // Only log unexpected errors to console to avoid spam
+    // Handle fetch/network errors
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+    
+    // Only log truly unexpected errors to console
     if (!isExpectedError(error)) {
       console.error('Unexpected API error:', error);
     }
     
-    // If it's already a user-friendly error, re-throw it
-    if (error.message.includes('Network error') || 
-        error.message.includes('Server response error') ||
-        error.message.includes('Invalid email') ||
-        error.message.includes('Access denied') ||
-        error.message.includes('Service not found') ||
-        error.message.includes('Too many attempts') ||
-        error.message.includes('Server error') ||
-        error.message.includes('Service temporarily unavailable')) {
-      throw error;
-    }
-    
-    // For any other unexpected errors
-    throw new Error('Something went wrong. Please try again later.');
+    // Re-throw the original error (it already has a user-friendly message)
+    throw error;
   }
 };
 
@@ -66,11 +68,14 @@ const apiRequest = async (endpoint, options = {}) => {
 function isExpectedError(error) {
   const expectedMessages = [
     'Invalid email',
+    'Invalid credentials',
     'Access denied',
     'Service not found',
     'Too many attempts',
     'Network error',
-    'Server response error'
+    'Server response error',
+    'Email already in use',
+    'Passwords do not match'
   ];
   
   return expectedMessages.some(msg => error.message.includes(msg));
@@ -84,6 +89,8 @@ function getFriendlyErrorMessage(status) {
       return 'Access denied. You don\'t have permission to perform this action.';
     case 404:
       return 'Service not found. Please try again later.';
+    case 423:
+      return 'Account temporarily locked due to too many failed attempts. Please try again in 30 minutes.';
     case 429:
       return 'Too many attempts. Please wait a moment before trying again.';
     case 500:
