@@ -71,10 +71,10 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative">
       <FloatingParticles />
       {/* Header */}
-      <header className="sticky top-0 z-50 glass border-b border-border/30 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 bg-white border-b border-border/30 shadow-sm">
         <div className="flex items-center justify-between px-6 h-16">
           {/* Logo and Navigation */}
           <div className="flex items-center gap-4">

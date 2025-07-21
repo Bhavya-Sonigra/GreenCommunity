@@ -36,6 +36,7 @@ import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
 import { authAPI } from '@/lib/api';
 import DashboardSkeleton from '@/components/DashboardSkeleton';
+import { Calendar as CustomCalendar } from '@/components/ui/calendar';
 
 const translations = {
   en: {
@@ -84,6 +85,7 @@ const Dashboard = () => {
   const { t } = useTranslation();
   const currency = currencySymbols[preferences.currency] || "$";
   const units = unitLabels[preferences.units] || unitLabels.metric;
+  const [date, setDate] = useState(new Date());
 
   // Handle client-side tasks
   useEffect(() => {
@@ -164,6 +166,10 @@ const Dashboard = () => {
     { title: 'Green Commuter', description: 'Used public transport 5x', icon: Car, earned: true },
     { title: 'Plant-Based', description: 'Ate vegetarian for 3 days', icon: Leaf, earned: false },
   ];
+
+  // Generate streak days from 1st to 13th of the current month
+  const today = new Date();
+  const streakDays = Array.from({ length: 13 }, (_, i) => new Date(today.getFullYear(), today.getMonth(), i + 1));
 
   return (
     <div className="p-8 space-y-8 bg-gradient-to-br from-background via-accent/5 to-primary/5 min-h-screen relative">
@@ -450,58 +456,26 @@ const Dashboard = () => {
           </div>
           {/* Calendar Streak */}
           <div className="animate-slide-up" style={{ animationDelay: '0.75s' }}>
-            <Card className="card-premium hover-glow">
+            <Card className="bg-gradient-to-br from-green-50 via-white to-green-100 border border-green-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <Calendar className="h-6 w-6 text-primary" />
-                  Streak Calendar
+                  <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-md mr-2">
+                    <Calendar className="h-6 w-6 text-white" />
+                  </span>
+                  <span className="bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent font-extrabold">Streak Calendar</span>
                 </CardTitle>
-                <CardDescription>Your activity streak this month</CardDescription>
+                <CardDescription className="text-base text-gray-600 mt-1">Your activity streak this month</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Highlight streak days: 5, 6, 7, 8, 9, 10, 11, 12, 13 June 2025 */}
-                <DateRangeCalendar
-                  showMonthAndYearPickers={true}
-                  showDateDisplay={false}
-                  showSelectionPreview={false}
-                  staticRanges={[]}
-                  inputRanges={[]}
-                  weekdayDisplayFormat="EEEEE"
-                  monthDisplayFormat="MMMM yyyy"
-                  className="rounded-xl shadow-md border-none"
-                  disabledDates={[]}
-                  editableDateInputs={false}
-                  moveRangeOnFirstSelection={false}
-                  dragSelectionEnabled={false}
-                  calendarFocus="forwards"
-                  months={1}
-                  direction="vertical"
-                  minDate={new Date(2025, 5, 1)}
-                  maxDate={new Date(2025, 5, 30)}
-                  dayContentRenderer={(date) => {
-                    const streakDays = [5,6,7,8,9,10,11,12,13];
-                    if (
-                      date.getFullYear() === 2025 &&
-                      date.getMonth() === 5 &&
-                      streakDays.includes(date.getDate())
-                    ) {
-                      return (
-                        <div style={{
-                          background: '#22c55e',
-                          color: 'white',
-                          borderRadius: '8px',
-                          width: 32,
-                          height: 32,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: 'auto',
-                        }}>{date.getDate()}</div>
-                      );
-                    }
-                    return <div>{date.getDate()}</div>;
-                  }}
-                />
+                <div className="flex justify-center items-center py-8">
+                  <CustomCalendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    streakDays={streakDays}
+                    className="rounded-2xl border-2 border-green-200 bg-white shadow-lg p-6 w-[360px] hover:shadow-green-200 transition-shadow duration-300"
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>

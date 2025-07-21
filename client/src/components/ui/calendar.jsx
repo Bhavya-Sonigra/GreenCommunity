@@ -1,62 +1,435 @@
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import * as React from "react"
 
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import {
+
+  ChevronDownIcon,
+
+  ChevronLeftIcon,
+
+  ChevronRightIcon,
+
+} from "lucide-react"
+
+import { DayPicker, getDefaultClassNames } from "react-day-picker";
+
+import { isSameDay, addDays, subDays } from 'date-fns';
+
+
+
+import { cn } from "@/lib/utils"
+
+import { Button, buttonVariants } from "@/components/ui/button"
+
+
 
 function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}) {
-  return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
-      }}
-      {...props}
-    />
-  );
-}
-Calendar.displayName = "Calendar";
 
-export { Calendar };
+  className,
+
+  classNames,
+
+  showOutsideDays = true,
+
+  captionLayout = "label",
+
+  buttonVariant = "ghost",
+
+  formatters,
+
+  components,
+
+  streakDays = [], // Accept streakDays as a prop
+
+  ...props
+
+}) {
+
+  const defaultClassNames = getDefaultClassNames()
+
+
+
+  // --- MODIFIERS FOR STREAK LOGIC ---
+
+  const isDateInArray = (date, dates) => dates.some(d => isSameDay(d, date));
+
+  const streakModifiers = {
+
+    streak: streakDays,
+
+    streak_start: (day) => {
+
+      const inStreak = isDateInArray(day, streakDays);
+
+      const prevNotStreak = !isDateInArray(subDays(day, 1), streakDays);
+
+      const nextNotStreak = !isDateInArray(addDays(day, 1), streakDays);
+
+      // Single day streak: both ends rounded
+
+      if (inStreak && prevNotStreak && nextNotStreak) return true;
+
+      // Start of multi-day streak: only left rounded
+
+      return inStreak && prevNotStreak;
+
+    },
+
+    streak_end: (day) => {
+
+      const inStreak = isDateInArray(day, streakDays);
+
+      const prevInStreak = isDateInArray(subDays(day, 1), streakDays);
+
+      const nextNotStreak = !isDateInArray(addDays(day, 1), streakDays);
+
+      // End of multi-day streak: only right rounded
+
+      return inStreak && prevInStreak && nextNotStreak;
+
+    },
+
+    streak_middle: (day) => isDateInArray(day, streakDays) && isDateInArray(subDays(day, 1), streakDays) && isDateInArray(addDays(day, 1), streakDays),
+
+  };
+
+
+
+  return (
+
+    <DayPicker
+
+      showOutsideDays={showOutsideDays}
+
+      modifiers={streakModifiers}
+
+      className={cn(
+
+        "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+
+        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
+
+        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+
+        className
+
+      )}
+
+      captionLayout={captionLayout}
+
+      formatters={{
+
+        formatMonthDropdown: (date) =>
+
+          date.toLocaleString("default", { month: "short" }),
+
+        ...formatters,
+
+      }}
+
+      classNames={{
+
+        root: cn("w-fit", defaultClassNames.root),
+
+        months: cn("flex gap-4 flex-col md:flex-row relative", defaultClassNames.months),
+
+        month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
+
+        nav: cn(
+
+          "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
+
+          defaultClassNames.nav
+
+        ),
+
+        button_previous: cn(
+
+          buttonVariants({ variant: buttonVariant }),
+
+          "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
+
+          defaultClassNames.button_previous
+
+        ),
+
+        button_next: cn(
+
+          buttonVariants({ variant: buttonVariant }),
+
+          "size-(--cell-size) aria-disabled:opacity-50 p-0 select-none",
+
+          defaultClassNames.button_next
+
+        ),
+
+        month_caption: cn(
+
+          "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)",
+
+          defaultClassNames.month_caption
+
+        ),
+
+        dropdowns: cn(
+
+          "w-full flex items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+
+          defaultClassNames.dropdowns
+
+        ),
+
+        dropdown_root: cn(
+
+          "relative has-focus:border-ring border border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] rounded-md",
+
+          defaultClassNames.dropdown_root
+
+        ),
+
+        dropdown: cn("absolute bg-popover inset-0 opacity-0", defaultClassNames.dropdown),
+
+        caption_label: cn("select-none font-medium", captionLayout === "label"
+
+          ? "text-sm"
+
+          : "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:text-muted-foreground [&>svg]:size-3.5", defaultClassNames.caption_label),
+
+        table: "w-full border-collapse",
+
+        weekdays: cn("flex", defaultClassNames.weekdays),
+
+        weekday: cn(
+
+          "text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] select-none",
+
+          defaultClassNames.weekday
+
+        ),
+
+        week: cn("flex w-full mt-2", defaultClassNames.week),
+
+        week_number_header: cn("select-none w-(--cell-size)", defaultClassNames.week_number_header),
+
+        week_number: cn(
+
+          "text-[0.8rem] select-none text-muted-foreground",
+
+          defaultClassNames.week_number
+
+        ),
+
+        day: cn(
+
+          "relative w-full h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
+
+          defaultClassNames.day
+
+        ),
+
+        range_start: cn("rounded-l-md bg-accent", defaultClassNames.range_start),
+
+        range_middle: cn("rounded-none", defaultClassNames.range_middle),
+
+        range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
+
+        today: cn(
+
+          "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
+
+          defaultClassNames.today
+
+        ),
+
+        outside: cn(
+
+          "text-muted-foreground aria-selected:text-muted-foreground",
+
+          defaultClassNames.outside
+
+        ),
+
+        disabled: cn("text-muted-foreground opacity-50", defaultClassNames.disabled),
+
+        hidden: cn("invisible", defaultClassNames.hidden),
+
+        ...classNames,
+
+      }}
+
+      components={{
+
+        Root: ({ className, rootRef, ...props }) => {
+
+          return (<div data-slot="calendar" ref={rootRef} className={cn(className)} {...props} />);
+
+        },
+
+        Chevron: ({ className, orientation, ...props }) => {
+
+          if (orientation === "left") {
+
+            return (<ChevronLeftIcon className={cn("size-4", className)} {...props} />);
+
+          }
+
+
+
+          if (orientation === "right") {
+
+            return (<ChevronRightIcon className={cn("size-4", className)} {...props} />);
+
+          }
+
+
+
+          return (<ChevronDownIcon className={cn("size-4", className)} {...props} />);
+
+        },
+
+        DayButton: CalendarDayButton,
+
+        WeekNumber: ({ children, ...props }) => {
+
+          return (
+
+            <td {...props}>
+
+              <div
+
+                className="flex size-(--cell-size) items-center justify-center text-center">
+
+                {children}
+
+              </div>
+
+            </td>
+
+          );
+
+        },
+
+        ...components,
+
+      }}
+
+      {...props} />
+
+  );
+
+}
+
+
+
+function CalendarDayButton({
+
+  className,
+
+  day,
+
+  modifiers,
+
+  ...props
+
+}) {
+
+  const defaultClassNames = getDefaultClassNames();
+
+  const ref = React.useRef(null);
+
+  React.useEffect(() => {
+
+    if (modifiers.focused) ref.current?.focus();
+
+  }, [modifiers.focused]);
+
+  const isStreak = modifiers.streak;
+
+  const isStart = modifiers.streak_start;
+
+  const isEnd = modifiers.streak_end;
+
+  const isMiddle = modifiers.streak_middle;
+
+  // If both start and end, it's a single-day streak
+
+  const isSingle = isStart && isEnd;
+
+  return (
+
+    <Button
+
+      ref={ref}
+
+      variant="ghost"
+
+      size="icon"
+
+      data-day={day.date.toLocaleDateString()}
+
+      data-selected-single={
+
+        modifiers.selected &&
+
+        !modifiers.range_start &&
+
+        !modifiers.range_end &&
+
+        !modifiers.range_middle
+
+      }
+
+      data-range-start={modifiers.range_start}
+
+      data-range-end={modifiers.range_end}
+
+      data-range-middle={modifiers.range_middle}
+
+      className={cn(
+
+        "relative flex items-center justify-center aspect-square w-full min-w-(--cell-size) font-medium text-base transition-colors overflow-hidden",
+
+        isStreak &&
+
+          "bg-green-100 text-green-700 z-0",
+
+        isStart && !isEnd &&
+
+          "rounded-l-xl",
+
+        isEnd && !isStart &&
+
+          "rounded-r-xl",
+
+        isStart && isEnd &&
+
+          "rounded-xl",
+
+        isMiddle &&
+
+          "rounded-none",
+
+        modifiers.selected &&
+
+          "bg-white text-green-700 ring-2 ring-green-500 z-10 font-bold",
+
+        defaultClassNames.day,
+
+        className
+
+      )}
+
+      {...props}
+
+    >
+
+      <span className="z-10">{day.date.getDate()}</span>
+
+    </Button>
+
+  );
+
+}
+
+
+
+export { Calendar, CalendarDayButton }
