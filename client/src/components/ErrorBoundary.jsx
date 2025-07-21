@@ -1,5 +1,17 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
+
+// Wrapper component to use hooks
+function ErrorBoundaryWithRouter({ children }) {
+  const router = useRouter();
+  
+  return (
+    <ErrorBoundary router={router}>
+      {children}
+    </ErrorBoundary>
+  );
+}
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -65,7 +77,7 @@ class ErrorBoundary extends React.Component {
               </button>
               
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => this.props.router.push('/')}
                 className="w-full bg-background border border-border text-foreground font-medium py-3 px-6 rounded-md hover:bg-accent transition-colors"
               >
                 Go to Homepage
@@ -100,4 +112,4 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-export default ErrorBoundary;
+export default ErrorBoundaryWithRouter;

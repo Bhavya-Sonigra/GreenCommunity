@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 const sidebarItems = [
-  { name: 'Dashboard', path: '/' },
+  { name: 'Dashboard', path: '/dashboard' },
   { name: 'Footprint Log', path: '/footprintlog' },
   { name: 'Marketplace', path: '/marketplace' },
   { name: 'Projects', path: '/projects' },
