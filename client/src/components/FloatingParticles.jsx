@@ -6,13 +6,14 @@ const FloatingParticles = () => {
   const [particles, setParticles] = useState([]);
 
   useEffect(() => {
-    const icons = [' 33f', ' 343', ' 331', '\u267b\ufe0f', '\u1f30d', '\u1f49a'];
+    const icons = ['🌱', '🌿', '♻️', '🌍', '🍃', '💚'];
     const newParticles = [];
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 3; i++) {
       newParticles.push({
         id: i,
-        left: Math.random() * 100,
-        animationDelay: Math.random() * 8,
+        left: 15 + Math.random() * 70, // Keep away from edges
+        top: 20 + Math.random() * 60, // Keep in middle areas
+        animationDelay: Math.random() * 12,
         icon: icons[Math.floor(Math.random() * icons.length)]
       });
     }
@@ -24,10 +25,12 @@ const FloatingParticles = () => {
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="floating-leaf absolute opacity-30"
+          className="floating-leaf absolute opacity-5 select-none"
           style={{
             left: `${particle.left}%`,
+            top: `${particle.top}%`,
             animationDelay: `${particle.animationDelay}s`,
+            zIndex: 1,
           }}
         >
           {particle.icon}

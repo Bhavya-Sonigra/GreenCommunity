@@ -190,7 +190,7 @@ const Community = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Community Hub</h1>
+          <h1 className="text-3xl font-bold text-gradient">Community Hub</h1>
           <p className="text-muted-foreground">Connect, compete, and create positive environmental impact together</p>
         </div>
         

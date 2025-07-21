@@ -97,7 +97,7 @@ const FootprintLog = () => {
     <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Carbon Footprint Log</h1>
+        <h1 className="text-3xl font-bold text-gradient">Carbon Footprint Log</h1>
         <p className="text-muted-foreground">Track your daily activities and calculate their environmental impact</p>
       </div>
 
