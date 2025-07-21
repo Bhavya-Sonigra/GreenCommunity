@@ -4,6 +4,7 @@ import "./globals.css";
 import { UserProvider } from "@/context/UserContext";
 import AuthLayoutWrapper from "@/components/AuthLayoutWrapper";
 import { PreferencesProvider } from "@/context/PreferencesContext";
+import { AnimationProvider } from "@/context/AnimationContext";
 import LenisProvider from "@/components/LenisProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
@@ -35,9 +36,11 @@ export default function RootLayout({ children }) {
         <ErrorBoundary>
           <LenisProvider>
             <PreferencesProvider>
-              <UserProvider>
-                <AuthLayoutWrapper>{children}</AuthLayoutWrapper>
-              </UserProvider>
+              <AnimationProvider>
+                <UserProvider>
+                  <AuthLayoutWrapper>{children}</AuthLayoutWrapper>
+                </UserProvider>
+              </AnimationProvider>
             </PreferencesProvider>
           </LenisProvider>
         </ErrorBoundary>

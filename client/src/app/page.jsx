@@ -1,532 +1,580 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
 import { 
-  TrendingUp, 
+  Calculator, 
   TrendingDown, 
-  Target, 
-  Plus, 
-  Zap, 
-  Users,
-  Calendar,
-  Car,
-  Home,
-  Utensils,
-  Plane,
-  Award,
+  TrendingUp,
+  ShoppingCart, 
+  Users, 
+  ArrowRight, 
+  CheckCircle, 
+  Star,
   Leaf,
+  Globe,
+  Target,
   BarChart3,
-  ArrowRight,
-  Sparkles
+  Award,
+  Sparkles,
+  Play,
+  Sun,
+  Mountain,
+  Waves,
+  ArrowDownCircle
 } from 'lucide-react';
-import AnimatedCounter from '@/components/AnimatedCounter';
-import ProfessionalProgress from '@/components/ProfessionalProgress';
-import { useUser } from '@/context/UserContext';
-import { useState, useEffect } from 'react';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
-import { Calendar as DateRangeCalendar } from 'react-date-range';
-import { addDays } from 'date-fns';
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
-import { usePreferences, useTranslation } from "@/context/PreferencesContext";
-import { authAPI } from '@/lib/api';
-import DashboardSkeleton from '@/components/DashboardSkeleton';
+import Link from 'next/link';
 
-const translations = {
-  en: {
-    welcome: "Welcome back!",
-    emissions: "Your emissions by category this month",
-    achievements: "Your eco-friendly milestones",
-    // ... add more as needed
-  },
-  hi: {
-    welcome: "वापसी पर स्वागत है!",
-    emissions: "इस महीने श्रेणी के अनुसार आपके उत्सर्जन",
-    achievements: "आपकी पर्यावरण-अनुकूल उपलब्धियाँ",
-    // ...
-  },
-  gu: {
-    welcome: "પાછા આવવા માટે સ્વાગત છે!",
-    emissions: "આ મહિને કેટેગરી પ્રમાણે તમારા ઉત્સર્જન",
-    achievements: "તમારી પર્યાવરણ-મૈત્રીપૂર્ણ સિદ્ધિઓ",
-    // ...
-  },
-};
-
-const currencySymbols = {
-  usd: "$",
-  eur: "€",
-  inr: "₹",
-};
-
-const unitLabels = {
-  metric: { distance: "km", weight: "kg" },
-  imperial: { distance: "mi", weight: "lb" },
-};
-
-const getGreetingKey = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'greeting_morning';
-  if (hour < 18) return 'greeting_afternoon';
-  return 'greeting_evening';
-};
-
-const Dashboard = () => {
-  const { user, updateUser } = useUser();
-  const [loading, setLoading] = useState(true);
-  const [greetingKey, setGreetingKey] = useState('greeting_morning'); // Default fallback
-  const { preferences } = usePreferences();
-  const { t } = useTranslation();
-  const currency = currencySymbols[preferences.currency] || "$";
-  const units = unitLabels[preferences.units] || unitLabels.metric;
-
-  // Handle client-side tasks
-  useEffect(() => {
-    // Set the correct greeting when component mounts
-    setGreetingKey(getGreetingKey());
-
-    // Handle OAuth callback token
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const auth = urlParams.get('auth');
-
-    if (auth === 'success' && token) {
-      localStorage.setItem('token', token);
-      window.history.replaceState({}, document.title, '/');
-      // Instead of reload, fetch user data and update context
-      (async () => {
-        try {
-          const userData = await authAPI.getCurrentUser();
-          updateUser(userData.user);
-        } catch (error) {
-          console.error('Failed to fetch user after OAuth login', error);
-          updateUser(null);
-        }
-      })();
+const LandingPage = () => {
+  const features = [
+    {
+      icon: Calculator,
+      title: "Carbon Footprint Calculator",
+      description: "Get precise measurements of your individual or business carbon impact with our comprehensive assessment tools.",
+      color: "text-blue-500"
+    },
+    {
+      icon: TrendingDown,
+      title: "Reduction Strategies",
+      description: "Receive personalized tips and actionable plans to reduce your environmental footprint effectively.",
+      color: "text-green-500"
+    },
+    {
+      icon: ShoppingCart,
+      title: "Offset Marketplace",
+      description: "Browse verified carbon offset projects and make meaningful environmental investments.",
+      color: "text-purple-500"
+    },
+    {
+      icon: Users,
+      title: "Sustainability Community",
+      description: "Connect with like-minded individuals and businesses sharing the journey toward carbon neutrality.",
+      color: "text-orange-500"
     }
-  }, []);
-
-  useEffect(() => {
-    // If user is null, check if token exists (fetch in progress)
-    if (user === null) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        // User is being fetched, keep loading
-        setLoading(true);
-        // Set a timeout to stop loading if user fetch takes too long
-        const timeout = setTimeout(() => setLoading(false), 3000);
-        return () => clearTimeout(timeout);
-      } else {
-        // No token, show guest mode
-        setLoading(false);
-      }
-    } else {
-      // User is loaded, stop loading
-      setLoading(false);
-    }
-  }, [user]);
-
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-
-  const isAuthenticated = !!user;
-  const name = user?.name || 'Guest';
-  const goalProgress = isAuthenticated ? 75 : 0;
-  
-
-  // Mock data - in a real app, this would come from an API
-  const currentFootprint = 2.4; // tons CO2 per month
-  const targetFootprint = 2.0;
-  const dailyEmissions = [1.2, 2.1, 1.8, 2.5, 1.9, 2.3, 1.7]; // Last 7 days
-  const weeklyTotal = dailyEmissions.reduce((a, b) => a + b, 0);
-
-  const footprintBreakdown = [
-    { category: 'Transportation', amount: 0.8, percentage: 33, icon: Car, color: 'text-blue-500' },
-    { category: 'Energy', amount: 0.7, percentage: 29, icon: Home, color: 'text-yellow-500' },
-    { category: 'Food', amount: 0.6, percentage: 25, icon: Utensils, color: 'text-green-500' },
-    { category: 'Travel', amount: 0.3, percentage: 13, icon: Plane, color: 'text-purple-500' },
   ];
 
-  const recentActivities = [
-    { type: 'Transportation', description: 'Commute to work (15 miles)', co2: 0.8, date: 'Today' },
-    { type: 'Energy', description: 'Home electricity usage', co2: 0.6, date: 'Yesterday' },
-    { type: 'Food', description: 'Groceries - mostly organic', co2: 0.4, date: 'Yesterday' },
+  const stats = [
+    { value: "10K+", label: "Climate Champions", subtext: "Growing 15% MoM" },
+    { value: "30%", label: "Average Carbon Reduction", subtext: "Members consistently reduce their carbon footprint" },
+    { value: "100%", label: "Real-time Impact Tracking", subtext: "Monitor your sustainability journey" }
   ];
 
-  const achievements = [
-    { title: 'Week Streak', description: '7 days of logging', icon: Award, earned: true },
-    { title: 'Green Commuter', description: 'Used public transport 5x', icon: Car, earned: true },
-    { title: 'Plant-Based', description: 'Ate vegetarian for 3 days', icon: Leaf, earned: false },
+  const toolkit = [
+    { title: "Verified Offset Projects", icon: CheckCircle },
+    { title: "MSME Sustainability Hub", icon: Target },
+    { title: "Expert-led Webinars", icon: Play }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Chen",
+      role: "Founder of EcoTech Solutions",
+      badge: "Carbon Neutral Certified",
+      quote: "GreenCommunity helped our small business reduce carbon emissions by 40% in just six months. The actionable insights were game-changing.",
+      avatar: "/woman.png"
+    },
+    {
+      name: "Michael Rodriguez",
+      role: "Community Member",
+      badge: "Top Project Contributor",
+      quote: "I never realized how much impact small changes could make until I used their calculator. Now our entire family is on a sustainability journey.",
+      avatar: "/man.png"
+    },
+    {
+      name: "Dr. Priya Patel",
+      role: "Environmental Consultant",
+      badge: "Urban Garden Innovator",
+      quote: "The offset marketplace connected us with amazing reforestation projects. We're not just reducing emissions, we're actively restoring nature.",
+      avatar: "/woman.png"
+    }
   ];
 
   return (
-    <div className="p-8 space-y-8 bg-gradient-to-br from-background via-accent/5 to-primary/5 min-h-screen relative">
-      {/* Enhanced Header */}
-      <div className="space-y-4 animate-fade-in">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-primary rounded-full animate-pulse-eco" />
-          <div>
-            <h1 className="text-4xl font-bold text-gradient">{t(greetingKey)}, {name}!</h1>
-            <p className="text-lg text-muted-foreground">Here's your environmental impact overview</p>
+    <div className="min-h-screen bg-gradient-to-r from-green-50 via-white to-white relative overflow-hidden">
+      {/* Landing Page Navbar - styled like old dashboard navbar */}
+      <header className="sticky top-0 z-50 glass border-b border-border/30 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-6 h-16">
+          {/* Logo and Navigation */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <img
+                src="/logo.png"
+                alt="App Logo"
+                className="mx-auto h-10 w-60 mb-1.2"
+              />
+            </div>
+            {/* Navigation Buttons */}
+            <nav className="hidden lg:flex gap-1 ml-15">
+              <Link href="/dashboard" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Dashboard</Link>
+              <Link href="/footprintlog" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Footprint Log</Link>
+              <Link href="/marketplace" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Marketplace</Link>
+              <Link href="/projects" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Projects</Link>
+              <Link href="/community" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Community</Link>
+              <Link href="/settings" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Settings</Link>
+            </nav>
+          </div>
+          {/* Right: Sign Up Button */}
+          <div className="flex gap-4">
+            <Link href="/Signup">
+              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full shadow transition-all" style={{fontFamily: "'Inter', sans-serif"}}>
+                Sign Up
+              </button>
+            </Link>
           </div>
         </div>
+      </header>
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(90deg, #72d1b8ff 200%, #b4ffd8ff 100%)",
+        }}></div>
       </div>
 
-      {/* Key Metrics Cards with Staggered Animation */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Monthly Footprint */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <Card className="card-premium hover-glow group cursor-pointer">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-primary transition-colors">
-                <BarChart3 className="h-5 w-5" />
-                Monthly Footprint
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-foreground">
-                  <AnimatedCounter end={currentFootprint} decimals={1} />
-                  <span className="text-base font-normal text-muted-foreground ml-1">tons CO₂</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-success animate-bounce" />
-                  <span className="text-sm text-success font-semibold">12% below target</span>
-                </div>
-                <ProfessionalProgress value={80} className="mt-3" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Weekly Total */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <Card className="card-floating hover-lift group">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-primary transition-colors">
-                <Calendar className="h-5 w-5" />
-                This Week
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-foreground">
-                  <AnimatedCounter end={weeklyTotal} decimals={1} />
-                  <span className="text-base font-normal text-muted-foreground ml-1">kg CO₂</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-warning animate-bounce" />
-                  <span className="text-sm text-warning font-semibold">5% above last week</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Goal Progress */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <Card className="card-floating hover-lift group">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-primary transition-colors">
-                <Target className="h-5 w-5" />
-                Goal Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-foreground">
-                  <AnimatedCounter end={goalProgress} />%
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Target: {targetFootprint} tons/month
-                </div>
-                <ProfessionalProgress value={goalProgress} />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Offset Credits */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
-          <Card className="card-premium hover-glow group cursor-pointer">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-muted-foreground flex items-center gap-2 group-hover:text-success transition-colors">
-                <Leaf className="h-5 w-5" />
-                Offset Credits
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="text-3xl font-bold text-foreground">
-                  <AnimatedCounter end={1.2} decimals={1} />
-                  <span className="text-base font-normal text-muted-foreground ml-1">tons</span>
-                </div>
-                <Badge variant="secondary" className="bg-success/15 text-success border-success/30 font-semibold animate-pulse-eco">
-                  50% offset this month
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Hero Section */}
+      <section className="w-full flex justify-center items-center py-8 bg-transparent">
+  <div
+    className="relative max-w-7xl w-full mx-auto rounded-3xl shadow-xl overflow-hidden border border-green-200"
+    style={{
+  background: "radial-gradient(circle at 0% 0%, #70e1acff 0%, #A7F3D0 20%, #fff 30%, #fff 100%)"
+}}
+  >
+    <div className="relative z-10 flex flex-col items-center px-8 py-30">
+      <h1
+        className="text-center font-bold mb-8 font-sans"
+        style={{
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 700,
+          fontSize: "clamp(48px, 7vw, 55px)",
+          lineHeight: 1.1
+        }}
+      >
+        <span
+          style={{
+            background: "linear-gradient(90deg, #07a27bff 0%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 700
+          }}
+        >
+          Building a
+        </span>{' '}
+        <span
+          style={{
+            fontWeight: 700,
+            color: "#222",
+            fontFamily: "'Inter', sans-serif"
+          }}
+        >
+          <span
+            style={{
+              background: "linear-gradient(90deg, #07a27bff 0%, #b9fa8dff 60%, #90bd7cff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 700
+            }}
+          >
+            Sustainable
+          </span><br />
+          <span
+            style={{
+              background: "linear-gradient(90deg, #07a27bff 0%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 700
+            }}
+          >
+            Future Together
+          </span>
+        </span>
+      </h1>
+      <p
+        className="mx-auto text-center"
+        style={{
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 400,
+          fontSize: "15px",
+          color: "#9CA3AF",
+          lineHeight: 1.5,
+          maxWidth: "700px",
+          marginBottom: "2rem"
+        }}
+      >
+        Calculate your carbon footprint, discover reduction strategies, offset your <br />
+        impact, and join a community committed to environmental stewardship.
+      </p>
+      
+      <div className="flex flex-col sm:flex-row gap-4 mb-10 justify-center">
+        <button
+          className="flex items-center justify-center px-7 py-2 rounded-full shadow-md font-bold text-white text-base"
+          style={{
+            background: "linear-gradient(90deg, #07a27bff 0%)",
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 600,
+            fontSize: "12px"
+          }}
+        >
+          Calculate My Carbon Footprint
+          <span className="ml-2" style={{ fontSize: "20px", color: '#fff' }}>→</span>
+        </button>
+        <button
+          className="bg-white border border-green-400 text-green-600 rounded-full shadow-md transition px-8 py-3"
+          style={{
+            fontFamily: "'Inter', 'Poppins', 'sans-serif'",
+            fontWeight: 600,
+            fontSize: "16px"
+          }}
+        >
+          Join the Community
+        </button>
       </div>
+      <div className="text-center text-gray-500 text-sm mb-4">
+        Trusted by environmentally conscious individuals and forward-thinking businesses
+      </div>
+      <div className="flex justify-center gap-20 text-green-600 text-2xl items-center">
+  {/* Lucide Leaf Icon */}
+  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-leaf h-7 w-7 opacity-80" aria-hidden="true">
+    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+  </svg>
+  {/* Lucide Waves Icon */}
+  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-waves h-7 w-7 opacity-80" aria-hidden="true">
+    <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+    <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+    <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+  </svg>
+  {/* Sun */}
+  <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="20" cy="20" r="6" />
+    <path d="M20 6v4M20 34v-4M6 20h4M34 20h-4M9.64 9.64l2.83 2.83M30.36 30.36l-2.83-2.83M9.64 30.36l2.83-2.83M30.36 9.64l-2.83 2.83" />
+  </svg>
+  {/* Lucide Mountain Icon */}
+  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mountain h-7 w-7 opacity-80" aria-hidden="true">
+    <path d="m8 3 4 8 5-5 5 15H2L8 3z"></path>
+  </svg>
+</div>
+    </div>
+  </div>
+</section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Enhanced Footprint Breakdown */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
-            <Card className="card-premium hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">{t('emissions')}</CardTitle>
-                <CardDescription>Your emissions by category this month</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {footprintBreakdown.map((item, index) => {
-                    const Icon = item.icon;
-                    return (
-                      <div
-                        key={item.category}
-                        className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:border-primary/20 hover:bg-primary/5 transition-all duration-300 group animate-fade-in"
-                        style={{ animationDelay: `${0.6 + (index * 0.1)}s` }}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 ${item.color} group-hover:scale-110 transition-transform duration-300`}>
-                            <Icon className="h-6 w-6" />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-foreground text-lg">{item.category}</div>
-                            <div className="text-sm text-muted-foreground">
-                              <AnimatedCounter end={item.amount} decimals={1} /> tons CO₂
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-center justify-center min-w-[60px]">
-                          <div className="w-12 h-12">
-                            <CircularProgressbar
-                              value={item.percentage}
-                              text={`${item.percentage}%`}
-                              styles={buildStyles({
-                                textSize: '24px',
-                                pathColor: '#22c55e',
-                                textColor: '#1a2e22',
-                                trailColor: '#e5e7eb',
-                              })}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+      {/* Features Section */}
+      <section className="w-full bg-white py-36 relative z-10">
+        <div className="absolute inset-0 bg-white z-0"></div>
+        <div className="relative z-10">
+          <div className="mb-15 max-w-5xl mx-auto px-5 -mt-15">
+            <h2 className="text-4xl font-bold text-gray-900 mb-3 text-left leading-tight">Everything You Need for<br/>Environmental Impact</h2>
+            <p className="text-base text-gray-500 text-left max-w-2xl">
+              Comprehensive tools and community support for your sustainability journey.
+            </p>
           </div>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 px-5 mt-2">
+            {/* Carbon Footprint Calculator */}
+            <div className="flex flex-col items-start">
+              <div className="w-8 h-8 rounded-md bg-green-600 flex items-center justify-center mb-2">
+                <Calculator className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-base font-semibold text-gray-900 mb-1">Carbon Footprint Calculator</div>
+              <div className="text-sm text-gray-600 mb-2">
+                Get precise measurements of your individual or business carbon impact with our comprehensive assessment tools.
+              </div>
+              <a href="#" className="text-green-600 font-medium hover:underline flex items-center gap-1 mt-1 text-sm">Learn more <span>&rarr;</span></a>
+            </div>
+            {/* Reduction Strategies */}
+            <div className="flex flex-col items-start">
+              <div className="w-8 h-8 rounded-md bg-green-600 flex items-center justify-center mb-2">
+                <TrendingDown className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-base font-semibold text-gray-900 mb-1">Reduction Strategies</div>
+              <div className="text-sm text-gray-600 mb-2">
+                Receive personalized tips and actionable plans to reduce your environmental footprint effectively.
+              </div>
+              <a href="#" className="text-green-600 font-medium hover:underline flex items-center gap-1 mt-1 text-sm">Learn more <span>&rarr;</span></a>
+            </div>
+            {/* Offset Marketplace */}
+            <div className="flex flex-col items-start">
+              <div className="w-8 h-8 rounded-md bg-green-600 flex items-center justify-center mb-2">
+                <ShoppingCart className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-base font-semibold text-gray-900 mb-1">Offset Marketplace</div>
+              <div className="text-sm text-gray-600 mb-2">
+                Browse verified carbon offset projects and make meaningful environmental investments.
+              </div>
+              <a href="#" className="text-green-600 font-medium hover:underline flex items-center gap-1 mt-1 text-sm">Learn more <span>&rarr;</span></a>
+            </div>
+            {/* Sustainability Community */}
+            <div className="flex flex-col items-start">
+              <div className="w-8 h-8 rounded-md bg-green-600 flex items-center justify-center mb-2">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-base font-semibold text-gray-900 mb-1">Sustainability Community</div>
+              <div className="text-sm text-gray-600 mb-2">
+                Connect with like-minded individuals and businesses sharing the journey toward carbon neutrality.
+              </div>
+              <a href="#" className="text-green-600 font-medium hover:underline flex items-center gap-1 mt-1 text-sm">Learn more <span>&rarr;</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {/* Enhanced Recent Activities */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
-            <Card className="card-floating hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Calendar className="h-6 w-6 text-primary" />
-                  Recent Activities
-                </CardTitle>
-                <CardDescription>Your latest carbon footprint entries</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivities.map((activity, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-accent/20 hover:shadow-lg transition-all duration-300 animate-fade-in hover-lift group"
-                      style={{ animationDelay: `${0.7 + (index * 0.1)}s` }}
-                    >
-                      <div className="flex-1">
-                        <div className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
-                          {activity.description}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {activity.type} • {activity.date}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                          +<AnimatedCounter end={activity.co2} decimals={1} /> kg
-                        </div>
-                        <div className="text-xs text-muted-foreground">CO₂</div>
-                      </div>
-                    </div>
+      {/* Drive Real Change Section */}
+      <section className="bg-gray-50 py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h3 className="text-lg font-semibold text-green-600 mb-2">Drive Real Change</h3>
+            <h2 className="text-4xl font-bold text-gray-800">A Community Platform for Climate Action</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Left Column - Community Engagement */}
+            <div>
+              <Card className="p-10 border border-gray-200 shadow-sm rounded-2xl bg-white flex flex-col h-full">
+                <div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Join 10,000+ Climate Champions</div>
+                  <div className="text-gray-600 text-base leading-relaxed mb-8">
+                    Our community is growing, and so is our impact. Together, we're making a measurable difference for the planet.
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
+                  <div className="text-6xl font-bold text-gray-900 mb-2">10K+</div>
+                  <div className="text-lg text-gray-500 mb-6">Climate Champions</div>
+                  <div className="flex items-center gap-2 text-green-600 font-medium mt-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Growing 15% MoM
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Center Column - Two Separate Cards */}
+            <div className="flex flex-col gap-8">
+              {/* Top Card: Average 30% Carbon Reduction */}
+              <Card className="p-10 border border-gray-200 shadow-sm rounded-2xl bg-white flex flex-col h-full items-center text-center">
+                <div className="text-lg font-semibold text-gray-900 mb-2">Average 30% Carbon Reduction</div>
+                <div className="text-gray-600 text-base leading-relaxed mb-6">
+                  Members consistently reduce their carbon footprint with our tools and insights.
+                </div>
+                <div className="text-6xl font-bold text-gray-900 mb-2">30%</div>
+                <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                  <ArrowDownCircle className="w-10 h-10 text-green-600" />
+                </div>
+              </Card>
+              {/* Bottom Card: Real-time Impact Tracking */}
+              <Card className="p-10 border border-gray-200 shadow-sm rounded-2xl bg-white flex flex-col h-full items-center text-center">
+                <div className="text-lg font-semibold text-gray-900 mb-2">Real-time Impact Tracking</div>
+                <div className="text-gray-600 text-base leading-relaxed mb-6">
+                  Monitor your sustainability journey with a personalized dashboard and reporting.
+                </div>
+                <div className="w-16 h-16 mx-auto mb-2 grid grid-cols-4 grid-rows-2 gap-1">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="bg-green-600 rounded-sm"></div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </Card>
+            </div>
 
-          {/* Enhanced Achievements */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
-            <Card className="card-floating hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">{t('achievements')}</CardTitle>
-                <CardDescription>Your eco-friendly milestones</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {achievements.map((achievement, index) => {
-                  const Icon = achievement.icon;
-                  return (
-                    <div 
-                      key={index} 
-                      className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-500 hover-lift ${
-                        achievement.earned 
-                          ? 'border-success/40 bg-gradient-to-r from-success/10 to-success/5 shadow-lg' 
-                          : 'border-border/30 bg-muted/10 hover:border-primary/20'
-                      }`}
-                    >
-                      <div className={`p-3 rounded-xl transition-all duration-300 ${
-                        achievement.earned 
-                          ? 'bg-success/20 text-success animate-pulse-eco' 
-                          : 'bg-muted text-muted-foreground'
-                      }`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className={`font-semibold text-lg ${
-                          achievement.earned ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          {achievement.title}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {achievement.description}
-                        </div>
-                      </div>
-                      {achievement.earned && (
-                        <Badge className="bg-success/20 text-success border-success/30 font-bold animate-pulse-eco">
-                          ✓ Earned
-                        </Badge>
-                      )}
+            {/* Right Column - Sustainability Toolkit */}
+            <div>
+              <Card className="p-10 border border-gray-200 shadow-sm rounded-2xl bg-white flex flex-col h-full justify-center">
+                <div>
+                  <div className="text-lg font-semibold text-gray-900 mb-2">Your Complete Sustainability Toolkit</div>
+                  <div className="text-gray-600 text-base leading-relaxed mb-8">
+                    From verified offsets to expert webinars and an MSME resource hub, all in one place.
+                  </div>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-full border border-gray-200 hover:border-green-300 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                      <Leaf className="w-4 h-4 text-green-600" />
                     </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
+                    <span className="text-gray-800 font-medium">Verified Offset Projects</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-full border border-gray-200 hover:border-green-300 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-800 font-medium">MSME Sustainability Hub</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-full border border-gray-200 hover:border-green-300 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                      <Globe className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-800 font-medium">Expert-led Webinars</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Right Column with Enhanced Styling */}
-        <div className="space-y-6">
-          {/* Enhanced Quick Actions */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
-            <Card className="card-premium hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Zap className="h-6 w-6 text-primary animate-pulse-eco" />
-                  Quick Actions
-                </CardTitle>
-                <CardDescription>Track your impact today</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
-                  <Plus className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Log Activity
-                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
-                  <Zap className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Offset Emissions
-                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button className="w-full justify-start h-14 text-lg font-semibold btn-professional group">
-                  <Users className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                  Join Challenge
-                  <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </CardContent>
-            </Card>
+      {/* Testimonials Section */}
+      <section className="bg-gradient-to-r from-green-50 to-blue-50 py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">Stories from Our Community</h2>
+            <p className="text-xl text-gray-600">
+              Real people making real environmental impact
+            </p>
           </div>
-          {/* Calendar Streak */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.75s' }}>
-            <Card className="card-premium hover-glow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Calendar className="h-6 w-6 text-primary" />
-                  Streak Calendar
-                </CardTitle>
-                <CardDescription>Your activity streak this month</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Highlight streak days: 5, 6, 7, 8, 9, 10, 11, 12, 13 June 2025 */}
-                <DateRangeCalendar
-                  showMonthAndYearPickers={true}
-                  showDateDisplay={false}
-                  showSelectionPreview={false}
-                  staticRanges={[]}
-                  inputRanges={[]}
-                  weekdayDisplayFormat="EEEEE"
-                  monthDisplayFormat="MMMM yyyy"
-                  className="rounded-xl shadow-md border-none"
-                  disabledDates={[]}
-                  editableDateInputs={false}
-                  moveRangeOnFirstSelection={false}
-                  dragSelectionEnabled={false}
-                  calendarFocus="forwards"
-                  months={1}
-                  direction="vertical"
-                  minDate={new Date(2025, 5, 1)}
-                  maxDate={new Date(2025, 5, 30)}
-                  dayContentRenderer={(date) => {
-                    const streakDays = [5,6,7,8,9,10,11,12,13];
-                    if (
-                      date.getFullYear() === 2025 &&
-                      date.getMonth() === 5 &&
-                      streakDays.includes(date.getDate())
-                    ) {
-                      return (
-                        <div style={{
-                          background: '#22c55e',
-                          color: 'white',
-                          borderRadius: '8px',
-                          width: 32,
-                          height: 32,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          margin: 'auto',
-                        }}>{date.getDate()}</div>
-                      );
-                    }
-                    return <div>{date.getDate()}</div>;
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </div>
-          {/* Enhanced Tip of the Day */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
-            <Card className="card-premium hover-glow border-2 border-primary/20 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-primary opacity-10 rounded-full -translate-y-10 translate-x-10" />
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <span className="text-2xl animate-pulse">💡</span>
-                  Eco Tip of the Day
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-base text-muted-foreground leading-relaxed">
-                  Try meal prepping with seasonal, local ingredients this week. It can reduce your food-related emissions by up to 
-                  <span className="font-bold text-success"> 20%</span> while saving time and money!
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="p-6 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border-0 shadow-lg">
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={testimonial.avatar} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-green-200"
+                    />
+                    <div>
+                      <div className="font-semibold text-gray-800">{testimonial.name}</div>
+                      <div className="text-sm text-gray-600">{testimonial.role}</div>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="w-fit bg-green-100 text-green-800 border-green-200">
+                    {testimonial.badge}
+                  </Badge>
+                  <blockquote className="text-gray-600 italic leading-relaxed">
+                    "{testimonial.quote}"
+                  </blockquote>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+            
+
+      {/* New Full-Width CTA Section */}
+      <section
+        className="w-full min-h-[400px] flex items-center justify-center"
+        style={{
+          background: "radial-gradient(circle at 60% 40%, #009966 0%, #065F46 100%)",
+          color: "white"
+        }}
+      >
+        <div className="max-w-2xl mx-auto text-center px-4 py-24">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Ready to Reduce Your <br /> Environmental Impact?
+          </h1>
+          <p className="text-lg mb-8 text-white/80 font-medium">
+            Join thousands of individuals and businesses taking measurable action toward a sustainable future.
+            Start with a free carbon footprint assessment today.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <button className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">
+              Start My Assessment
+            </button>
+            <button className="bg-transparent border border-white text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-white hover:text-green-700 transition">
+              Explore the Marketplace →
+            </button>
+          </div>
+          <div className="text-sm text-white/70">
+            Free assessment • No credit card required • Join 10,000+ climate champions
+          </div>
+        </div>
+      </section>
+
+      
+
+      {/* Footer */}
+      <footer className="bg-white border-t py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Logo, description, and newsletter signup */}
+          <div className="flex-1 min-w-[250px] mb-8">
+            <div className="flex items-center gap-2 mb-2">
+              {/* Logo icon */}
+              <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+              <span className="font-medium text-lg text-gray-700" style={{fontFamily: "'Inter', sans-serif"}}>GreenCommunity</span>
+            </div>
+            <p className="text-base text-gray-600 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>
+              GreenCommunity is building the world's largest platform for measurable environmental impact, connecting individuals and businesses in the journey toward carbon neutrality and nature restoration.
+            </p>
+            <div>
+              <div className="font-semibold text-base text-gray-900 mb-1" style={{fontFamily: "'Inter', sans-serif"}}>Get sustainability tips and community updates</div>
+              <form className="flex gap-2 mb-8">
+                <input type="email" placeholder="Your email" className="border rounded px-3 py-2 text-sm" style={{fontFamily: "'Inter', sans-serif"}} />
+                <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded font-semibold text-sm" style={{fontFamily: "'Inter', sans-serif"}}>Sign Up</button>
+              </form>
+            </div>
+          </div>
+          {/* Footer links below signup */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="font-bold mb-2 text-gray-900" style={{fontFamily: "'Inter', sans-serif"}}>Platform</div>
+              <ul className="text-sm text-gray-600 space-y-1" style={{fontFamily: "'Inter', sans-serif"}}>
+                <li><a href="#" className="hover:underline focus:underline">Carbon Calculator</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Offset Marketplace</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Reduction Tips</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Community Hub</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-bold mb-2 text-gray-900" style={{fontFamily: "'Inter', sans-serif"}}>Resources</div>
+              <ul className="text-sm text-gray-600 space-y-1" style={{fontFamily: "'Inter', sans-serif"}}>
+                <li><a href="#" className="hover:underline focus:underline">Blog</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Case Studies</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Research</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Webinars</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-bold mb-2 text-gray-900" style={{fontFamily: "'Inter', sans-serif"}}>Support</div>
+              <ul className="text-sm text-gray-600 space-y-1" style={{fontFamily: "'Inter', sans-serif"}}>
+                <li><a href="#" className="hover:underline focus:underline">Help Center</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Contact Us</a></li>
+                <li><a href="#" className="hover:underline focus:underline">API Docs</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Partner With Us</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-bold mb-2 text-gray-900" style={{fontFamily: "'Inter', sans-serif"}}>Company</div>
+              <ul className="text-sm text-gray-600 space-y-1" style={{fontFamily: "'Inter', sans-serif"}}>
+                <li><a href="#" className="hover:underline focus:underline">About Us</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Careers</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Press</a></li>
+                <li><a href="#" className="hover:underline focus:underline">Privacy Policy</a></li>
+              </ul>
+            </div>
+          </div>
+          <hr className="my-8 border-gray-200" />
+          <div className="flex flex-col md:flex-row items-center justify-between text-sm text-gray-400" style={{fontFamily: "'Inter', sans-serif"}}>
+            <div>© 2025 GreenCommunity. All Rights Reserved.</div>
+            <div className="flex gap-4 mt-4 md:mt-0">
+              {/* Social icons (replace # with your links) */}
+              <a href="#" aria-label="Twitter"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.4.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.5 0c-2.5 0-4.5 2.01-4.5 4.5 0 .35.04.7.11 1.03C7.69 5.36 4.07 3.6 1.64.96c-.38.65-.6 1.4-.6 2.2 0 1.52.77 2.86 1.95 3.65A4.48 4.48 0 0 1 .96 6v.06c0 2.13 1.52 3.91 3.54 4.31-.37.1-.76.16-1.16.16-.28 0-.55-.03-.81-.08.55 1.72 2.16 2.97 4.07 3A9.05 9.05 0 0 1 0 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.85-6.88 12.85-12.85 0-.2 0-.39-.01-.58A9.22 9.22 0 0 0 24 4.59a9.1 9.1 0 0 1-2.6.71z"/></svg></a>
+              <a href="#" aria-label="Facebook"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 2h-3a4 4 0 0 0-4 4v3H7v4h4v8h4v-8h3l1-4h-4V6a1 1 0 0 1 1-1h3z"/></svg></a>
+              <a href="#" aria-label="LinkedIn"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+              <a href="#" aria-label="Instagram"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="16" height="16" rx="4"/><circle cx="10" cy="10" r="4"/><path d="M18 6.5v.01"/></svg></a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default Dashboard;
+export default LandingPage; 

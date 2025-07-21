@@ -14,39 +14,42 @@ const ProfessionalProgress = ({
   max = 100, 
   label, 
   className = '',
-  showAnimation = true 
+  showAnimation = true,
+  skipAnimation = false 
 }) => {
   const { preferences } = usePreferences();
   const units = unitLabels[preferences.units] || unitLabels.metric;
   const [animatedValue, setAnimatedValue] = useState(0);
-  const percentage = Math.min((value / max) * 100, 100);
 
   useEffect(() => {
-    if (!showAnimation) {
-      setAnimatedValue(percentage);
+    if (!showAnimation || skipAnimation) {
+      setAnimatedValue(value);
       return;
     }
 
-    const duration = 1500; // Animation duration in ms
+    // Add a delay to sync with page load and card animations
+    const initialDelay = 800; // Wait for card animations to complete
+    const duration = 2000; // Animation duration in ms (match AnimatedCounter)
     const startTime = Date.now();
-    const startValue = animatedValue;
-    const targetValue = percentage;
 
     const animate = () => {
       const now = Date.now();
       const progress = Math.min((now - startTime) / duration, 1);
-      // Smooth easing function
       const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
       const easedProgress = easeOutCubic(progress);
-      const currentValue = startValue + (targetValue - startValue) * easedProgress;
+      const currentValue = value * easedProgress; // Animate based on actual value
       setAnimatedValue(currentValue);
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
 
-    requestAnimationFrame(animate);
-  }, [percentage, showAnimation]);
+    const timeout = setTimeout(() => {
+      requestAnimationFrame(animate);
+    }, initialDelay);
+
+    return () => clearTimeout(timeout);
+  }, [value, showAnimation, skipAnimation]);
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -54,13 +57,13 @@ const ProfessionalProgress = ({
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">{label}</span>
           <span className="font-medium text-foreground">
-            {Math.round(animatedValue)}%
+            {Math.round((animatedValue / max) * 100)}%
           </span>
         </div>
       )}
       <div className="relative">
         <Progress 
-          value={animatedValue} 
+          value={(animatedValue / max) * 100} 
           className="h-3 progress-eco relative overflow-hidden"
         />
         {/* Shimmer effect */}

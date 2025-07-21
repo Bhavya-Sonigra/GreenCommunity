@@ -269,4 +269,74 @@
   .text-warning {
     color: #f59e0b;
   }
+
+  /* Floating particles animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-20px) rotate(90deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(180deg);
+    }
+    75% {
+      transform: translateY(-30px) rotate(270deg);
+    }
+  }
+
+  .floating-leaf {
+    animation: float 12s ease-in-out infinite;
+    font-size: 1.5rem;
+    filter: blur(0.5px);
+    transform-origin: center;
+  }
+  
+  /* Calendar styling to prevent overflow */
+  .custom-date-picker {
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Override react-date-range default styles */
+  .custom-date-picker .rdrCalendarWrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    font-size: 14px;
+  }
+  
+  .custom-date-picker .rdrMonth {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .custom-date-picker .rdrMonthAndYearWrapper {
+    padding: 8px 12px;
+  }
+  
+  .custom-date-picker .rdrWeekDays {
+    padding: 0 12px;
+  }
+  
+  .custom-date-picker .rdrDays {
+    padding: 0 12px;
+  }
+  
+  /* Make calendar responsive */
+  @media (max-width: 768px) {
+    .custom-date-picker .rdrCalendarWrapper {
+      font-size: 12px;
+    }
+    
+    .custom-date-picker .rdrMonthAndYearWrapper {
+      padding: 6px 8px;
+    }
+    
+    .custom-date-picker .rdrWeekDays,
+    .custom-date-picker .rdrDays {
+      padding: 0 8px;
+    }
+  }
 }

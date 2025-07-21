@@ -117,7 +117,7 @@ const Settings = () => {
   return (
     <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">{t('settings_profile')}</h1>
+        <h1 className="text-3xl font-bold text-gradient">{t('settings_profile')}</h1>
         <p className="text-muted-foreground">{t('manage_account_preferences')}</p>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
