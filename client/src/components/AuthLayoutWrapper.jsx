@@ -5,11 +5,13 @@ import Layout from "@/components/Layout";
 export default function AuthLayoutWrapper({ children }) {
   const pathname = usePathname();
   const authRoutes = [
+    "/",
     "/login",
     "/signup",
     "/Signup",
     "/forgot-password",
     "/update-password",
+    "/landing",
   ];
   if (authRoutes.includes(pathname)) {
     return <>{children}</>;
