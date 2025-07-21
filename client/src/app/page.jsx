@@ -25,6 +25,9 @@ import {
   ArrowDownCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import { useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import toast, { Toaster } from 'react-hot-toast';
 
 const LandingPage = () => {
   const features = [
@@ -90,10 +93,23 @@ const LandingPage = () => {
     }
   ];
 
+  const router = useRouter();
+  const protectedClickCount = useRef(0);
+  const handleProtectedRoute = useCallback((e) => {
+    e.preventDefault();
+    protectedClickCount.current += 1;
+    toast.error('Please log in first to access this page.');
+    if (protectedClickCount.current >= 2) {
+      protectedClickCount.current = 0;
+      setTimeout(() => router.push('/Signup'), 800);
+    }
+  }, [router]);
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-50 via-white to-white relative overflow-hidden">
+      <Toaster position="top-center" toastOptions={{ duration: 2500, style: { fontSize: '1rem', fontFamily: 'Inter, sans-serif' } }} />
       {/* Landing Page Navbar - styled like old dashboard navbar */}
-      <header className="sticky top-0 z-50 glass border-b border-border/30 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 glass border-b border-border/30 backdrop-blur-xl animate-fade-in-down">
         <div className="flex items-center justify-between px-6 h-16">
           {/* Logo and Navigation */}
           <div className="flex items-center gap-4">
@@ -106,18 +122,18 @@ const LandingPage = () => {
             </div>
             {/* Navigation Buttons */}
             <nav className="hidden lg:flex gap-1 ml-15">
-              <Link href="/dashboard" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Dashboard</Link>
-              <Link href="/footprintlog" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Footprint Log</Link>
-              <Link href="/marketplace" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Marketplace</Link>
-              <Link href="/projects" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Projects</Link>
-              <Link href="/community" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Community</Link>
-              <Link href="/settings" className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Settings</Link>
+              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Dashboard</a>
+              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Footprint Log</a>
+              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Marketplace</a>
+              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Projects</a>
+              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Community</a>
+              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Settings</a>
             </nav>
           </div>
           {/* Right: Sign Up Button */}
           <div className="flex gap-4">
             <Link href="/Signup">
-              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full shadow transition-all" style={{fontFamily: "'Inter', sans-serif"}}>
+              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200" style={{fontFamily: "'Inter', sans-serif"}}>
                 Sign Up
               </button>
             </Link>

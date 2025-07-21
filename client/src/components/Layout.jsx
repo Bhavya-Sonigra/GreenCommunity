@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 const sidebarItems = [
-  { name: 'Dashboard', path: '/' },
+  { name: 'Dashboard', path: '/dashboard' },
   { name: 'Footprint Log', path: '/footprintlog' },
   { name: 'Marketplace', path: '/marketplace' },
   { name: 'Projects', path: '/projects' },
@@ -92,7 +92,7 @@ export default function Layout({ children }) {
                   key={item.path}
                   href={item.path}
                   className={`px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm
-                    ${pathname === item.path
+                    ${(item.path === '/' && (pathname === '/' || pathname === '/dashboard')) || (item.path !== '/' && pathname === item.path)
                       ? 'bg-primary/90 text-white shadow-sm'
                       : 'text-foreground hover:bg-primary/10 hover:text-primary'}
                   `}
