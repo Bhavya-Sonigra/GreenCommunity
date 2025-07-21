@@ -95,16 +95,16 @@ const LandingPage = () => {
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 40px, #22c55e 40px, #22c55e 41px)`,
+          background: "linear-gradient(90deg, #72d1b8ff 200%, #b4ffd8ff 100%)",
         }}></div>
       </div>
 
       {/* Hero Section */}
       <section className="w-full flex justify-center items-center py-8 bg-transparent">
   <div
-    className="relative max-w-5xl w-full mx-auto rounded-3xl shadow-xl overflow-hidden border border-green-200"
+    className="relative max-w-7xl w-full mx-auto rounded-3xl shadow-xl overflow-hidden border border-green-200"
     style={{
-  background: "radial-gradient(circle at 0% 0%, #A7F3D0 0%, #A7F3D0 20%, #fff 30%, #fff 100%)"
+  background: "radial-gradient(circle at 0% 0%, #70e1acff 0%, #A7F3D0 20%, #fff 30%, #fff 100%)"
 }}
   >
     <div className="relative z-10 flex flex-col items-center px-8 py-30">
@@ -119,7 +119,7 @@ const LandingPage = () => {
       >
         <span
           style={{
-            background: "linear-gradient(90deg, #00C897 0%, #12D8A5 100%)",
+            background: "linear-gradient(90deg, #07a27bff 0%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -138,7 +138,7 @@ const LandingPage = () => {
         >
           <span
             style={{
-              background: "linear-gradient(90deg, #5FE6C1 0%, #D4FFB7 60%, #F6FFE6 100%)",
+              background: "linear-gradient(90deg, #07a27bff 0%, #b9fa8dff 60%, #90bd7cff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -150,7 +150,7 @@ const LandingPage = () => {
           </span><br />
           <span
             style={{
-              background: "linear-gradient(90deg, #00C9A7 0%, #12E6C1 100%)",
+              background: "linear-gradient(90deg, #07a27bff 0%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -182,7 +182,7 @@ const LandingPage = () => {
         <button
           className="flex items-center justify-center px-7 py-2 rounded-full shadow-md font-bold text-white text-base"
           style={{
-            background: "linear-gradient(90deg, #00C897 0%, #12E6C1 100%)",
+            background: "linear-gradient(90deg, #07a27bff 0%)",
             fontFamily: "'Inter', sans-serif",
             fontWeight: 600,
             fontSize: "12px"

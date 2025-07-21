@@ -111,6 +111,6 @@ const DashboardSkeleton = () => (
       </div>
     </div>
   </SkeletonTheme>
-);
+  );
 
 export default DashboardSkeleton; 

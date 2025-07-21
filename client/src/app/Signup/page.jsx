@@ -15,6 +15,11 @@ export default function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationError, setVerificationError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   const router = useRouter();
   const { updateUser } = useUser();
@@ -45,11 +50,9 @@ export default function SignUpPage() {
       }
       
       setIsSuccess(true);
-      
-      // Redirect to home page after successful registration
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
+      setShowVerification(true); // Show verification UI
+      setIsSubmitting(false);
+      // Do not redirect yet
       
     } catch (error) {
       setError(error.message || 'Registration failed. Please try again.');
@@ -57,9 +60,61 @@ export default function SignUpPage() {
     }
   };
 
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setVerificationError('');
+    setIsVerifying(true);
+    // TODO: Replace with real API call
+    if (verificationCode === '123456') { // Demo: Accept 123456 as valid
+      setIsVerified(true);
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
+    } else {
+      setVerificationError('Invalid code. Please try again.');
+    }
+    setIsVerifying(false);
+  };
+
   const handleGoogleSignUp = () => {
     authAPI.googleLogin();
   };
+
+  if (showVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <form onSubmit={handleVerifyCode} className="w-full max-w-sm space-y-4">
+          <div className="text-center">
+            <img
+              src="/logo.png"
+              alt="App Logo"
+              className="mx-auto h-15 w-80 mb-5"
+            />
+          </div>
+          <div className="text-xl font-semibold text-center mb-2">Verify your email id</div>
+          <div className="text-sm text-center text-muted-foreground mb-4">We have sent a verification code to your email. Please enter it below.</div>
+          {verificationError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">{verificationError}</div>
+          )}
+          <input
+            type="text"
+            placeholder="Enter verification code"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground placeholder:text-muted-foreground"
+            required
+          />
+          <button
+            type="submit"
+            className={`w-full flex items-center justify-center py-2 rounded-md font-semibold text-white transition-all ${isVerifying ? 'bg-primary/70 cursor-not-allowed' : isVerified ? 'bg-green-600' : 'bg-primary hover:bg-primary/90'}`}
+            disabled={isVerifying || isVerified}
+          >
+            {isVerifying ? 'Verifying...' : isVerified ? 'Verified!' : 'Verify'}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
