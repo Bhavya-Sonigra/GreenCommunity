@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
+import { generateSecureToken, generateSecureCode, hashData, isCommonPassword } from '../utils/security.js';
 
 const userSchema = new mongoose.Schema({
   name: { 
@@ -75,7 +76,8 @@ userSchema.pre('save', async function(next) {
   
   if (this.password) {
     try {
-      const salt = await bcrypt.genSalt(10);
+      // Increase bcrypt rounds for better security
+      const salt = await bcrypt.genSalt(12);
       this.password = await bcrypt.hash(this.password, salt);
     } catch (error) {
       return next(error);
@@ -121,9 +123,9 @@ userSchema.methods.resetLoginAttempts = function() {
 
 // Method to generate password reset token
 userSchema.methods.generatePasswordResetToken = function() {
-  const token = crypto.randomBytes(32).toString('hex');
+  const token = generateSecureToken();
   
-  this.passwordResetToken = crypto.createHash('sha256').update(token).digest('hex');
+  this.passwordResetToken = hashData(token);
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   
   return token;
@@ -131,9 +133,9 @@ userSchema.methods.generatePasswordResetToken = function() {
 
 // Method to generate password reset code (6-digit)
 userSchema.methods.generatePasswordResetCode = function() {
-  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+  const code = generateSecureCode();
   
-  this.passwordResetCode = crypto.createHash('sha256').update(code).digest('hex');
+  this.passwordResetCode = hashData(code);
   this.passwordResetCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   
   return code;
@@ -149,7 +151,7 @@ userSchema.methods.verifyPasswordResetCode = function(code) {
     return false; // Code expired
   }
   
-  const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+  const hashedCode = hashData(code);
   return hashedCode === this.passwordResetCode;
 };
 
@@ -161,9 +163,9 @@ userSchema.methods.clearPasswordResetCode = function() {
 
 // Method to generate email verification token
 userSchema.methods.generateEmailVerificationToken = function() {
-  const token = crypto.randomBytes(32).toString('hex');
+  const token = generateSecureToken();
   
-  this.emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
+  this.emailVerificationToken = hashData(token);
   this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
   
   return token;
