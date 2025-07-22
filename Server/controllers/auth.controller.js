@@ -5,12 +5,23 @@ import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { validationResult } from 'express-validator';
 import emailService from '../services/email.service.js';
+import { generateJwtId, hashData, calculateDelay } from '../utils/security.js';
 
 
-// Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: '1d'
+// Generate JWT token with additional security
+const generateToken = (userId, userRole = 'user') => {
+  const payload = {
+    id: userId,
+    role: userRole,
+    iat: Math.floor(Date.now() / 1000),
+    jti: generateJwtId() // JWT ID for token tracking
+  };
+  
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: '1d',
+    algorithm: 'HS256',
+    issuer: 'greencommunity-app',
+    audience: 'greencommunity-users'
   });
 };
 
@@ -88,7 +99,9 @@ export const loginUser = asyncHandler(async (req, res) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     await user.incLoginAttempts();
-    return res.status(401).json({ message: 'Invalid credentials' });
+    // Add delay to prevent rapid brute force
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
   // Reset login attempts on successful login

@@ -17,11 +17,26 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
+    // Add additional token validation
+    if (token.length < 100) {
+      return res.status(401).json({ message: 'Invalid token format.' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({ message: 'Invalid token payload.' });
+    }
+
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
       return res.status(401).json({ message: 'Invalid token. User not found.' });
+    }
+
+    // Additional security: Check if user account is locked
+    if (user.isLocked) {
+      return res.status(423).json({ message: 'Account is locked.' });
     }
 
     req.user = user;
@@ -33,7 +48,10 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid token.' });
     }
     
-    console.error('Authentication error:', error);
+    // Don't log token details in production
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Authentication error:', error);
+    }
     res.status(500).json({ message: 'Server error during authentication.' });
   }
 };
