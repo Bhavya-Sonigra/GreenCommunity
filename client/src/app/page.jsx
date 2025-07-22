@@ -602,7 +602,7 @@ const LandingPage = () => {
               </ul>
             </div>
             <div>
-              <div className="font-bold mb-2 text-gray-900" style={{ fontFamily: "'Inter', sans-serif" }}>Resources</div>
+              <div className="font-bold mb-3 text-gray-900" style={{ fontFamily: "'Inter', sans-serif" }}>Resources</div>
               <ul className="text-sm text-gray-600 space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                 <li><a href="#" className="hover:underline focus:underline">Blog</a></li>
                 <li><a href="#" className="hover:underline focus:underline">Case Studies</a></li>
@@ -631,7 +631,7 @@ const LandingPage = () => {
           </div>
           <hr className="my-8 border-gray-200" />
           <div className="flex flex-col md:flex-row items-center justify-between text-sm text-gray-400" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <div>© 2025 GreenCommunity. All Rights Reserved.</div>
+
             <div className="flex gap-4 mt-4 md:mt-0">
               {/* Social icons (replace # with your links) */}
               <a href="#" aria-label="Twitter"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.4.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.5 0c-2.5 0-4.5 2.01-4.5 4.5 0 .35.04.7.11 1.03C7.69 5.36 4.07 3.6 1.64.96c-.38.65-.6 1.4-.6 2.2 0 1.52.77 2.86 1.95 3.65A4.48 4.48 0 0 1 .96 6v.06c0 2.13 1.52 3.91 3.54 4.31-.37.1-.76.16-1.16.16-.28 0-.55-.03-.81-.08.55 1.72 2.16 2.97 4.07 3A9.05 9.05 0 0 1 0 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.85-6.88 12.85-12.85 0-.2 0-.39-.01-.58A9.22 9.22 0 0 0 24 4.59a9.1 9.1 0 0 1-2.6.71z" /></svg></a>
