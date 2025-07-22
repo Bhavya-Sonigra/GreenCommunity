@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from 'react';
+import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +27,7 @@ import {
   ArrowDownCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 import { useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
@@ -144,18 +147,17 @@ const LandingPage = () => {
                 className="mx-auto h-10 w-60 mb-1.2"
               />
             </div>
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons - Disabled for landing page */}
             <nav className="hidden lg:flex gap-1 ml-15">
-              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Dashboard</a>
-              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Footprint Log</a>
-              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Marketplace</a>
-              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Projects</a>
-              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Community</a>
-              <a href="#" onClick={handleProtectedRoute} className="px-4 py-2 rounded-full font-medium transition-colors duration-200 text-sm text-foreground hover:bg-primary/10 hover:text-primary" style={{ fontWeight: 500, letterSpacing: '0.01em' }}>Settings</a>
-            </nav>
+              </nav>
           </div>
-          {/* Right: Sign Up Button */}
-          <div className="flex gap-4">
+          {/* Right: Sign In and Sign Up Buttons */}
+          <div className="flex gap-3">
+            <Link href="/login">
+              <button className="border border-green-600 text-green-600 hover:bg-green-50 font-semibold px-5 py-2 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200" style={{fontFamily: "'Inter', sans-serif"}}>
+                Sign In
+              </button>
+            </Link>
             <Link href="/Signup">
               <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Sign Up
@@ -663,4 +665,26 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+const MainPage = () => {
+  const router = useRouter();
+  const { user, isLoading } = useUser();
+  const [hasRedirected, setHasRedirected] = useState(false);
+
+  useEffect(() => {
+    // If user is authenticated and we haven't redirected yet, redirect to dashboard
+    if (!isLoading && user && !hasRedirected) {
+      setHasRedirected(true);
+      router.replace('/dashboard');
+    }
+  }, [user, isLoading, router, hasRedirected]);
+
+  // Show loading skeleton while checking authentication or redirecting
+  if (isLoading || (user && hasRedirected)) {
+    return <DashboardSkeleton />;
+  }
+
+  // Show landing page for non-authenticated users
+  return <LandingPage />;
+};
+
+export default MainPage;

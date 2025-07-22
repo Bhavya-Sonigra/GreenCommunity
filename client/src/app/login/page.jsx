@@ -38,10 +38,8 @@ export default function LoginPage() {
       
       setIsSuccess(true);
       
-      // Redirect to home after successful login
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
+      // Redirect to dashboard immediately after successful login
+      router.push('/dashboard');
       
     } catch (error) {
       setError(error.message || 'Login failed. Please try again.');

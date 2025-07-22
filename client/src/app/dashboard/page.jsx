@@ -78,8 +78,7 @@ const getGreetingKey = () => {
 };
 
 const Dashboard = () => {
-  const { user, updateUser } = useUser();
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading } = useUser();
   const [greetingKey, setGreetingKey] = useState('greeting_morning'); // Default fallback
   const { preferences } = usePreferences();
   const { t } = useTranslation();
@@ -91,49 +90,9 @@ const Dashboard = () => {
   useEffect(() => {
     // Set the correct greeting when component mounts
     setGreetingKey(getGreetingKey());
-
-    // Handle OAuth callback token
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const auth = urlParams.get('auth');
-
-    if (auth === 'success' && token) {
-      localStorage.setItem('token', token);
-      window.history.replaceState({}, document.title, '/');
-      // Instead of reload, fetch user data and update context
-      (async () => {
-        try {
-          const userData = await authAPI.getCurrentUser();
-          updateUser(userData.user);
-        } catch (error) {
-          console.error('Failed to fetch user after OAuth login', error);
-          updateUser(null);
-        }
-      })();
-    }
   }, []);
 
-  useEffect(() => {
-    // If user is null, check if token exists (fetch in progress)
-    if (user === null) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        // User is being fetched, keep loading
-        setLoading(true);
-        // Set a timeout to stop loading if user fetch takes too long
-        const timeout = setTimeout(() => setLoading(false), 3000);
-        return () => clearTimeout(timeout);
-      } else {
-        // No token, show guest mode
-        setLoading(false);
-      }
-    } else {
-      // User is loaded, stop loading
-      setLoading(false);
-    }
-  }, [user]);
-
-  if (loading) {
+  if (isLoading) {
     return <DashboardSkeleton />;
   }
 

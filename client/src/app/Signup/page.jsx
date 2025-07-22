@@ -68,7 +68,7 @@ export default function SignUpPage() {
     if (verificationCode === '123456') { // Demo: Accept 123456 as valid
       setIsVerified(true);
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
       }, 1000);
     } else {
       setVerificationError('Invalid code. Please try again.');
