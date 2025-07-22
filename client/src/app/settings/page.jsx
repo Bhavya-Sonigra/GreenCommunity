@@ -117,8 +117,8 @@ const Settings = () => {
   return (
     <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gradient">{t('settings_profile')}</h1>
-        <p className="text-muted-foreground">{t('manage_account_preferences')}</p>
+        <h1 className="text-3xl font-bold text-gradient">{t('Settings')}</h1>
+        <p className="text-muted-foreground">{t('Manage Account Preferences')}</p>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -134,9 +134,9 @@ const Settings = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    {t('profile_information')}
+                    {t('Profile Information')}
                   </CardTitle>
-                  <CardDescription>{t('update_personal_info')}</CardDescription>
+                  <CardDescription>{t('Update Personal Info')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center gap-6">
@@ -157,7 +157,7 @@ const Settings = () => {
                   <Separator />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">{t('full_name')}</Label>
+                      <Label htmlFor="name">{t('Full Name')}</Label>
                       <Input
                         id="name"
                         value={profileData.name}
@@ -166,7 +166,7 @@ const Settings = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">{t('email_address')}</Label>
+                      <Label htmlFor="email">{t('Email Address')}</Label>
                       <Input
                         id="email"
                         type="email"
@@ -176,7 +176,7 @@ const Settings = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">{t('phone_number')}</Label>
+                      <Label htmlFor="phone">{t('Phone Number')}</Label>
                       <Input
                         id="phone"
                         value={profileData.phone}
@@ -206,7 +206,7 @@ const Settings = () => {
                     />
                   </div>
                   <div>
-                    <Label>{t('preferred_units')}</Label>
+                    <Label>{t('Preferred units')}</Label>
                     <Select 
                       value={profileData.preferredUnits} 
                       onValueChange={(value) => handleProfileUpdate('preferredUnits', value)}
@@ -235,23 +235,23 @@ const Settings = () => {
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('member_since')}</span>
+                      <span className="text-muted-foreground">{t('Member Since')}</span>
                       <span className="font-medium">{new Date(profileData.joinDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('total_eco_points')}</span>
+                      <span className="text-muted-foreground">{t('Total Eco Points')}</span>
                       <span className="font-medium text-primary">1,850</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('challenges_completed')}</span>
+                      <span className="text-muted-foreground">{t('Challenges Completed')}</span>
                       <span className="font-medium">12</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('co2_offset')}</span>
+                      <span className="text-muted-foreground">{t('CO2 Offset')}</span>
                       <span className="font-medium text-success">24.5 tons</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('community_rank')}</span>
+                      <span className="text-muted-foreground">{t('Community Rank')}</span>
                       <Badge variant="secondary">#23</Badge>
                     </div>
                   </div>
@@ -265,15 +265,15 @@ const Settings = () => {
                   <div className="grid grid-cols-3 gap-2">
                     <div className="text-center p-2">
                       <div className="text-2xl mb-1">🏆</div>
-                      <div className="text-xs text-muted-foreground">{t('eco_warrior')}</div>
+                      <div className="text-xs text-muted-foreground">{t('Eco Warrior')}</div>
                     </div>
                     <div className="text-center p-2">
                       <div className="text-2xl mb-1">🌱</div>
-                      <div className="text-xs text-muted-foreground">{t('plant_protector')}</div>
+                      <div className="text-xs text-muted-foreground">{t('Plant Protector')}</div>
                     </div>
                     <div className="text-center p-2">
                       <div className="text-2xl mb-1">♻️</div>
-                      <div className="text-xs text-muted-foreground">{t('zero_waste')}</div>
+                      <div className="text-xs text-muted-foreground">{t('Zero Waste')}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -297,11 +297,11 @@ const Settings = () => {
                 <h4 className="font-medium text-foreground">{t('email_notifications')}</h4>
                 <div className="space-y-4">
                   {[
-                    { key: 'emailUpdates', label: t('platform_updates'), description: t('important_updates') },
-                    { key: 'challengeReminders', label: t('challenge_reminders'), description: t('challenge_reminders_description') },
-                    { key: 'weeklyReports', label: t('weekly_progress_reports'), description: t('weekly_progress_reports_description') },
-                    { key: 'communityActivity', label: t('community_activity'), description: t('community_activity_description') },
-                    { key: 'marketingEmails', label: t('marketing_emails'), description: t('marketing_emails_description') }
+                    { key: 'emailUpdates', label: t('Platform Updates'), description: t('Important Updates') },
+                    { key: 'challengeReminders', label: t('Challenge Reminders'), description: t('Challenge Reminders Description') },
+                    { key: 'weeklyReports', label: t('Weekly Progress Reports'), description: t('Weekly Progress Reports Description') },
+                    { key: 'communityActivity', label: t('Community Activity'), description: t('Community Activity Description') },
+                    { key: 'marketingEmails', label: t('Marketing Emails'), description: t('Marketing Emails Description') }
                   ].map(({ key, label, description }) => (
                     <div key={key} className="flex items-center justify-between p-3 border border-border/50 rounded-lg">
                       <div className="flex-1">
@@ -322,8 +322,8 @@ const Settings = () => {
                 <h4 className="font-medium text-foreground">{t('push_notifications')}</h4>
                 <div className="space-y-4">
                   {[
-                    { key: 'mobilePush', label: t('mobile_push_notifications'), description: t('receive_notifications_on_mobile') },
-                    { key: 'socialActivity', label: t('social_activity'), description: t('when_someone_likes_or_comments') }
+                    { key: 'mobilePush', label: t('Mobile Push Notifications'), description: t('Receive Notifications on Mobile') },
+                    { key: 'socialActivity', label: t('Social Activity'), description: t('When Someone Likes or Comments') }
                   ].map(({ key, label, description }) => (
                     <div key={key} className="flex items-center justify-between p-3 border border-border/50 rounded-lg">
                       <div className="flex-1">

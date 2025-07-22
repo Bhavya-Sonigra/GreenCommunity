@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -64,9 +65,9 @@ const Projects = () => {
       image: "/tree1.jpg",
       description: 'Large-scale reforestation project protecting and restoring 50,000 hectares of Amazon rainforest',
       co2Removed: 125000,
-      co2PerDollar: 2.5,
-      totalFunding: 2500000,
-      currentFunding: 1875000,
+      co2PerRupee: 0.00036,  // Adjusted for INR (0.03/83)
+      totalFunding: 207500000, // 2.5M USD * 83
+      currentFunding: 155625000, // 1.875M USD * 83,
       contributors: 15420,
       timeRemaining: '8 months',
       verified: true,
@@ -88,9 +89,9 @@ const Projects = () => {
       image: "/tree2.jpg",
       description: 'Clean energy generation through wind turbines, providing renewable power to 25,000 homes',
       co2Removed: 75000,
-      co2PerDollar: 1.8,
-      totalFunding: 5000000,
-      currentFunding: 3200000,
+      co2PerRupee: 0.00027, // Adjusted for INR (0.022/83)
+      totalFunding: 415000000, // 5M USD * 83
+      currentFunding: 265600000, // 3.2M USD * 83,
       contributors: 8765,
       timeRemaining: '12 months',
       verified: true,
@@ -112,9 +113,9 @@ const Projects = () => {
       image: "/tree3.jpg",
       description: 'Restoring underwater kelp forests to sequester carbon and support marine ecosystems',
       co2Removed: 45000,
-      co2PerDollar: 3.2,
-      totalFunding: 800000,
-      currentFunding: 520000,
+      co2PerRupee: 0.00047, // Adjusted for INR (0.039/83)
+      totalFunding: 66400000, // 800K USD * 83
+      currentFunding: 43160000, // 520K USD * 83,
       contributors: 3240,
       timeRemaining: '6 months',
       verified: true,
@@ -136,9 +137,9 @@ const Projects = () => {
       image: "/tree4.jpg",
       description: 'Community-owned solar installation providing clean energy access to rural villages',
       co2Removed: 32000,
-      co2PerDollar: 2.1,
-      totalFunding: 450000,
-      currentFunding: 285000,
+      co2PerRupee: 0.0003, // Adjusted for INR (0.025/83)
+      totalFunding: 37350000, // 450K USD * 83
+      currentFunding: 23655000, // 285K USD * 83,
       contributors: 1890,
       timeRemaining: '4 months',
       verified: true,
@@ -160,9 +161,9 @@ const Projects = () => {
       image: "/tree5.jpg",
       description: 'Protecting and restoring mangrove ecosystems crucial for coastal communities and carbon storage',
       co2Removed: 85000,
-      co2PerDollar: 2.8,
-      totalFunding: 1200000,
-      currentFunding: 900000,
+      co2PerRupee: 0.00041, // Adjusted for INR (0.034/83)
+      totalFunding: 99600000, // 1.2M USD * 83
+      currentFunding: 74700000, // 900K USD * 83,
       contributors: 6750,
       timeRemaining: '10 months',
       verified: true,
@@ -206,14 +207,14 @@ const Projects = () => {
   };
 
   const calculateImpact = (amount) => {
-    return (amount * 2.5).toFixed(1); // Average CO2 per dollar
+    return ((amount * 83) * 0.00036).toFixed(1); // Average CO2 per rupee (adjusted for INR)
   };
 
   return (
     <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Carbon Offset Projects</h1>
+        <h1 className="text-3xl font-bold text-gradient">Carbon Offset Projects</h1>
         <p className="text-muted-foreground">Support verified projects that remove CO₂ from the atmosphere</p>
       </div>
 
@@ -277,15 +278,20 @@ const Projects = () => {
 
       {/* Projects List */}
       <div className="space-y-6">
-        {filteredProjects.map(project => {
+        {filteredProjects.map((project, index) => {
           const Icon = getProjectIcon(project.type);
           const fundingPercentage = (project.currentFunding / project.totalFunding) * 100;
           
           return (
-            <Card key={project.id} className="card-gradient hover-lift">
-              
-              
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              key={project.id}
+            >
+              <Card className="card-gradient">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
                 {/* Project Image */}
                 <div className="relative">
                   <img 
@@ -346,9 +352,9 @@ const Projects = () => {
                     </div>
                     <div className="text-center p-3 bg-accent/20 rounded-lg">
                       <div className="text-lg font-bold text-foreground">
-                        ${project.co2PerDollar}
+                        ₹{project.co2PerRupee}
                       </div>
-                      <div className="text-xs text-muted-foreground">CO₂/dollar</div>
+                      <div className="text-xs text-muted-foreground">CO₂/rupee</div>
                     </div>
                     <div className="text-center p-3 bg-accent/20 rounded-lg">
                       <div className="text-lg font-bold text-foreground">
@@ -363,7 +369,7 @@ const Projects = () => {
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Funding Progress</span>
                       <span className="font-medium">
-                        ${project.currentFunding.toLocaleString()} / ${project.totalFunding.toLocaleString()}
+                        ₹{(project.currentFunding/10000000).toFixed(1)}Cr / ₹{(project.totalFunding/10000000).toFixed(1)}Cr
                       </span>
                     </div>
                     <Progress value={fundingPercentage} className="h-3 progress-eco" />
@@ -390,13 +396,13 @@ const Projects = () => {
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div>
-                            <Label>Contribution Amount: ${contributionAmount[0]}</Label>
+                            <Label>Contribution Amount: ₹{(contributionAmount[0] * 83).toLocaleString()}</Label>
                             <Slider
                               value={contributionAmount}
                               onValueChange={setContributionAmount}
-                              max={500}
-                              min={10}
-                              step={10}
+                              max={50000}
+                              min={1000}
+                              step={1000}
                               className="mt-2"
                             />
                           </div>
@@ -412,7 +418,7 @@ const Projects = () => {
                         </div>
                         <DialogFooter>
                           <Button className="w-full btn-hero">
-                            Contribute ${contributionAmount[0]}
+                            Contribute ₹{(contributionAmount[0] * 83).toLocaleString()}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -426,8 +432,9 @@ const Projects = () => {
                 </div>
               </div>
             </Card>
-          );
-        })}
+          </motion.div>
+        )
+      })}
       </div>
 
       {filteredProjects.length === 0 && (

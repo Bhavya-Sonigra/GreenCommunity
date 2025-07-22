@@ -148,7 +148,7 @@ export default function MarketplacePage() {
             <CardTitle className="text-sm font-semibold text-muted-foreground">Average Price</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">$11</div>
+            <div className="text-3xl font-bold text-foreground">₹915</div>
             <div className="text-sm text-muted-foreground">per credit</div>
           </CardContent>
         </Card>
