@@ -29,6 +29,7 @@ import {
   CheckCircle,
   ArrowRight
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState('list');
@@ -36,6 +37,7 @@ const Projects = () => {
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [contributionAmount, setContributionAmount] = useState([50]);
+  const router = useRouter();
 
   const regions = [
     { value: 'all', label: 'All Regions' },
@@ -417,7 +419,7 @@ const Projects = () => {
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button className="w-full btn-hero">
+                          <Button className="w-full btn-hero" onClick={() => router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`)}>
                             Contribute ₹{(contributionAmount[0] * 83).toLocaleString()}
                           </Button>
                         </DialogFooter>
