@@ -7,16 +7,17 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import './config/passport.js'; 
-import connectDB from './config/db.js';
+import { connectAllDatabases } from './config/databases.js';
 import authRoutes from './routes/auth.routes.js';
+import marketplaceRoutes from './routes/marketplace.routes.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to all MongoDB databases
+connectAllDatabases();
 
 // Security middleware
 app.use(helmet({
@@ -99,6 +100,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

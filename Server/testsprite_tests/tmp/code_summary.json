@@ -1,0 +1,26 @@
+{
+  "techStack": {
+    "backend": "Node.js",
+    "frameworks": ["Express"],
+    "database": ["MongoDB"],
+    "authentication": "Passport"
+  },
+  "features": [
+    "User registration and authentication",
+    "Email verification",
+    "Password reset",
+    "Product management in the marketplace",
+    "Sustainability features for products",
+    "Role-based access control",
+    "Session management",
+    "Security: Helmet, CORS, Rate limiting"
+  ],
+  "services": [
+    "Email sending service",
+    "Google OAuth integration"
+  ],
+  "routing": {
+    "authRoutes": ["/register", "/login", "/logout", "/verify-email"],
+    "marketplaceRoutes": ["/products", "/featured", "/categories"]
+  }
+}
