@@ -229,7 +229,7 @@
   
   /* Gradient classes */
   .bg-gradient-primary {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: linear-gradient(135deg, #22c55e, #15803d);
   }
   
   .text-gradient {
@@ -237,6 +237,9 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.5;
+    display: inline-block;
+    overflow: visible;
   }
   
   /* Hover effects */

@@ -27,7 +27,7 @@ class EmailService {
   }
 
   /**
-   * Send email verification
+   * Send email verification (legacy link-based)
    * @param {string} email - Recipient email
    * @param {string} token - Verification token
    * @param {string} clientUrl - Client URL for verification link
@@ -53,6 +53,68 @@ class EmailService {
           ">Verify Email</a>
           <p style="color: #666;">This link will expire in 24 hours.</p>
           <p style="color: #666;">If you didn't create this account, please ignore this email.</p>
+        </div>
+      `
+    };
+
+    return await this.transporter.sendMail(mailOptions);
+  }
+
+  /**
+   * Send email verification with 6-digit code
+   * @param {string} email - Recipient email
+   * @param {string} verificationCode - 6-digit verification code
+   */
+  async sendEmailVerificationCode(email, verificationCode) {
+    const mailOptions = {
+      to: email,
+      subject: 'Email Verification - GreenCommunity',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #4CAF50; text-align: center;">Welcome to GreenCommunity!</h2>
+          
+          <p>Hello,</p>
+          
+          <p>Thank you for registering with GreenCommunity! Please use the verification code below to verify your email address:</p>
+          
+          <div style="
+            background-color: #f8f9fa;
+            border: 2px dashed #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0;
+          ">
+            <h3 style="color: #4CAF50; margin: 0 0 10px 0;">Verification Code</h3>
+            <div style="
+              font-size: 32px;
+              font-weight: bold;
+              color: #4CAF50;
+              letter-spacing: 8px;
+              font-family: monospace;
+            ">${verificationCode}</div>
+          </div>
+          
+          <p><strong>Instructions:</strong></p>
+          <ol>
+            <li>Enter this verification code in the app</li>
+            <li>Complete your registration</li>
+            <li>Start contributing to our green community!</li>
+          </ol>
+          
+          <p style="color: #666; font-size: 14px; margin-top: 30px;">
+            <strong>Important:</strong> This code will expire in 24 hours for security reasons.
+          </p>
+          
+          <p style="color: #666; font-size: 14px;">
+            If you didn't create this account, please ignore this email.
+          </p>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            This is an automated message from GreenCommunity. Please do not reply to this email.
+          </p>
         </div>
       `
     };

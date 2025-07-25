@@ -34,6 +34,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   const { name, email, password } = req.body;
 
+<<<<<<< HEAD
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ message: 'Email already in use' });
 
@@ -55,28 +56,73 @@ export const registerUser = asyncHandler(async (req, res) => {
   } catch (emailError) {
     console.error('Email sending error:', emailError);
     // Don't fail registration if email fails
+=======
+  // Check if user exists - handle both verified and unverified accounts
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    if (existingUser.isEmailVerified) {
+      return res.status(400).json({ message: 'Email already in use' });
+    } else {
+      // User exists but email not verified - allow re-registration with cleanup
+      await User.deleteOne({ email });
+      console.log(`Cleaned up unverified account for email: ${email}`);
+    }
+>>>>>>> 2fb484a8f50087e27aba71fbbad709061765d50d
   }
 
-  const token = generateToken(user._id);
+  let user;
+  try {
+    user = await User.create({ 
+      name, 
+      email, 
+      password, // Will be hashed by pre-save middleware
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
 
-  // Set HTTP-only cookie for security
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  });
+    // Generate email verification code
+    const verificationCode = user.generateEmailVerificationCode();
+    await user.save();
 
-  res.status(201).json({
-    message: 'User registered successfully. Please check your email for verification.',
-    token: token,
-    user: { 
-      id: user._id, 
-      name: user.name, 
-      email: user.email,
-      isEmailVerified: user.isEmailVerified
+    // Send verification email with code
+    try {
+      await emailService.sendEmailVerificationCode(user.email, verificationCode);
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      // Don't fail registration if email fails - user can request resend
     }
-  });
+
+    const token = generateToken(user._id);
+
+    // Set HTTP-only cookie for security
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
+    res.status(201).json({
+      message: 'User registered successfully. Please check your email for verification.',
+      token: token,
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    // If user creation fails, clean up any partial data
+    if (user && user._id) {
+      try {
+        await User.deleteOne({ _id: user._id });
+      } catch (cleanupError) {
+        console.error('Error cleaning up user after failed registration:', cleanupError);
+      }
+    }
+    throw error; // Re-throw the original error
+  }
 });
 
 // User Login
@@ -136,7 +182,7 @@ export const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
-// Email Verification
+// Email Verification (legacy token-based)
 export const verifyEmail = asyncHandler(async (req, res) => {
   const { token } = req.body;
 
@@ -157,6 +203,62 @@ export const verifyEmail = asyncHandler(async (req, res) => {
   await user.save();
 
   res.status(200).json({ message: 'Email verified successfully' });
+});
+
+// Email Verification with Code
+export const verifyEmailCode = asyncHandler(async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(400).json({ message: 'Email and verification code are required' });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid verification code' });
+  }
+
+  const isValidCode = user.verifyEmailVerificationCode(code);
+  if (!isValidCode) {
+    return res.status(400).json({ message: 'Invalid or expired verification code' });
+  }
+
+  user.isEmailVerified = true;
+  user.clearEmailVerificationCode();
+  await user.save();
+
+  res.status(200).json({ message: 'Email verified successfully' });
+});
+
+// Resend Email Verification Code
+export const resendVerificationCode = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: 'User not found' });
+  }
+
+  if (user.isEmailVerified) {
+    return res.status(400).json({ message: 'Email is already verified' });
+  }
+
+  // Generate new verification code
+  const verificationCode = user.generateEmailVerificationCode();
+  await user.save();
+
+  // Send verification email with new code
+  try {
+    await emailService.sendEmailVerificationCode(user.email, verificationCode);
+    res.status(200).json({ message: 'Verification code sent successfully' });
+  } catch (emailError) {
+    console.error('Email sending error:', emailError);
+    return res.status(500).json({ message: 'Error sending verification code' });
+  }
 });
 
 // Password Reset Request

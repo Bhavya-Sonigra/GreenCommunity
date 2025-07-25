@@ -409,24 +409,41 @@ const Dashboard = () => {
           </div>
           {/* Calendar Streak */}
           <div className="animate-slide-up" style={{ animationDelay: '0.75s' }}>
+<<<<<<< HEAD
             <Card className="bg-gradient-to-br from-green-50 via-white to-green-100 border border-green-200 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl hover:scale-[1.02]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-md mr-2 animate-pulse-eco">
                     <Calendar className="h-6 w-6 text-white" />
+=======
+            <Card className="bg-gradient-to-br from-green-50 via-white to-green-100 border border-green-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-2xl w-full max-w-full sm:max-w-md mx-auto p-0">
+              <CardHeader className="px-4 py-3 sm:px-6 sm:py-4">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <span className="inline-flex items-center justify-center h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-md mr-2">
+                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+>>>>>>> 2fb484a8f50087e27aba71fbbad709061765d50d
                   </span>
                   <span className="bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent font-extrabold">Streak Calendar</span>
                 </CardTitle>
-                <CardDescription className="text-base text-gray-600 mt-1">Your activity streak this month</CardDescription>
+                <CardDescription className="text-sm sm:text-base text-gray-600 mt-1">Your activity streak this month</CardDescription>
               </CardHeader>
+<<<<<<< HEAD
               <CardContent>
                 <div className="flex justify-center items-center py-6">
+=======
+              <CardContent className="px-2 py-4 sm:px-6 sm:py-8">
+                <div className="flex justify-center items-center">
+>>>>>>> 2fb484a8f50087e27aba71fbbad709061765d50d
                   <CustomCalendar
                     mode="single"
                     selected={date}
                     onSelect={setDate}
                     streakDays={streakDays}
+<<<<<<< HEAD
                     className="rounded-2xl border-2 border-green-200 bg-white shadow-lg p-4 w-[360px] hover:shadow-green-200/70 transition-all duration-300"
+=======
+                    className="rounded-xl sm:rounded-2xl border-2 border-green-200 bg-white shadow-lg p-2 sm:p-6 w-full max-w-xs sm:max-w-[360px] hover:shadow-green-200 transition-shadow duration-300"
+>>>>>>> 2fb484a8f50087e27aba71fbbad709061765d50d
                   />
                 </div>
               </CardContent>

@@ -5,7 +5,9 @@ import rateLimit from 'express-rate-limit';
 import { 
   registerUser, 
   loginUser, 
-  verifyEmail, 
+  verifyEmail,
+  verifyEmailCode,
+  resendVerificationCode, 
   requestPasswordReset, 
   resetPassword, 
   getCurrentUser, 
@@ -60,6 +62,8 @@ router.post('/logout', logout);
 
 // Email Verification
 router.post('/verify-email', verifyEmail);
+router.post('/verify-email-code', verifyEmailCode);
+router.post('/resend-verification-code', resendVerificationCode);
 
 // Password Reset
 router.post('/forgot-password', forgotPasswordLimiter, validatePasswordResetRequest, requestPasswordReset);

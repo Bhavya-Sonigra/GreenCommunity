@@ -302,7 +302,7 @@ const Projects = () => {
                     className="w-full h-48 lg:h-full object-cover rounded-lg"
                   />
                   {project.verified && (
-                    <Badge className="absolute top-3 right-3 bg-success text-white">
+                    <Badge className="absolute top-3 right-3 bg-green-600 text-white shadow-md">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Verified
                     </Badge>
