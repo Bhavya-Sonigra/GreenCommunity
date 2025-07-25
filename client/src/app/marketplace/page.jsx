@@ -23,6 +23,7 @@ import {
   Grid3X3,
   List
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const USD_TO_INR = 83;
 
@@ -138,27 +139,16 @@ const products = [
   }
 ];
 
-function MobileMarketplaceView() {
+function MobileMarketplaceView({ 
+  cartItems, 
+  addToCart, 
+  removeFromCart,
+  updateCartItemQuantity,
+  getTotalCartItems, 
+  getTotalCartValue 
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [cartItems, setCartItems] = useState([]);
-
-  const addToCart = (product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
-
-  const getTotalCartItems = () => cartItems.reduce((total, item) => total + item.quantity, 0);
-  const getTotalCartValue = () => cartItems.reduce((total, item) => total + (item.price * USD_TO_INR * item.quantity), 0);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -179,13 +169,9 @@ function MobileMarketplaceView() {
         {/* Cart */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="relative p-2 h-10 w-10 rounded-full bg-gradient-primary">
-              <ShoppingCart className="h-5 w-5" />
-              {getTotalCartItems() > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-success text-white">
-                  {getTotalCartItems()}
-                </Badge>
-              )}
+            <Button className="relative bg-gradient-primary">
+              <ShoppingCart className="h-5 w-5 mr-2" />
+              Cart
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -269,7 +255,7 @@ function MobileMarketplaceView() {
                 )}
               </div>
             </div>
-            <Button size="icon" onClick={() => addToCart(product)} disabled={!product.inStock} className="ml-2 bg-gradient-primary">
+            <Button size="icon" onClick={() => addToCart(product)} disabled={!product.inStock} className="ml-2 bg-gradient-primary hover:bg-green-700 hover:shadow-lg">
               <Plus className="h-4 w-4" />
             </Button>
           </Card>
@@ -285,29 +271,19 @@ function MobileMarketplaceView() {
   );
 }
 
-function TabletMarketplaceView() {
+function TabletMarketplaceView({
+  cartItems,
+  addToCart,
+  removeFromCart,
+  updateCartItemQuantity,
+  getTotalCartItems,
+  getTotalCartValue
+}) {
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [cartItems, setCartItems] = useState([]);
 
-  const addToCart = (product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
-
-  const getTotalCartItems = () => cartItems.reduce((total, item) => total + item.quantity, 0);
-  const getTotalCartValue = () => cartItems.reduce((total, item) => total + (item.price * USD_TO_INR * item.quantity), 0);
-
+  // Use props for cart totals, only declare filteredProducts here
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -325,14 +301,9 @@ function TabletMarketplaceView() {
         </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="relative bg-gradient-primary hover:shadow-medium">
+            <Button className="relative bg-gradient-primary">
               <ShoppingCart className="h-5 w-5 mr-2" />
               Cart
-              {getTotalCartItems() > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-success text-white">
-                  {getTotalCartItems()}
-                </Badge>
-              )}
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -387,22 +358,6 @@ function TabletMarketplaceView() {
             ))}
           </SelectContent>
         </Select>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
       {/* Products Grid */}
       <div className={viewMode === 'grid'
@@ -410,9 +365,7 @@ function TabletMarketplaceView() {
         : 'space-y-4'}>
         {filteredProducts.map(product => (
           <Card key={product.id} className={`card-gradient hover-lift ${viewMode === 'list' ? 'flex-row' : ''}`}>
-            {product.featured && (
-              <Badge className="absolute top-3 left-3 z-10 bg-success text-white">Featured</Badge>
-            )}
+            
             <div className={viewMode === 'list' ? 'w-32 shrink-0' : ''}>
               <div className="relative aspect-square overflow-hidden rounded-t-lg">
                 <img
@@ -434,11 +387,6 @@ function TabletMarketplaceView() {
                     <h3 className="font-semibold text-foreground leading-tight text-base">{product.name}</h3>
                     <div className="text-right shrink-0">
                       <div className="font-bold text-foreground">₹{(product.price * USD_TO_INR).toFixed(2)}</div>
-                      {product.originalPrice && (
-                        <div className="text-sm text-muted-foreground line-through">
-                          ₹{(product.originalPrice * USD_TO_INR).toFixed(2)}
-                        </div>
-                      )}
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
@@ -465,20 +413,53 @@ function TabletMarketplaceView() {
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between gap-2 mt-2">
                   <div className="flex items-center gap-1 text-success">
                     <Leaf className="h-4 w-4" />
                     <span className="text-sm font-medium">-{product.co2Saved}kg CO₂</span>
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => addToCart(product)}
-                    disabled={!product.inStock}
-                    className="bg-gradient-primary hover:shadow-medium"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add to Cart
-                  </Button>
+                  {(() => {
+                    const cartItem = cartItems.find(item => item.id === product.id);
+                    if (cartItem) {
+                      return (
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center bg-gray-200 rounded-full px-2 py-1 gap-2">
+                            <button
+                              className="p-1 rounded-full hover:bg-green-200 transition"
+                              onClick={() => updateCartItemQuantity(product.id, cartItem.quantity - 1)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span className="font-semibold w-6 text-center">{cartItem.quantity}</span>
+                            <button
+                              className="p-1 rounded-full hover:bg-green-200 transition"
+                              onClick={() => updateCartItemQuantity(product.id, cartItem.quantity + 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => removeFromCart(product.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white ml-2 whitespace-nowrap"
+                          >
+                            Remove from Cart
+                          </Button>
+                        </div>
+                      );
+                    }
+                    return (
+                      <Button
+                        size="sm"
+                        onClick={() => addToCart(product)}
+                        disabled={!product.inStock}
+                        className="bg-black-primary hover:bg-green-700 hover:shadow-lg whitespace-nowrap"
+                      >
+                      
+                        Add to Cart
+                      </Button>
+                    );
+                  })()}
                 </div>
               </div>
             </CardContent>
@@ -495,34 +476,20 @@ function TabletMarketplaceView() {
   );
 }
 
-function DesktopMarketplaceView() {
+function DesktopMarketplaceView({
+  cartItems,
+  addToCart,
+  removeFromCart,
+  updateCartItemQuantity,
+  getTotalCartItems,
+  getTotalCartValue
+}) {
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [cartItems, setCartItems] = useState([]);
+  const router = useRouter();
 
-  const addToCart = (product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
-
-  const getTotalCartItems = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getTotalCartValue = () => {
-    return cartItems.reduce((total, item) => total + (item.price * USD_TO_INR * item.quantity), 0);
-  };
-
+  // Use props for cart totals, only declare filteredProducts here
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -536,21 +503,15 @@ function DesktopMarketplaceView() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           {/* Add 'Featured' label above heading */}
-          <div className="text-muted-foreground text-sm font-semibold mb-0.5">Featured</div>
-          <h1 className="text-3xl font-bold text-foreground">Eco Marketplace</h1>
+          <h1 className="text-3xl font-bold text-gradient">Eco Marketplace</h1>
           <p className="text-muted-foreground">Discover sustainable products that make a difference</p>
         </div>
         {/* Cart */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="relative bg-gradient-primary hover:shadow-medium">
+            <Button className="relative bg-gradient-primary">
               <ShoppingCart className="h-5 w-5 mr-2" />
               Cart
-              {getTotalCartItems() > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-success text-white">
-                  {getTotalCartItems()}
-                </Badge>
-              )}
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -575,7 +536,7 @@ function DesktopMarketplaceView() {
                       <div className="text-sm">Qty: {item.quantity}</div>
                     </div>
                   ))}
-                  <Button className="w-full btn-hero mt-6">
+                  <Button className="w-full btn-hero mt-6" onClick={() => router.push('/payment')}>
                     Proceed to Checkout
                   </Button>
                 </>
@@ -607,22 +568,6 @@ function DesktopMarketplaceView() {
             ))}
           </SelectContent>
         </Select>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
       {/* Products Grid */}
       <div className={viewMode === 'grid'
@@ -654,11 +599,6 @@ function DesktopMarketplaceView() {
                     <h3 className="font-semibold text-foreground leading-tight">{product.name}</h3>
                     <div className="text-right shrink-0">
                       <div className="font-bold text-foreground">₹{(product.price * USD_TO_INR).toFixed(2)}</div>
-                      {product.originalPrice && (
-                        <div className="text-sm text-muted-foreground line-through">
-                          ₹{(product.originalPrice * USD_TO_INR).toFixed(2)}
-                        </div>
-                      )}
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
@@ -685,20 +625,44 @@ function DesktopMarketplaceView() {
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between gap-2 mt-2">
                   <div className="flex items-center gap-1 text-success">
                     <Leaf className="h-4 w-4" />
                     <span className="text-sm font-medium">-{product.co2Saved}kg CO₂</span>
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => addToCart(product)}
-                    disabled={!product.inStock}
-                    className="bg-gradient-primary hover:shadow-medium"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add to Cart
-                  </Button>
+                  {(() => {
+                    const cartItem = cartItems.find(item => item.id === product.id);
+                    if (cartItem) {
+                      return (
+                        <div className="flex items-center bg-gray-200 rounded-full px-2 py-1 gap-2">
+                          <button
+                            className="p-1 rounded-full hover:bg-green-200 transition"
+                            onClick={() => updateCartItemQuantity(product.id, cartItem.quantity - 1)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="font-semibold w-6 text-center">{cartItem.quantity}</span>
+                          <button
+                            className="p-1 rounded-full hover:bg-green-200 transition"
+                            onClick={() => updateCartItemQuantity(product.id, cartItem.quantity + 1)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      );
+                    }
+                    return (
+                      <Button
+                        size="sm"
+                        onClick={() => addToCart(product)}
+                        disabled={!product.inStock}
+                        className="bg-gradient-primary hover:bg-green-700 hover:shadow-lg whitespace-nowrap"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add to Cart
+                      </Button>
+                    );
+                  })()}
                 </div>
               </div>
             </CardContent>
@@ -718,15 +682,54 @@ function DesktopMarketplaceView() {
 const Marketplace = () => {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1023 });
-  // Desktop: minWidth 1024
+  const [cartItems, setCartItems] = useState([]);
+
+  const addToCart = (product) => {
+    setCartItems(prevItems => {
+      const existingItem = prevItems.find(item => item.id === product.id);
+      if (existingItem) {
+        return prevItems.map(item => 
+          item.id === product.id 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prevItems, { ...product, quantity: 1 }];
+    });
+  };
+
+  const getTotalCartItems = () => cartItems.reduce((total, item) => total + item.quantity, 0);
+  const getTotalCartValue = () => cartItems.reduce((total, item) => total + (item.price * USD_TO_INR * item.quantity), 0);
+
+  const removeFromCart = (productId) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+  };
+
+  const updateCartItemQuantity = (productId, quantity) => {
+    setCartItems(prevItems => 
+      prevItems.map(item => 
+        item.id === productId
+          ? { ...item, quantity: Math.max(0, quantity) }
+          : item
+      ).filter(item => item.quantity > 0)
+    );
+  };
+
+  const cartProps = {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateCartItemQuantity,
+    getTotalCartItems,
+    getTotalCartValue
+  };
 
   if (isMobile) {
-    return <MobileMarketplaceView />;
+    return <MobileMarketplaceView {...cartProps} />;
   }
   if (isTablet) {
-    return <TabletMarketplaceView />;
+    return <TabletMarketplaceView {...cartProps} />;
   }
-  return <DesktopMarketplaceView />;
+  return <DesktopMarketplaceView {...cartProps} />;
 };
-
 export default Marketplace;

@@ -179,60 +179,7 @@ const Payment = () => {
           {/* Payment Form */}
           <div className="lg:col-span-3 space-y-6">
             {/* Contribution Amount */}
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-green-50 dark:from-gray-800 dark:to-emerald-900/20">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
-                    <Calculator className="h-5 w-5 text-white" />
-                  </div>
-                  Contribution Amount
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Every dollar makes a difference in our fight against climate change
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="relative">
-                  <Label className="text-lg font-semibold mb-4 block">Amount: ₹{contributionAmount[0] * USD_TO_INR}</Label>
-                  <div className="relative px-4">
-                    <Slider
-                      value={contributionAmount}
-                      onValueChange={setContributionAmount}
-                      max={1000}
-                      min={10}
-                      step={10}
-                      className="mt-2"
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-3">
-                      <span>$10</span>
-                      <span>$1000</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Amount Buttons */}
-                <div className="grid grid-cols-4 gap-3">
-                  {[25, 50, 100, 250].map(amount => (
-                    <Button
-                      key={amount}
-                      variant={contributionAmount[0] === amount ? "default" : "outline"}
-                      size="lg"
-                      onClick={() => setContributionAmount([amount])}
-                      className={`relative overflow-hidden transition-all duration-300 ${
-                        contributionAmount[0] === amount 
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105' 
-                          : 'hover:scale-105'
-                      }`}
-                    >
-                      <span className="relative z-10">₹{amount * USD_TO_INR}</span>
-                      {contributionAmount[0] === amount && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 opacity-20"></div>
-                      )}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            
 
             {/* Payment Method */}
             <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900/20">

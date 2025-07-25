@@ -149,7 +149,7 @@ const Settings = () => {
                     <div className="space-y-2">
                       <Button variant="outline" size="sm">
                         <Camera className="h-4 w-4 mr-2" />
-                        {t('change_photo')}
+                        {t('Change Photo')}
                       </Button>
                       <p className="text-sm text-muted-foreground">{t('Max Size 5mb')}</p>
                     </div>
@@ -222,7 +222,7 @@ const Settings = () => {
                   </div>
                   <Button className="btn-hero">
                     <Save className="h-4 w-4 mr-2" />
-                    {t('save_changes')}
+                    {t('Save Changes')}
                   </Button>
                 </CardContent>
               </Card>
@@ -230,7 +230,7 @@ const Settings = () => {
             <div className="space-y-6">
               <Card className="card-eco">
                 <CardHeader>
-                  <CardTitle>{t('account_stats')}</CardTitle>
+                  <CardTitle>{t('Account Stats')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
