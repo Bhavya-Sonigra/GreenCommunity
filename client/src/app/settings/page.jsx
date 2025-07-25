@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,14 +24,22 @@ import {
   Shield,
   Trash2,
   Save,
-  Upload
+  Upload,
+  Loader2
 } from 'lucide-react';
 import { usePreferences } from "@/context/PreferencesContext";
 import { useTranslation } from "@/context/PreferencesContext";
+import { authAPI } from '@/lib/api';
+import { useUser } from '@/context/UserContext';
+import toast from 'react-hot-toast';
 
 const Settings = () => {
   const { t } = useTranslation();
+  const { user, updateUser } = useUser();
   const [activeTab, setActiveTab] = useState('profile');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
@@ -60,6 +68,47 @@ const Settings = () => {
     confirm: '',
   });
   const [passwordMessage, setPasswordMessage] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Load user settings on component mount
+  useEffect(() => {
+    loadUserSettings();
+  }, []);
+
+  const loadUserSettings = async () => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.getUserSettings();
+      const userData = response.user;
+      
+      // Update profile data
+      setProfileData({
+        name: userData.name || '',
+        email: userData.email || '',
+        phone: userData.profile?.phone || '',
+        location: userData.profile?.location ? 
+          `${userData.profile.location.city || ''}, ${userData.profile.location.state || ''}, ${userData.profile.location.country || ''}`.replace(/^, |, $/g, '') : '',
+        bio: userData.profile?.bio || '',
+        joinDate: userData.createdAt || '',
+        preferredUnits: userData.profile?.preferredUnits || 'metric'
+      });
+
+      // Update notifications
+      if (userData.profile?.notificationPreferences) {
+        setNotifications(userData.profile.notificationPreferences);
+      }
+
+      // Update app preferences
+      if (userData.profile?.appPreferences) {
+        setPreferences(userData.profile.appPreferences);
+      }
+    } catch (error) {
+      console.error('Error loading user settings:', error);
+      toast.error('Failed to load settings');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleProfileUpdate = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
@@ -77,9 +126,64 @@ const Settings = () => {
     setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
   };
 
-  const submitPasswordChange = (e) => {
+  const saveProfileSettings = async () => {
+    try {
+      setIsSaving(true);
+      const response = await authAPI.updateProfile({
+        name: profileData.name,
+        email: profileData.email,
+        profile: {
+          phone: profileData.phone,
+          bio: profileData.bio,
+          preferredUnits: profileData.preferredUnits,
+          location: {
+            // Parse location string into components
+            raw: profileData.location
+          }
+        }
+      });
+      
+      // Update user context
+      updateUser(response.user);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveNotificationSettings = async () => {
+    try {
+      setIsSaving(true);
+      await authAPI.updateNotificationPreferences(notifications);
+      toast.success('Notification preferences updated!');
+    } catch (error) {
+      console.error('Error updating notifications:', error);
+      toast.error('Failed to update notification preferences');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveAppPreferences = async () => {
+    try {
+      setIsSaving(true);
+      await authAPI.updateAppPreferences(preferences);
+      toast.success('App preferences updated!');
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+      toast.error('Failed to update app preferences');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const submitPasswordChange = async (e) => {
     e.preventDefault();
     setPasswordMessage('');
+    
     if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
       setPasswordMessage('All fields are required.');
       return;
@@ -88,12 +192,25 @@ const Settings = () => {
       setPasswordMessage('New passwords do not match.');
       return;
     }
-    // TODO: Connect to backend
-    setTimeout(() => {
+    
+    try {
+      setIsChangingPassword(true);
+      await authAPI.changePassword({
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.new
+      });
+      
       setPasswordMessage('Password changed successfully!');
       setPasswordForm({ current: '', new: '', confirm: '' });
       setShowChangePassword(false);
-    }, 1000);
+      toast.success('Password changed successfully!');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordMessage(error.response?.data?.message || 'Failed to change password');
+      toast.error('Failed to change password');
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const exportData = () => {
@@ -220,9 +337,17 @@ const Settings = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="btn-hero">
-                    <Save className="h-4 w-4 mr-2" />
-                    {t('Save Changes')}
+                  <Button 
+                    className="btn-hero"
+                    onClick={saveProfileSettings}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    {isSaving ? t('Saving...') : t('Save Changes')}
                   </Button>
                 </CardContent>
               </Card>
@@ -338,9 +463,17 @@ const Settings = () => {
                   ))}
                 </div>
               </div>
-              <Button className="btn-hero">
-                <Save className="h-4 w-4 mr-2" />
-                {t('Save Notification Settings')}
+              <Button 
+                className="btn-hero"
+                onClick={saveNotificationSettings}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {isSaving ? t('Saving...') : t('Save Notification Settings')}
               </Button>
             </CardContent>
           </Card>

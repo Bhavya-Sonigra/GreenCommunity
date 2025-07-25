@@ -200,6 +200,50 @@ const userSchema = new mongoose.Schema({
       instagram: String,
       twitter: String,
       linkedin: String
+    },
+    preferredUnits: {
+      type: String,
+      enum: ['metric', 'imperial'],
+      default: 'metric'
+    },
+    // Notification Preferences
+    notificationPreferences: {
+      emailUpdates: { type: Boolean, default: true },
+      challengeReminders: { type: Boolean, default: true },
+      weeklyReports: { type: Boolean, default: true },
+      communityActivity: { type: Boolean, default: false },
+      marketingEmails: { type: Boolean, default: false },
+      mobilePush: { type: Boolean, default: true },
+      socialActivity: { type: Boolean, default: true }
+    },
+    // App Preferences
+    appPreferences: {
+      theme: {
+        type: String,
+        enum: ['light', 'dark', 'system'],
+        default: 'light'
+      },
+      language: {
+        type: String,
+        enum: ['en', 'hi', 'gu'],
+        default: 'en'
+      },
+      currency: {
+        type: String,
+        enum: ['usd', 'eur', 'inr'],
+        default: 'usd'
+      },
+      units: {
+        type: String,
+        enum: ['metric', 'imperial'],
+        default: 'metric'
+      },
+      privacy: {
+        type: String,
+        enum: ['public', 'friends', 'private'],
+        default: 'public'
+      },
+      dataSharing: { type: Boolean, default: false }
     }
   },
 

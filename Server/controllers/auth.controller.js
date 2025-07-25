@@ -403,3 +403,205 @@ export const updatePassword = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'Password updated successfully' });
 });
+
+// Update Profile Information
+export const updateProfile = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const {
+    name,
+    email,
+    phone,
+    location,
+    bio,
+    preferredUnits,
+    firstName,
+    lastName,
+    dateOfBirth,
+    gender
+  } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if email is being changed and if it already exists
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: req.user.id } });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      user.email = email;
+      user.isEmailVerified = false; // Reset email verification if email changed
+    }
+
+    // Update basic profile fields
+    if (name) user.name = name;
+    if (phone) user.profile = { ...user.profile, phone };
+    if (bio) user.profile = { ...user.profile, bio };
+    if (firstName) user.profile = { ...user.profile, first_name: firstName };
+    if (lastName) user.profile = { ...user.profile, last_name: lastName };
+    if (dateOfBirth) user.profile = { ...user.profile, date_of_birth: new Date(dateOfBirth) };
+    if (gender) user.profile = { ...user.profile, gender };
+    
+    // Update location
+    if (location) {
+      const locationParts = location.split(',').map(part => part.trim());
+      user.profile = {
+        ...user.profile,
+        location: {
+          city: locationParts[0] || '',
+          state: locationParts[1] || '',
+          country: locationParts[2] || ''
+        }
+      };
+    }
+
+    // Update preferred units (could be stored in user preferences or profile)
+    if (preferredUnits) {
+      user.profile = { ...user.profile, preferredUnits };
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profile: user.profile,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+});
+
+// Update Notification Preferences
+export const updateNotificationPreferences = asyncHandler(async (req, res) => {
+  const {
+    emailUpdates,
+    challengeReminders,
+    weeklyReports,
+    communityActivity,
+    marketingEmails,
+    mobilePush,
+    socialActivity
+  } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Initialize notification preferences if they don't exist
+    if (!user.profile.notificationPreferences) {
+      user.profile.notificationPreferences = {};
+    }
+
+    // Update notification preferences
+    const notificationPreferences = {
+      emailUpdates: emailUpdates !== undefined ? emailUpdates : user.profile.notificationPreferences.emailUpdates,
+      challengeReminders: challengeReminders !== undefined ? challengeReminders : user.profile.notificationPreferences.challengeReminders,
+      weeklyReports: weeklyReports !== undefined ? weeklyReports : user.profile.notificationPreferences.weeklyReports,
+      communityActivity: communityActivity !== undefined ? communityActivity : user.profile.notificationPreferences.communityActivity,
+      marketingEmails: marketingEmails !== undefined ? marketingEmails : user.profile.notificationPreferences.marketingEmails,
+      mobilePush: mobilePush !== undefined ? mobilePush : user.profile.notificationPreferences.mobilePush,
+      socialActivity: socialActivity !== undefined ? socialActivity : user.profile.notificationPreferences.socialActivity
+    };
+
+    user.profile.notificationPreferences = notificationPreferences;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Notification preferences updated successfully',
+      notificationPreferences
+    });
+  } catch (error) {
+    console.error('Notification preferences update error:', error);
+    res.status(500).json({ message: 'Error updating notification preferences' });
+  }
+});
+
+// Update App Preferences
+export const updateAppPreferences = asyncHandler(async (req, res) => {
+  const {
+    theme,
+    language,
+    currency,
+    units,
+    privacy,
+    dataSharing
+  } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Initialize app preferences if they don't exist
+    if (!user.profile.appPreferences) {
+      user.profile.appPreferences = {};
+    }
+
+    // Update app preferences
+    const appPreferences = {
+      theme: theme !== undefined ? theme : user.profile.appPreferences.theme || 'light',
+      language: language !== undefined ? language : user.profile.appPreferences.language || 'en',
+      currency: currency !== undefined ? currency : user.profile.appPreferences.currency || 'usd',
+      units: units !== undefined ? units : user.profile.appPreferences.units || 'metric',
+      privacy: privacy !== undefined ? privacy : user.profile.appPreferences.privacy || 'public',
+      dataSharing: dataSharing !== undefined ? dataSharing : user.profile.appPreferences.dataSharing || false
+    };
+
+    user.profile.appPreferences = appPreferences;
+    await user.save();
+
+    res.status(200).json({
+      message: 'App preferences updated successfully',
+      appPreferences
+    });
+  } catch (error) {
+    console.error('App preferences update error:', error);
+    res.status(500).json({ message: 'Error updating app preferences' });
+  }
+});
+
+// Get User Profile and Settings
+export const getUserSettings = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profile: user.profile,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt,
+        marketplace_activity: user.marketplace_activity
+      }
+    });
+  } catch (error) {
+    console.error('Get user settings error:', error);
+    res.status(500).json({ message: 'Error fetching user settings' });
+  }
+});

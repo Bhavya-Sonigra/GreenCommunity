@@ -151,6 +151,39 @@ export const authAPI = {
     });
   },
 
+  // Settings API methods
+  getUserSettings: async () => {
+    return apiRequest('/api/auth/settings');
+  },
+
+  updateProfile: async (profileData) => {
+    return apiRequest('/api/auth/update-profile', {
+      method: 'POST',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  updateNotificationPreferences: async (notifications) => {
+    return apiRequest('/api/auth/update-notifications', {
+      method: 'POST',
+      body: JSON.stringify(notifications),
+    });
+  },
+
+  updateAppPreferences: async (preferences) => {
+    return apiRequest('/api/auth/update-preferences', {
+      method: 'POST',
+      body: JSON.stringify(preferences),
+    });
+  },
+
+  changePassword: async (passwordData) => {
+    return apiRequest('/api/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(passwordData),
+    });
+  },
+
   googleLogin: () => {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
   },

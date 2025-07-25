@@ -15,7 +15,11 @@ import {
   changePassword,
   verifyResetCode,
   updatePasswordWithCode,
-  updatePassword
+  updatePassword,
+  updateProfile,
+  updateNotificationPreferences,
+  updateAppPreferences,
+  getUserSettings
 } from '../controllers/auth.controller.js';
 import { 
   validateRegister, 
@@ -75,6 +79,12 @@ router.post('/update-password-with-code', validateUpdatePasswordWithCode, update
 router.get('/me', authenticate, getCurrentUser);
 router.post('/change-password', authenticate, changePassword);
 router.post('/update-password', authenticate, validateUpdatePassword, updatePassword);
+
+// Settings Routes
+router.get('/settings', authenticate, getUserSettings);
+router.post('/update-profile', authenticate, updateProfile);
+router.post('/update-notifications', authenticate, updateNotificationPreferences);
+router.post('/update-preferences', authenticate, updateAppPreferences);
 
 // Google OAuth - Start login flow
 router.get('/google', passport.authenticate('google', {
