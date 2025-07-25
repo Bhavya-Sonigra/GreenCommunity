@@ -69,7 +69,9 @@ export function UserProvider({ children }) {
         console.warn('User authentication failed. Token may have expired.');
         
         // If token is invalid or any auth error occurs, clear the token and user
-        if (error.message?.includes('Invalid credentials') || 
+        if (error.message?.includes('Invalid credentials') ||
+            error.message?.includes('Invalid token') ||
+            error.message?.includes('Token expired') ||
             error.message?.includes('Unauthorized') ||
             error.message?.includes('401') ||
             error.message?.includes('403')) {

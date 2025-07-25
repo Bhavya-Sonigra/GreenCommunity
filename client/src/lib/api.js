@@ -69,6 +69,8 @@ function isExpectedError(error) {
   const expectedMessages = [
     'Invalid email',
     'Invalid credentials',
+    'Invalid token',
+    'Token expired',
     'Access denied',
     'Service not found',
     'Too many attempts',

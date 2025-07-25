@@ -34,6 +34,29 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   const { name, email, password } = req.body;
 
+<<<<<<< HEAD
+  const exists = await User.findOne({ email });
+  if (exists) return res.status(400).json({ message: 'Email already in use' });
+
+  const user = await User.create({ 
+    name, 
+    email, 
+    password, // Will be hashed by pre-save middleware
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent')
+  });
+
+  // Generate email verification token
+  const verificationToken = user.emailVerificationToken();
+  await user.save();
+
+  // Send verification email
+  try {
+    await emailService.sendEmailVerification(user.email, verificationToken, process.env.CLIENT_URL);
+  } catch (emailError) {
+    console.error('Email sending error:', emailError);
+    // Don't fail registration if email fails
+=======
   // Check if user exists - handle both verified and unverified accounts
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -44,6 +67,7 @@ export const registerUser = asyncHandler(async (req, res) => {
       await User.deleteOne({ email });
       console.log(`Cleaned up unverified account for email: ${email}`);
     }
+>>>>>>> 2fb484a8f50087e27aba71fbbad709061765d50d
   }
 
   let user;
@@ -120,14 +144,14 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    await user.incLoginAttempts();
+    await user.loginAttempts();
     // Add delay to prevent rapid brute force
     await new Promise(resolve => setTimeout(resolve, 1000));
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
   // Reset login attempts on successful login
-  await user.resetLoginAttempts();
+  await user.loginAttempts();
   
   // Update last login info
   user.lastLogin = new Date();
@@ -252,7 +276,7 @@ export const requestPasswordReset = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'If the email exists, a verification code will be sent' });
   }
 
-  const resetCode = user.generatePasswordResetCode();
+  const resetCode = user.passwordResetCode();
   await user.save();
 
   try {
@@ -282,7 +306,7 @@ export const verifyResetCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.verifyPasswordResetCode(code);
+  const isValidCode = user.passwordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
@@ -307,13 +331,13 @@ export const updatePasswordWithCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.verifyPasswordResetCode(code);
+  const isValidCode = user.passwordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
 
   user.password = newPassword; // Will be hashed by pre-save middleware
-  user.clearPasswordResetCode();
+  user.passwordResetCode();
   await user.save();
 
   res.status(200).json({ message: 'Password updated successfully' });
