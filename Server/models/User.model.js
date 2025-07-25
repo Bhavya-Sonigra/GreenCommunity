@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { generateSecureToken, generateSecureCode, hashData, isCommonPassword } from '../utils/security.js';
+import { getConnection, DB_NAMES } from '../config/databases.js';
 
 const userSchema = new mongoose.Schema({
   name: { 
@@ -174,5 +175,6 @@ userSchema.methods.generateEmailVerificationToken = function() {
 // Indexes are created automatically by MongoDB for unique fields
 // Additional indexes can be added here if needed
 
+// Create User model (will be connected to auth database when app starts)
 const User = mongoose.model('User', userSchema);
 export default User;

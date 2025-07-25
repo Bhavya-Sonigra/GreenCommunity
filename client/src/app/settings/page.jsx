@@ -151,7 +151,7 @@ const Settings = () => {
                         <Camera className="h-4 w-4 mr-2" />
                         {t('change_photo')}
                       </Button>
-                      <p className="text-sm text-muted-foreground">{t('max_size_5mb')}</p>
+                      <p className="text-sm text-muted-foreground">{t('Max Size 5mb')}</p>
                     </div>
                   </div>
                   <Separator />
@@ -191,7 +191,7 @@ const Settings = () => {
                         value={profileData.location}
                         onChange={(e) => handleProfileUpdate('location', e.target.value)}
                         className="mt-1"
-                        placeholder={t('city_state_country')}
+                        placeholder={t('City State Country')}
                       />
                     </div>
                   </div>
@@ -202,7 +202,7 @@ const Settings = () => {
                       value={profileData.bio}
                       onChange={(e) => handleProfileUpdate('bio', e.target.value)}
                       className="mt-1"
-                      placeholder={t('tell_about_yourself')}
+                      placeholder={t('Tell About Yourself')}
                     />
                   </div>
                   <div>
@@ -215,8 +215,8 @@ const Settings = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="metric">{t('metric_units')}</SelectItem>
-                        <SelectItem value="imperial">{t('imperial_units')}</SelectItem>
+                        <SelectItem value="Metric">{t('Metric Units')}</SelectItem>
+                        <SelectItem value="Imperial">{t('Imperial Units')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -287,14 +287,14 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                {t('notification_preferences')}
+                {t('Notification Preferences')}
               </CardTitle>
-              <CardDescription>{t('choose_how_to_be_notified')}</CardDescription>
+              <CardDescription>{t('Choose How to be Notified')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Email Notifications */}
               <div className="space-y-4">
-                <h4 className="font-medium text-foreground">{t('email_notifications')}</h4>
+                <h4 className="font-medium text-foreground">{t('Email Notifications')}</h4>
                 <div className="space-y-4">
                   {[
                     { key: 'emailUpdates', label: t('Platform Updates'), description: t('Important Updates') },
@@ -340,7 +340,7 @@ const Settings = () => {
               </div>
               <Button className="btn-hero">
                 <Save className="h-4 w-4 mr-2" />
-                {t('save_notification_settings')}
+                {t('Save Notification Settings')}
               </Button>
             </CardContent>
           </Card>
@@ -411,11 +411,11 @@ const Settings = () => {
               </div>
               <Separator />
               <div className="space-y-4">
-                <h4 className="font-medium text-foreground">{t('privacy_settings')}</h4>
+                <h4 className="font-medium text-foreground">{t('Privacy Settings')}</h4>
                 <div className="space-y-4">
                   <div>
-                    <Label>{t('profile_visibility')}</Label>
-                    <Select value={preferences.privacy} onValueChange={(value) => handlePreferenceChange('privacy', value)}>
+                    <Label>{t('Profile Visibility')}</Label>
+                    <Select value={preferences.privacy} onValueChange={(value) => handlePreferenceChange('Privacy', value)}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
@@ -428,9 +428,9 @@ const Settings = () => {
                   </div>
                   <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg">
                     <div className="flex-1">
-                      <div className="font-medium text-foreground">{t('data_sharing_for_research')}</div>
+                      <div className="font-medium text-foreground">{t('Data Sharing for Research')}</div>
                       <div className="text-sm text-muted-foreground">
-                        {t('help_improve_environmental_research')}
+                        {t('Help Improve Environmental Research')}
                       </div>
                     </div>
                     <Switch
@@ -442,7 +442,7 @@ const Settings = () => {
               </div>
               <Button className="btn-hero">
                 <Save className="h-4 w-4 mr-2" />
-                {t('save_preferences')}
+                {t('Save Preferences')}
               </Button>
             </CardContent>
           </Card>
@@ -454,17 +454,17 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  {t('data_export')}
+                  {t('Data Export')}
                 </CardTitle>
-                <CardDescription>{t('download_all_data')}</CardDescription>
+                <CardDescription>{t('Download all Data')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  {t('export_includes_profile_info')}
+                  {t('Export Includes Profile Info')}
                 </p>
                 <Button onClick={exportData} variant="outline" className="w-full">
                   <Download className="h-4 w-4 mr-2" />
-                  {t('download_my_data')}
+                  {t('Download My Data')}
                 </Button>
               </CardContent>
             </Card>
@@ -472,17 +472,17 @@ const Settings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
                   <Trash2 className="h-5 w-5" />
-                  {t('delete_account')}
+                  {t('Delete Account')}
                 </CardTitle>
-                <CardDescription>{t('permanently_delete_account')}</CardDescription>
+                <CardDescription>{t('Permanently Delete Account')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  {t('this_action_cannot_be_undone')}
+                  {t('This Action cannot be undone')}
                 </p>
                 <Button onClick={deleteAccount} variant="destructive" className="w-full">
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {t('delete_account')}
+                  {t('Delete Account')}
                 </Button>
               </CardContent>
             </Card>
@@ -491,27 +491,27 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                {t('privacy_security')}
+                {t('Privacy Security')}
               </CardTitle>
-              <CardDescription>{t('manage_account_security')}</CardDescription>
+              <CardDescription>{t('Manage Account Security')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button variant="outline" className="justify-start" onClick={() => setShowChangePassword((v) => !v)}>
                   <Shield className="h-4 w-4 mr-2" />
-                  {t('change_password')}
+                  {t('Change Password')}
                 </Button>
                 <Button variant="outline" className="justify-start">
                   <Phone className="h-4 w-4 mr-2" />
-                  {t('two_factor_authentication')}
+                  {t('Two Factor Authentication')}
                 </Button>
                 <Button variant="outline" className="justify-start">
                   <Mail className="h-4 w-4 mr-2" />
-                  {t('login_notifications')}
+                  {t('Login Notifications')}
                 </Button>
                 <Button variant="outline" className="justify-start">
                   <Calendar className="h-4 w-4 mr-2" />
-                  {t('session_management')}
+                  {t('Session Management')}
                 </Button>
               </div>
               {showChangePassword && (
