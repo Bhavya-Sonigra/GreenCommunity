@@ -137,6 +137,20 @@ export const authAPI = {
     });
   },
 
+  verifyEmailCode: async (email, code) => {
+    return apiRequest('/api/auth/verify-email-code', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+  },
+
+  resendVerificationCode: async (email) => {
+    return apiRequest('/api/auth/resend-verification-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
   googleLogin: () => {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
   },

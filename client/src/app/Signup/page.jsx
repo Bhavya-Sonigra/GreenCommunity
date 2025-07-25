@@ -20,6 +20,8 @@ export default function SignUpPage() {
   const [verificationError, setVerificationError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
 
   const router = useRouter();
   const { updateUser } = useUser();
@@ -54,8 +56,14 @@ export default function SignUpPage() {
       setIsSubmitting(false);
       // Do not redirect yet
       
-    } catch (error) {
-      setError(error.message || 'Registration failed. Please try again.');
+    } catch (err) {
+      if (err.errors && Array.isArray(err.errors)) {
+        setError(err.errors.map(e => e.msg).join('. '));
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
       setIsSubmitting(false);
     }
   };
@@ -64,16 +72,31 @@ export default function SignUpPage() {
     e.preventDefault();
     setVerificationError('');
     setIsVerifying(true);
-    // TODO: Replace with real API call
-    if (verificationCode === '123456') { // Demo: Accept 123456 as valid
+    
+    try {
+      await authAPI.verifyEmailCode(email, verificationCode);
       setIsVerified(true);
       setTimeout(() => {
         router.push('/dashboard');
       }, 1000);
-    } else {
-      setVerificationError('Invalid code. Please try again.');
+    } catch (err) {
+      setVerificationError(err.message || 'Invalid code. Please try again.');
     }
     setIsVerifying(false);
+  };
+
+  const handleResendCode = async () => {
+    setIsResending(true);
+    setResendMessage('');
+    setVerificationError('');
+    
+    try {
+      await authAPI.resendVerificationCode(email);
+      setResendMessage('Verification code sent successfully!');
+    } catch (err) {
+      setVerificationError(err.message || 'Error sending verification code');
+    }
+    setIsResending(false);
   };
 
   const handleGoogleSignUp = () => {

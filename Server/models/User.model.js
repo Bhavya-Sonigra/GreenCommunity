@@ -45,6 +45,8 @@ const userSchema = new mongoose.Schema({
   },
   emailVerificationToken: String,
   emailVerificationExpires: Date,
+  emailVerificationCode: String,
+  emailVerificationCodeExpires: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
   passwordResetCode: String,
@@ -62,6 +64,146 @@ const userSchema = new mongoose.Schema({
   lastLogin: Date,
   ipAddress: String,
   userAgent: String,
+
+  // Marketplace Profile
+  marketplace_profile: {
+    is_seller: {
+      type: Boolean,
+      default: false
+    },
+    seller_status: {
+      type: String,
+      enum: ['pending', 'approved', 'suspended', 'rejected'],
+      default: 'pending'
+    },
+    business_name: {
+      type: String,
+      trim: true,
+      maxlength: 100
+    },
+    business_description: {
+      type: String,
+      trim: true,
+      maxlength: 500
+    },
+    business_address: {
+      street: { type: String, trim: true },
+      city: { type: String, trim: true },
+      state: { type: String, trim: true },
+      zipCode: { type: String, trim: true },
+      country: { type: String, trim: true }
+    },
+    tax_id: {
+      type: String,
+      select: false // Sensitive data - don't include by default
+    },
+    bank_details: {
+      account_holder: String,
+      account_number: {
+        type: String,
+        select: false // Sensitive data
+      },
+      routing_number: {
+        type: String,
+        select: false // Sensitive data
+      },
+      bank_name: String
+    },
+    seller_rating: {
+      average: { type: Number, default: 0, min: 0, max: 5 },
+      total_reviews: { type: Number, default: 0 }
+    },
+    verification: {
+      identity_verified: { type: Boolean, default: false },
+      business_verified: { type: Boolean, default: false },
+      tax_verified: { type: Boolean, default: false },
+      verified_at: Date,
+      verified_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    },
+    seller_metrics: {
+      total_sales: { type: Number, default: 0 },
+      total_orders: { type: Number, default: 0 },
+      response_time: { type: Number, default: 0 }, // hours
+      dispute_rate: { type: Number, default: 0 }, // percentage
+      return_rate: { type: Number, default: 0 } // percentage
+    }
+  },
+
+  // Customer Profile
+  customer_profile: {
+    shipping_addresses: [{
+      name: String,
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true },
+      country: { type: String, required: true },
+      phone: String,
+      is_default: { type: Boolean, default: false },
+      created_at: { type: Date, default: Date.now }
+    }],
+    preferred_categories: [String],
+    sustainability_preference: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium'
+    },
+    price_range_preference: {
+      min: Number,
+      max: Number
+    },
+    delivery_preferences: {
+      standard: { type: Boolean, default: true },
+      express: { type: Boolean, default: false },
+      eco_friendly: { type: Boolean, default: true }
+    }
+  },
+
+  // Activity Tracking
+  marketplace_activity: {
+    total_purchases: { type: Number, default: 0 },
+    total_spent: { type: Number, default: 0 },
+    favorite_sellers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    recent_searches: [{
+      query: String,
+      searched_at: { type: Date, default: Date.now }
+    }],
+    last_purchase_date: Date,
+    loyalty_points: { type: Number, default: 0 },
+    customer_tier: {
+      type: String,
+      enum: ['bronze', 'silver', 'gold', 'platinum'],
+      default: 'bronze'
+    }
+  },
+
+  // Profile Information
+  profile: {
+    first_name: String,
+    last_name: String,
+    phone: String,
+    date_of_birth: Date,
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other', 'prefer_not_to_say']
+    },
+    avatar_url: String,
+    bio: { type: String, maxlength: 300 },
+    location: {
+      city: String,
+      state: String,
+      country: String,
+      timezone: String
+    },
+    social_links: {
+      website: String,
+      instagram: String,
+      twitter: String,
+      linkedin: String
+    }
+  },
+
+  // Timestamps
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
@@ -162,7 +304,7 @@ userSchema.methods.clearPasswordResetCode = function() {
   this.passwordResetCodeExpires = undefined;
 };
 
-// Method to generate email verification token
+// Method to generate email verification token (legacy)
 userSchema.methods.generateEmailVerificationToken = function() {
   const token = generateSecureToken();
   
@@ -172,8 +314,96 @@ userSchema.methods.generateEmailVerificationToken = function() {
   return token;
 };
 
-// Indexes are created automatically by MongoDB for unique fields
-// Additional indexes can be added here if needed
+// Method to generate email verification code (6-digit)
+userSchema.methods.generateEmailVerificationCode = function() {
+  const code = generateSecureCode();
+  
+  this.emailVerificationCode = hashData(code);
+  this.emailVerificationCodeExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  
+  return code;
+};
+
+// Method to verify email verification code
+userSchema.methods.verifyEmailVerificationCode = function(code) {
+  if (!this.emailVerificationCode || !this.emailVerificationCodeExpires) {
+    return false;
+  }
+  
+  if (this.emailVerificationCodeExpires < Date.now()) {
+    return false; // Code expired
+  }
+  
+  const hashedCode = hashData(code);
+  return hashedCode === this.emailVerificationCode;
+};
+
+// Method to clear email verification code
+userSchema.methods.clearEmailVerificationCode = function() {
+  this.emailVerificationCode = undefined;
+  this.emailVerificationCodeExpires = undefined;
+};
+
+// Indexes for performance optimization
+userSchema.index({ email: 1 }); // Unique index already exists
+userSchema.index({ 'marketplace_profile.is_seller': 1 });
+userSchema.index({ 'marketplace_profile.seller_status': 1 });
+userSchema.index({ 'marketplace_profile.seller_rating.average': -1 });
+userSchema.index({ 'marketplace_activity.customer_tier': 1 });
+userSchema.index({ 'marketplace_activity.total_purchases': -1 });
+userSchema.index({ 'profile.location.city': 1, 'profile.location.country': 1 });
+userSchema.index({ role: 1, isEmailVerified: 1 });
+userSchema.index({ createdAt: -1 });
+
+// Instance methods for marketplace
+userSchema.methods.becomeSeller = function(businessData) {
+  this.marketplace_profile.is_seller = true;
+  this.marketplace_profile.business_name = businessData.business_name;
+  this.marketplace_profile.business_description = businessData.business_description;
+  this.marketplace_profile.business_address = businessData.business_address;
+  this.marketplace_profile.seller_status = 'pending';
+  return this.save();
+};
+
+userSchema.methods.updateSellerRating = function(newRating) {
+  const currentTotal = this.marketplace_profile.seller_rating.total_reviews;
+  const currentAverage = this.marketplace_profile.seller_rating.average;
+  
+  const newTotal = currentTotal + 1;
+  const newAverage = ((currentAverage * currentTotal) + newRating) / newTotal;
+  
+  this.marketplace_profile.seller_rating.average = Math.round(newAverage * 10) / 10;
+  this.marketplace_profile.seller_rating.total_reviews = newTotal;
+  
+  return this.save();
+};
+
+userSchema.methods.addToWishlist = function(productId) {
+  if (!this.marketplace_activity.wishlist) {
+    this.marketplace_activity.wishlist = [];
+  }
+  if (!this.marketplace_activity.wishlist.includes(productId)) {
+    this.marketplace_activity.wishlist.push(productId);
+  }
+  return this.save();
+};
+
+// Static methods
+userSchema.statics.findSellers = function(criteria = {}) {
+  const query = { 'marketplace_profile.is_seller': true };
+  
+  if (criteria.status) {
+    query['marketplace_profile.seller_status'] = criteria.status;
+  }
+  
+  if (criteria.minRating) {
+    query['marketplace_profile.seller_rating.average'] = { $gte: criteria.minRating };
+  }
+  
+  return this.find(query)
+    .select('name email marketplace_profile.business_name marketplace_profile.seller_rating profile.location')
+    .sort({ 'marketplace_profile.seller_rating.average': -1 });
+};
 
 // Create User model (will be connected to auth database when app starts)
 const User = mongoose.model('User', userSchema);

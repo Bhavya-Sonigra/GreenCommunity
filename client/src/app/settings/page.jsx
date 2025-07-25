@@ -122,10 +122,10 @@ const Settings = () => {
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile">{t('profile')}</TabsTrigger>
-          <TabsTrigger value="notifications">{t('notifications')}</TabsTrigger>
+          <TabsTrigger value="profile">{t('Profile')}</TabsTrigger>
+          <TabsTrigger value="notifications">{t('Notifications')}</TabsTrigger>
           <TabsTrigger value="preferences">{t('preferences')}</TabsTrigger>
-          <TabsTrigger value="data">{t('data_privacy')}</TabsTrigger>
+          <TabsTrigger value="data">{t('Data privacy')}</TabsTrigger>
         </TabsList>
         <TabsContent value="profile" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
