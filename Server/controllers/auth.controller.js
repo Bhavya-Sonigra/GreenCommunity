@@ -34,29 +34,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   const { name, email, password } = req.body;
 
-<<<<<<< HEAD
-  const exists = await User.findOne({ email });
-  if (exists) return res.status(400).json({ message: 'Email already in use' });
-
-  const user = await User.create({ 
-    name, 
-    email, 
-    password, // Will be hashed by pre-save middleware
-    ipAddress: req.ip,
-    userAgent: req.get('User-Agent')
-  });
-
-  // Generate email verification token
-  const verificationToken = user.emailVerificationToken();
-  await user.save();
-
-  // Send verification email
-  try {
-    await emailService.sendEmailVerification(user.email, verificationToken, process.env.CLIENT_URL);
-  } catch (emailError) {
-    console.error('Email sending error:', emailError);
-    // Don't fail registration if email fails
-=======
   // Check if user exists - handle both verified and unverified accounts
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -67,7 +44,6 @@ export const registerUser = asyncHandler(async (req, res) => {
       await User.deleteOne({ email });
       console.log(`Cleaned up unverified account for email: ${email}`);
     }
->>>>>>> 2fb484a8f50087e27aba71fbbad709061765d50d
   }
 
   let user;
