@@ -17,11 +17,6 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
-    // Add additional token validation
-    if (token.length < 100) {
-      return res.status(401).json({ message: 'Invalid token format.' });
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     if (!decoded || !decoded.id) {

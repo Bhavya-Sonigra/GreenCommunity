@@ -46,7 +46,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   });
 
   // Generate email verification token
-  const verificationToken = user.generateEmailVerificationToken();
+  const verificationToken = user.emailVerificationToken();
   await user.save();
 
   // Send verification email
@@ -98,14 +98,14 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    await user.incLoginAttempts();
+    await user.loginAttempts();
     // Add delay to prevent rapid brute force
     await new Promise(resolve => setTimeout(resolve, 1000));
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
   // Reset login attempts on successful login
-  await user.resetLoginAttempts();
+  await user.loginAttempts();
   
   // Update last login info
   user.lastLogin = new Date();
@@ -174,7 +174,7 @@ export const requestPasswordReset = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'If the email exists, a verification code will be sent' });
   }
 
-  const resetCode = user.generatePasswordResetCode();
+  const resetCode = user.passwordResetCode();
   await user.save();
 
   try {
@@ -204,7 +204,7 @@ export const verifyResetCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.verifyPasswordResetCode(code);
+  const isValidCode = user.passwordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
@@ -229,13 +229,13 @@ export const updatePasswordWithCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.verifyPasswordResetCode(code);
+  const isValidCode = user.passwordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
 
   user.password = newPassword; // Will be hashed by pre-save middleware
-  user.clearPasswordResetCode();
+  user.passwordResetCode();
   await user.save();
 
   res.status(200).json({ message: 'Password updated successfully' });
