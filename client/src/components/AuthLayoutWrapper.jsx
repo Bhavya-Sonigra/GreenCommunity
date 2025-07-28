@@ -14,7 +14,9 @@ export default function AuthLayoutWrapper({ children }) {
     "/Signup",
     "/forgot-password",
     "/update-password",
-    "/landing"
+    "/landing",
+    "/CarbonCalculator",
+    "/verify-email"
   ];
   
   // Auth pages and landing page don't need layout

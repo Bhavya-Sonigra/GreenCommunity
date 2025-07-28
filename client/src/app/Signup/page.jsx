@@ -130,9 +130,10 @@ export default function SignUpPage() {
       }
       
       setIsSuccess(true);
-      setShowVerification(true); // Show verification UI
       setIsSubmitting(false);
-      // Do not redirect yet
+      
+      // Redirect to email verification page
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       
     } catch (err) {
       // Handle different types of errors with user-friendly messages
