@@ -158,19 +158,19 @@ function MobileMarketplaceView({
   });
 
   return (
-    <div className="p-2 space-y-4 bg-gradient-to-b from-background to-accent/5 min-h-screen">
+    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         {/* Heading and description instead of logo */}
         <div className="flex flex-col flex-1">
-          <h1 className="text-lg font-bold text-foreground leading-tight">Eco Marketplace</h1>
+          <h1 className="text-base sm:text-lg font-bold text-foreground leading-tight">Eco Marketplace</h1>
           <span className="text-xs text-muted-foreground">Discover sustainable products that make a difference</span>
         </div>
         {/* Cart */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="relative bg-gradient-primary">
-              <ShoppingCart className="h-5 w-5 mr-2" />
+            <Button className="relative bg-gradient-primary text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
               Cart
             </Button>
           </SheetTrigger>
@@ -211,7 +211,7 @@ function MobileMarketplaceView({
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm"
+            className="pl-10 text-xs sm:text-sm"
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -228,13 +228,13 @@ function MobileMarketplaceView({
         </Select>
       </div>
       {/* Products List */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 sm:gap-3">
         {filteredProducts.map(product => (
-          <Card key={product.id} className="relative flex flex-row gap-2 items-center p-2">
+          <Card key={product.id} className="relative flex flex-row gap-2 items-center p-2 sm:p-3">
             {product.featured && (
-              <Badge className="absolute top-2 left-2 z-10 bg-success text-white text-xs">Featured</Badge>
+              <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 z-10 bg-success text-white text-[10px] sm:text-xs">Featured</Badge>
             )}
-            <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" />
+            <img src={product.image} alt={product.name} className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded" />
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-xs text-foreground leading-tight">{product.name}</h3>
@@ -255,14 +255,14 @@ function MobileMarketplaceView({
                 )}
               </div>
             </div>
-            <Button size="icon" onClick={() => addToCart(product)} disabled={!product.inStock} className="ml-2 bg-gradient-primary hover:bg-green-700 hover:shadow-lg">
-              <Plus className="h-4 w-4" />
+            <Button size="icon" onClick={() => addToCart(product)} disabled={!product.inStock} className="ml-2 bg-gradient-primary hover:bg-green-700 hover:shadow-lg p-1 sm:p-2">
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </Card>
         ))}
         {filteredProducts.length === 0 && (
-          <div className="text-center py-8">
-            <div className="text-muted-foreground text-base">No products found</div>
+          <div className="text-center py-6 sm:py-8">
+            <div className="text-muted-foreground text-sm sm:text-base">No products found</div>
             <p className="text-muted-foreground text-xs">Try adjusting your search or filters</p>
           </div>
         )}
@@ -292,17 +292,17 @@ function TabletMarketplaceView({
   });
 
   return (
-    <div className="p-4 space-y-5 bg-gradient-to-b from-background to-accent/5 min-h-screen">
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Eco Marketplace</h1>
-          <p className="text-muted-foreground text-sm">Discover sustainable products</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Eco Marketplace</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">Discover sustainable products</p>
         </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="relative bg-gradient-primary">
-              <ShoppingCart className="h-5 w-5 mr-2" />
+            <Button className="relative bg-gradient-primary text-xs sm:text-sm px-3 sm:px-4 py-2">
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
               Cart
             </Button>
           </SheetTrigger>
@@ -336,18 +336,18 @@ function TabletMarketplaceView({
         </Sheet>
       </div>
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search eco-friendly products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 text-sm"
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className="w-full sm:w-48 text-sm">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
@@ -361,8 +361,8 @@ function TabletMarketplaceView({
       </div>
       {/* Products Grid */}
       <div className={viewMode === 'grid'
-        ? 'grid grid-cols-1 sm:grid-cols-2 gap-4'
-        : 'space-y-4'}>
+        ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'
+        : 'space-y-3 sm:space-y-4'}>
         {filteredProducts.map(product => (
           <Card key={product.id} className={`card-gradient hover-lift ${viewMode === 'list' ? 'flex-row' : ''}`}>
             
@@ -384,31 +384,31 @@ function TabletMarketplaceView({
               <div className="space-y-2">
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-foreground leading-tight text-base">{product.name}</h3>
+                    <h3 className="font-semibold text-foreground leading-tight text-sm sm:text-base">{product.name}</h3>
                     <div className="text-right shrink-0">
-                      <div className="font-bold text-foreground">₹{(product.price * USD_TO_INR).toFixed(2)}</div>
+                      <div className="font-bold text-foreground text-sm sm:text-base">₹{(product.price * USD_TO_INR).toFixed(2)}</div>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">{product.description}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{product.rating}</span>
+                    <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs sm:text-sm font-medium">{product.rating}</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">({product.reviews})</span>
-                  <Badge variant="outline" className="ml-auto">
+                  <span className="text-xs sm:text-sm text-muted-foreground">({product.reviews})</span>
+                  <Badge variant="outline" className="ml-auto text-xs">
                     {product.vendorType}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {product.tags.slice(0, 2).map(tag => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
+                    <Badge key={tag} variant="secondary" className="text-[10px] sm:text-xs">
                       {tag}
                     </Badge>
                   ))}
                   {product.tags.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-[10px] sm:text-xs">
                       +{product.tags.length - 2}
                     </Badge>
                   )}

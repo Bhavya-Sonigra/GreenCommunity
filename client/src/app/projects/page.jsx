@@ -213,28 +213,27 @@ const Projects = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
+    <div className="p-3 sm:p-6 space-y-3 sm:space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gradient">Carbon Offset Projects</h1>
-        <p className="text-muted-foreground">Support verified projects that remove CO₂ from the atmosphere</p>
+      <div className="space-y-1 sm:space-y-2">
+        <h1 className="text-xl sm:text-3xl font-bold text-gradient">Carbon Offset Projects</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Support verified projects that remove CO₂ from the atmosphere</p>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search projects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 text-sm"
           />
         </div>
-        
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-40 text-sm">
               <SelectValue placeholder="Region" />
             </SelectTrigger>
             <SelectContent>
@@ -245,9 +244,8 @@ const Projects = () => {
               ))}
             </SelectContent>
           </Select>
-
           <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-40 text-sm">
               <SelectValue placeholder="Project Type" />
             </SelectTrigger>
             <SelectContent>
@@ -258,12 +256,12 @@ const Projects = () => {
               ))}
             </SelectContent>
           </Select>
-
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 mt-1 sm:mt-0">
             <Button
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('list')}
+              className="text-xs sm:text-sm px-2 sm:px-3"
             >
               <List className="h-4 w-4" />
             </Button>
@@ -271,6 +269,7 @@ const Projects = () => {
               variant={viewMode === 'map' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setViewMode('map')}
+              className="text-xs sm:text-sm px-2 sm:px-3"
             >
               <Map className="h-4 w-4" />
             </Button>
@@ -279,7 +278,7 @@ const Projects = () => {
       </div>
 
       {/* Projects List */}
-      <div className="space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         {filteredProjects.map((project, index) => {
           const Icon = getProjectIcon(project.type);
           const fundingPercentage = (project.currentFunding / project.totalFunding) * 100;
@@ -293,16 +292,16 @@ const Projects = () => {
               key={project.id}
             >
               <Card className="card-gradient">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 p-3 sm:p-6">
                 {/* Project Image */}
                 <div className="relative">
                   <img 
                     src={project.image} 
                     alt={project.name}
-                    className="w-full h-48 lg:h-full object-cover rounded-lg"
+                    className="w-full h-32 sm:h-48 lg:h-full object-cover rounded-lg"
                   />
                   {project.verified && (
-                    <Badge className="absolute top-3 right-3 bg-green-600 text-white shadow-md">
+                    <Badge className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-600 text-white shadow-md text-xs">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Verified
                     </Badge>
@@ -310,13 +309,13 @@ const Projects = () => {
                 </div>
 
                 {/* Project Details */}
-                <div className="lg:col-span-2 space-y-4">
+                <div className="sm:col-span-1 lg:col-span-2 space-y-2 sm:space-y-4">
                   <div>
                     <div className="flex items-start justify-between gap-4 mb-2">
-                      <h3 className="text-xl font-bold text-foreground">{project.name}</h3>
-                      <div className="flex gap-2">
+                      <h3 className="text-base sm:text-xl font-bold text-foreground">{project.name}</h3>
+                      <div className="flex gap-1 sm:gap-2 flex-wrap">
                         {project.certifications.map(cert => (
-                          <Badge key={cert} variant="outline" className="text-xs">
+                          <Badge key={cert} variant="outline" className="text-[10px] sm:text-xs">
                             <Award className="h-3 w-3 mr-1" />
                             {cert}
                           </Badge>
@@ -324,67 +323,67 @@ const Projects = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-4 mb-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin className="h-4 w-4" />
-                        <span className="text-sm">{project.location}</span>
+                        <span className="text-xs sm:text-sm">{project.location}</span>
                       </div>
-                      <Badge className={`${getTypeColor(project.type)}`}>
+                      <Badge className={`${getTypeColor(project.type)} text-xs`}>
                         <Icon className="h-3 w-3 mr-1" />
                         {projectTypes.find(t => t.value === project.type)?.label}
                       </Badge>
                     </div>
                     
-                    <p className="text-muted-foreground">{project.description}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{project.description}</p>
                   </div>
 
                   {/* Metrics */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-accent/20 rounded-lg">
-                      <div className="text-lg font-bold text-foreground">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4">
+                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
+                      <div className="text-base sm:text-lg font-bold text-foreground">
                         {(project.co2Removed / 1000).toFixed(0)}k
                       </div>
-                      <div className="text-xs text-muted-foreground">tons CO₂</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">tons CO₂</div>
                     </div>
-                    <div className="text-center p-3 bg-accent/20 rounded-lg">
-                      <div className="text-lg font-bold text-foreground">
+                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
+                      <div className="text-base sm:text-lg font-bold text-foreground">
                         {project.contributors.toLocaleString()}
                       </div>
-                      <div className="text-xs text-muted-foreground">contributors</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">contributors</div>
                     </div>
-                    <div className="text-center p-3 bg-accent/20 rounded-lg">
-                      <div className="text-lg font-bold text-foreground">
+                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
+                      <div className="text-base sm:text-lg font-bold text-foreground">
                         ₹{project.co2PerRupee}
                       </div>
-                      <div className="text-xs text-muted-foreground">CO₂/rupee</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">CO₂/rupee</div>
                     </div>
-                    <div className="text-center p-3 bg-accent/20 rounded-lg">
-                      <div className="text-lg font-bold text-foreground">
+                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
+                      <div className="text-base sm:text-lg font-bold text-foreground">
                         {project.timeRemaining}
                       </div>
-                      <div className="text-xs text-muted-foreground">remaining</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">remaining</div>
                     </div>
                   </div>
 
                   {/* Funding Progress */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Funding Progress</span>
-                      <span className="font-medium">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Funding Progress</span>
+                      <span className="font-medium text-xs sm:text-sm">
                         ₹{(project.currentFunding/10000000).toFixed(1)}Cr / ₹{(project.totalFunding/10000000).toFixed(1)}Cr
                       </span>
                     </div>
-                    <Progress value={fundingPercentage} className="h-3 progress-eco" />
-                    <div className="text-sm text-muted-foreground">
+                    <Progress value={fundingPercentage} className="h-2 sm:h-3 progress-eco" />
+                    <div className="text-xs sm:text-sm text-muted-foreground">
                       {fundingPercentage.toFixed(0)}% funded
                     </div>
                   </div>
 
                   {/* Action Button */}
-                  <div className="flex gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="btn-hero">
+                        <Button className="btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
                           <Heart className="h-4 w-4 mr-2" />
                           Contribute
                         </Button>
@@ -398,7 +397,7 @@ const Projects = () => {
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div>
-                            <Label>Contribution Amount: ₹{(contributionAmount[0] * 83).toLocaleString()}</Label>
+                            <Label className="text-xs sm:text-sm">Contribution Amount: ₹{(contributionAmount[0] * 83).toLocaleString()}</Label>
                             <Slider
                               value={contributionAmount}
                               onValueChange={setContributionAmount}
@@ -408,25 +407,24 @@ const Projects = () => {
                               className="mt-2"
                             />
                           </div>
-                          <div className="p-4 bg-primary/10 rounded-lg">
+                          <div className="p-3 sm:p-4 bg-primary/10 rounded-lg">
                             <div className="text-center">
-                              <div className="text-sm text-muted-foreground">Your Impact</div>
-                              <div className="text-2xl font-bold text-primary">
+                              <div className="text-xs sm:text-sm text-muted-foreground">Your Impact</div>
+                              <div className="text-xl sm:text-2xl font-bold text-primary">
                                 {calculateImpact(contributionAmount[0])} tons CO₂
                               </div>
-                              <div className="text-sm text-muted-foreground">will be offset</div>
+                              <div className="text-xs sm:text-sm text-muted-foreground">will be offset</div>
                             </div>
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button className="w-full btn-hero" onClick={() => router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`)}>
+                          <Button className="w-full btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3" onClick={() => router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`)}>
                             Contribute ₹{(contributionAmount[0] * 83).toLocaleString()}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                    
-                    <Button variant="outline">
+                    <Button variant="outline" className="text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
                       Learn More
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
@@ -440,9 +438,9 @@ const Projects = () => {
       </div>
 
       {filteredProjects.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-muted-foreground text-lg">No projects found</div>
-          <p className="text-muted-foreground">Try adjusting your search or filters</p>
+        <div className="text-center py-8 sm:py-12">
+          <div className="text-muted-foreground text-sm sm:text-lg">No projects found</div>
+          <p className="text-muted-foreground text-xs sm:text-base">Try adjusting your search or filters</p>
         </div>
       )}
     </div>

@@ -69,7 +69,7 @@ export default function LoginPage() {
     
     return isValid;
   };
-
+  
   const handleContinue = async (e) => {
     e.preventDefault();
     
@@ -276,13 +276,13 @@ export default function LoginPage() {
             Password
           </label>
           <div className="relative">
-            <input
-              id="password"
+          <input
+            id="password"
               type={showPassword ? "text" : "password"}
-              required
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
               className={`leaf-cursor w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground placeholder:text-muted-foreground transition-colors ${
                 passwordError ? 'border-red-500 focus:ring-red-500' : 'border-border'
               }`}

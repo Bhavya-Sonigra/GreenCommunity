@@ -159,7 +159,7 @@ export default function SignUpPage() {
         } else if (err.message.includes('Validation failed') || err.message.includes('validation')) {
           errorMessage = 'Please check your information and try again.';
           type = 'validation';
-        } else {
+      } else {
           errorMessage = err.message;
           type = 'server';
         }
@@ -391,13 +391,13 @@ export default function SignUpPage() {
             Password
           </label>
           <div className="relative">
-            <input
-              id="password"
+          <input
+            id="password"
               type={showPassword ? "text" : "password"}
-              required
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
               className={`leaf-cursor w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground placeholder:text-muted-foreground ${
                 passwordErrors.length > 0 ? 'border-red-500' : 'border-border'
               }`}
@@ -436,13 +436,13 @@ export default function SignUpPage() {
             Confirm Password
           </label>
           <div className="relative">
-            <input
-              id="confirmPassword"
+          <input
+            id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
-              required
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
               className={`leaf-cursor w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-card text-foreground placeholder:text-muted-foreground ${
                 confirmPasswordError ? 'border-red-500' : 'border-border'
               }`}

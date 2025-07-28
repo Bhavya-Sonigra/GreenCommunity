@@ -89,8 +89,8 @@ export default function Layout({ children }) {
               <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
                 <img
                   src="/logo.png"
-                  alt="App Logo"
-                  className="mx-auto h-7 w-auto"
+                  alt="GreenCommunity Logo"
+                  className="h-12 w-auto max-w-[160px] object-contain"
                 />
               </div>
             </>
@@ -98,8 +98,8 @@ export default function Layout({ children }) {
             <div className="flex items-center gap-3 group cursor-pointer">
               <img
                 src="/logo.png"
-                alt="App Logo"
-                className="mx-auto h-10 w-60 mb-1.2"
+                alt="GreenCommunity Logo"
+                className="h-14 w-auto max-w-[220px] object-contain"
               />
             </div>
           )}
@@ -202,7 +202,7 @@ export default function Layout({ children }) {
                 )}
                 <div className={`fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 flex flex-col`}>
                   <div className="flex items-center justify-between p-4 border-b">
-                    <img src="/logo.png" alt="Logo" className="h-8" />
+                    <img src="/logo.png" alt="GreenCommunity Logo" className="h-12 w-auto max-w-[160px] object-contain" />
                     <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
                       <X className="h-6 w-6" />
                     </Button>

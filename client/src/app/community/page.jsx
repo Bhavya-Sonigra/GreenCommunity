@@ -186,33 +186,32 @@ const Community = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
+    <div className="p-3 sm:p-6 space-y-3 sm:space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gradient">Community Hub</h1>
-          <p className="text-muted-foreground">Connect, compete, and create positive environmental impact together</p>
+          <h1 className="text-xl sm:text-3xl font-bold text-gradient">Community Hub</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Connect, compete, and create positive environmental impact together</p>
         </div>
-        
-        <Button className="btn-hero">
-          <Plus className="h-5 w-5 mr-2" />
+        <Button className="btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
+          <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
           Start a Challenge
         </Button>
       </div>
 
       {/* Search */}
-      <div className="relative max-w-md">
+      <div className="relative w-full max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search challenges, groups, events..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10 text-sm"
         />
       </div>
 
       {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="challenges">Challenges</TabsTrigger>
           <TabsTrigger value="groups">Groups</TabsTrigger>
@@ -221,48 +220,45 @@ const Community = () => {
         </TabsList>
 
         {/* Challenges Tab */}
-        <TabsContent value="challenges" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <TabsContent value="challenges" className="space-y-3 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {challenges.map(challenge => (
               <Card key={challenge.id} className={`card-gradient hover-lift`}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="text-3xl">{challenge.image}</div>
-                    <Badge className={getDifficultyColor(challenge.difficulty)}>
+                    <div className="text-2xl sm:text-3xl">{challenge.image}</div>
+                    <Badge className={getDifficultyColor(challenge.difficulty) + ' text-xs'}>
                       {challenge.difficulty}
                     </Badge>
                   </div>
-                  <CardTitle className="text-lg">{challenge.title}</CardTitle>
-                  <CardDescription>{challenge.description}</CardDescription>
+                  <CardTitle className="text-base sm:text-lg">{challenge.title}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{challenge.description}</CardDescription>
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                       <span>{challenge.participants} joined</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                       <span>{challenge.timeRemaining}</span>
                     </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-muted-foreground">Progress</span>
                       <span className="font-medium">{challenge.progress}%</span>
                     </div>
-                    <Progress value={challenge.progress} className="h-2 progress-eco" />
+                    <Progress value={challenge.progress} className="h-1.5 sm:h-2 progress-eco" />
                   </div>
-
                   <div className="flex items-center justify-between pt-2 border-t border-border/50">
                     <div className="flex items-center gap-1 text-success">
-                      <Trophy className="h-4 w-4" />
-                      <span className="text-sm font-medium">{challenge.reward}</span>
+                      <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="text-xs sm:text-sm font-medium">{challenge.reward}</span>
                     </div>
-                    
-                    <Button size="sm" className="bg-gradient-primary hover:shadow-medium">
+                    <Button size="sm" className="bg-gradient-primary hover:shadow-medium text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
                       Join Challenge
                     </Button>
                   </div>
@@ -273,52 +269,50 @@ const Community = () => {
         </TabsContent>
 
         {/* Groups Tab */}
-        <TabsContent value="groups" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent value="groups" className="space-y-3 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             {groups.map(group => (
               <Card key={group.id} className="card-gradient hover-lift">
                 <CardHeader>
                   <div className="flex items-start gap-4">
-                    <div className="text-4xl">{group.avatar}</div>
+                    <div className="text-2xl sm:text-4xl">{group.avatar}</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-lg">{group.name}</CardTitle>
+                        <CardTitle className="text-base sm:text-lg">{group.name}</CardTitle>
                         {group.active && (
-                          <Badge variant="secondary" className="bg-success/10 text-success">
+                          <Badge variant="secondary" className="bg-success/10 text-success text-xs">
                             Active
                           </Badge>
                         )}
                       </div>
-                      <CardDescription>{group.description}</CardDescription>
+                      <CardDescription className="text-xs sm:text-sm">{group.description}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                     <div>
-                      <div className="text-lg font-bold text-foreground">
+                      <div className="text-base sm:text-lg font-bold text-foreground">
                         {group.members.toLocaleString()}
                       </div>
-                      <div className="text-xs text-muted-foreground">Members</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">Members</div>
                     </div>
                     <div>
-                      <div className="text-lg font-bold text-foreground">{group.posts}</div>
-                      <div className="text-xs text-muted-foreground">Posts</div>
+                      <div className="text-base sm:text-lg font-bold text-foreground">{group.posts}</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">Posts</div>
                     </div>
                     <div>
-                      <div className="text-lg font-bold text-foreground">4.8★</div>
-                      <div className="text-xs text-muted-foreground">Rating</div>
+                      <div className="text-base sm:text-lg font-bold text-foreground">4.8★</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">Rating</div>
                     </div>
                   </div>
-
                   <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span className="text-sm">{group.location}</span>
+                    <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground">
+                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="text-xs sm:text-sm">{group.location}</span>
                     </div>
-                    
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" className="text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
                       Join Group
                     </Button>
                   </div>
@@ -329,44 +323,41 @@ const Community = () => {
         </TabsContent>
 
         {/* Events Tab */}
-        <TabsContent value="events" className="space-y-6">
-          <div className="space-y-4">
+        <TabsContent value="events" className="space-y-3 sm:space-y-6">
+          <div className="space-y-2 sm:space-y-4">
             {events.map(event => (
               <Card key={event.id} className="card-gradient hover-lift">
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div className="lg:col-span-3">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <h3 className="text-xl font-bold text-foreground">{event.title}</h3>
-                          <Badge variant="outline">{event.organizer}</Badge>
+                <CardContent className="p-3 sm:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-6">
+                    <div className="sm:col-span-3">
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="flex items-start justify-between gap-2 sm:gap-4">
+                          <h3 className="text-base sm:text-xl font-bold text-foreground">{event.title}</h3>
+                          <Badge variant="outline" className="text-xs sm:text-sm">{event.organizer}</Badge>
                         </div>
-                        
-                        <p className="text-muted-foreground">{event.description}</p>
-                        
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
+                        <p className="text-xs sm:text-sm text-muted-foreground">{event.description}</p>
+                        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>{event.date} at {event.time}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>{event.location}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span>{event.attendees}/{event.maxAttendees} attending</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="flex flex-col justify-center gap-3">
+                    <div className="flex flex-col justify-center gap-2 sm:gap-3">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-foreground">{event.attendees}</div>
-                        <div className="text-sm text-muted-foreground">people attending</div>
+                        <div className="text-lg sm:text-2xl font-bold text-foreground">{event.attendees}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">people attending</div>
                       </div>
-                      <Button className="w-full btn-hero">
+                      <Button className="w-full btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
                         Join Event
                       </Button>
                     </div>
@@ -378,21 +369,21 @@ const Community = () => {
         </TabsContent>
 
         {/* Leaderboard Tab */}
-        <TabsContent value="leaderboard" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="leaderboard" className="space-y-3 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             {/* Monthly Leaderboard */}
             <Card className="card-gradient">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  Monthly Leaderboard
+                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  <span className="text-base sm:text-lg">Monthly Leaderboard</span>
                 </CardTitle>
-                <CardDescription>Top contributors this month</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Top contributors this month</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {leaderboard.map(user => (
-                  <div key={user.rank} className="flex items-center gap-4 p-3 rounded-lg border border-border/50">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                  <div key={user.rank} className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg border border-border/50">
+                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm ${
                       user.rank === 1 ? 'bg-yellow-100 text-yellow-700' :
                       user.rank === 2 ? 'bg-gray-100 text-gray-700' :
                       user.rank === 3 ? 'bg-orange-100 text-orange-700' :
@@ -401,18 +392,18 @@ const Community = () => {
                       #{user.rank}
                     </div>
                     
-                    <div className="text-2xl">{user.avatar}</div>
+                    <div className="text-lg sm:text-2xl">{user.avatar}</div>
                     
                     <div className="flex-1">
-                      <div className="font-medium text-foreground">{user.name}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-medium text-xs sm:text-base text-foreground">{user.name}</div>
+                      <div className="text-[10px] sm:text-sm text-muted-foreground">
                         {user.streak} day streak • {user.badges} badges
                       </div>
                     </div>
                     
                     <div className="text-right">
-                      <div className="font-bold text-foreground">{user.points.toLocaleString()}</div>
-                      <div className="text-xs text-muted-foreground">eco-points</div>
+                      <div className="font-bold text-xs sm:text-base text-foreground">{user.points.toLocaleString()}</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">eco-points</div>
                     </div>
                   </div>
                 ))}
@@ -423,41 +414,40 @@ const Community = () => {
             <Card className="card-eco">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-primary" />
-                  Your Impact
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  <span className="text-base sm:text-lg">Your Impact</span>
                 </CardTitle>
-                <CardDescription>Your community contributions</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Your community contributions</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-background/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground">1,850</div>
-                    <div className="text-sm text-muted-foreground">Eco-Points</div>
+              <CardContent className="space-y-3 sm:space-y-6">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                  <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">1,850</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Eco-Points</div>
                   </div>
-                  <div className="text-center p-3 bg-background/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground">23</div>
-                    <div className="text-sm text-muted-foreground">Rank</div>
+                  <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">23</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Rank</div>
                   </div>
-                  <div className="text-center p-3 bg-background/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground">7</div>
-                    <div className="text-sm text-muted-foreground">Badges</div>
+                  <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">7</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Badges</div>
                   </div>
-                  <div className="text-center p-3 bg-background/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground">31</div>
-                    <div className="text-sm text-muted-foreground">Day Streak</div>
+                  <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">31</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Day Streak</div>
                   </div>
                 </div>
-
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Recent Achievements</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-2 bg-success/10 rounded-lg">
-                      <CheckCircle className="h-4 w-4 text-success" />
-                      <span className="text-sm">Completed Zero Waste Week</span>
+                <div className="space-y-2 sm:space-y-3">
+                  <h4 className="font-medium text-xs sm:text-base text-foreground">Recent Achievements</h4>
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex items-center gap-2 sm:gap-3 p-2 bg-success/10 rounded-lg">
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
+                      <span className="text-xs sm:text-sm">Completed Zero Waste Week</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-primary/10 rounded-lg">
-                      <Award className="h-4 w-4 text-primary" />
-                      <span className="text-sm">Earned Eco Warrior Badge</span>
+                    <div className="flex items-center gap-2 sm:gap-3 p-2 bg-primary/10 rounded-lg">
+                      <Award className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                      <span className="text-xs sm:text-sm">Earned Eco Warrior Badge</span>
                     </div>
                   </div>
                 </div>

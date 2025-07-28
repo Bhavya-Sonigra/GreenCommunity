@@ -94,26 +94,26 @@ const FootprintLog = () => {
     .reduce((total, entry) => total + entry.co2, 0);
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gradient">Carbon Footprint Log</h1>
-        <p className="text-muted-foreground">Track your daily activities and calculate their environmental impact</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Carbon Footprint Log</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Track your daily activities and calculate their environmental impact</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="card-eco">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">This Week</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {weeklyTotal.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">kg CO₂</span>
+            <div className="text-xl sm:text-2xl font-bold text-foreground">
+              {weeklyTotal.toFixed(1)} <span className="text-xs sm:text-sm font-normal text-muted-foreground">kg CO₂</span>
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <TrendingDown className="h-4 w-4 text-success" />
-              <span className="text-sm text-success">8% lower than last week</span>
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
+              <span className="text-xs sm:text-sm text-success">8% lower than last week</span>
             </div>
           </CardContent>
         </Card>
@@ -123,8 +123,8 @@ const FootprintLog = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Entries</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{entries.length}</div>
-            <div className="text-sm text-muted-foreground mt-2">Activities logged</div>
+            <div className="text-xl sm:text-2xl font-bold text-foreground">{entries.length}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground mt-2">Activities logged</div>
           </CardContent>
         </Card>
 
@@ -133,15 +133,15 @@ const FootprintLog = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Average Daily</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {(weeklyTotal / 7).toFixed(1)} <span className="text-sm font-normal text-muted-foreground">kg CO₂</span>
+            <div className="text-xl sm:text-2xl font-bold text-foreground">
+              {(weeklyTotal / 7).toFixed(1)} <span className="text-xs sm:text-sm font-normal text-muted-foreground">kg CO₂</span>
             </div>
-            <div className="text-sm text-muted-foreground mt-2">Per day this week</div>
+            <div className="text-xs sm:text-sm text-muted-foreground mt-2">Per day this week</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column - Activity Form */}
         <div className="lg:col-span-1">
           <Card className="card-gradient">
@@ -152,10 +152,10 @@ const FootprintLog = () => {
               </CardTitle>
               <CardDescription>Add an activity to track its carbon footprint</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               {/* Activity Type */}
               <div>
-                <Label>Activity Type</Label>
+                <Label className="text-sm sm:text-base">Activity Type</Label>
                 <Select value={activityType} onValueChange={setActivityType}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select activity type" />
@@ -178,9 +178,9 @@ const FootprintLog = () => {
 
               {/* Quantity and Unit */}
               {activityType && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <Label>Quantity</Label>
+                    <Label className="text-sm sm:text-base">Quantity</Label>
                     <Input
                       type="number"
                       placeholder="0"
@@ -190,7 +190,7 @@ const FootprintLog = () => {
                     />
                   </div>
                   <div>
-                    <Label>Unit</Label>
+                    <Label className="text-sm sm:text-base">Unit</Label>
                     <Input
                       value={getSelectedActivityDetails()?.unit || ''}
                       disabled
@@ -202,13 +202,13 @@ const FootprintLog = () => {
 
               {/* Date */}
               <div>
-                <Label>Date</Label>
+                <Label className="text-sm sm:text-base">Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full mt-1 justify-start text-left font-normal",
+                        "w-full mt-1 justify-start text-left font-normal text-sm sm:text-base",
                         !selectedDate && "text-muted-foreground"
                       )}
                     >
@@ -232,7 +232,7 @@ const FootprintLog = () => {
               <Button 
                 onClick={calculateEmissions}
                 disabled={!activityType || !quantity}
-                className="w-full btn-hero"
+                className="w-full btn-hero text-sm sm:text-base"
               >
                 <Calculator className="h-4 w-4 mr-2" />
                 Calculate Emissions
@@ -240,14 +240,14 @@ const FootprintLog = () => {
 
               {/* Results */}
               {showResult && (
-                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                <div className="p-3 sm:p-4 bg-primary/10 border border-primary/20 rounded-lg">
                   <div className="text-center">
-                    <div className="text-sm text-muted-foreground">Estimated Emissions</div>
-                    <div className="text-2xl font-bold text-primary">
+                    <div className="text-xs sm:text-sm text-muted-foreground">Estimated Emissions</div>
+                    <div className="text-xl sm:text-2xl font-bold text-primary">
                       {calculatedEmissions.toFixed(2)} kg CO₂
                     </div>
                   </div>
-                  <Button className="w-full mt-3 btn-hero" onClick={handleAddToLog}>
+                  <Button className="w-full mt-3 btn-hero text-sm sm:text-base" onClick={handleAddToLog}>
                     Add to Log
                   </Button>
                 </div>
@@ -272,30 +272,30 @@ const FootprintLog = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {entries.map((entry) => {
                   const Icon = entry.icon;
                   return (
                     <div 
                       key={entry.id}
-                      className="flex items-center gap-4 p-4 border border-border/50 rounded-lg hover:bg-accent/20 transition-colors hover-lift"
+                      className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-border/50 rounded-lg hover:bg-accent/20 transition-colors hover-lift"
                     >
-                      <div className="p-3 bg-accent/20 rounded-lg">
-                        <Icon className="h-5 w-5 text-primary" />
+                      <div className="p-2 sm:p-3 bg-accent/20 rounded-lg">
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
                       
                       <div className="flex-1">
-                        <div className="font-medium text-foreground">{entry.activity}</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="font-medium text-foreground text-sm sm:text-base">{entry.activity}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                           {entry.amount} {entry.unit} • {entry.date}
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <Badge variant="secondary" className="mb-1">
+                        <Badge variant="secondary" className="mb-1 text-xs">
                           {entry.type}
                         </Badge>
-                        <div className="text-lg font-bold text-foreground">
+                        <div className="text-base sm:text-lg font-bold text-foreground">
                           +{entry.co2} kg
                         </div>
                         <div className="text-xs text-muted-foreground">CO₂</div>
