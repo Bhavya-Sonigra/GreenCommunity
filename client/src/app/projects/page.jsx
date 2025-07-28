@@ -37,6 +37,7 @@ const Projects = () => {
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [contributionAmount, setContributionAmount] = useState([50]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const regions = [
@@ -181,12 +182,24 @@ const Projects = () => {
   ];
   
   const filteredProjects = projects.filter(project => {
+    if (!project || !project.name) return false;
+    
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchQuery.toLowerCase());
+                         (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesRegion = selectedRegion === 'all' || project.region === selectedRegion;
     const matchesType = selectedType === 'all' || project.type === selectedType;
     return matchesSearch && matchesRegion && matchesType;
   });
+
+  const handleProjectClick = (projectId) => {
+    router.push(`/projects/${projectId}`);
+  };
+
+  const handleContribute = (e, project) => {
+    e.stopPropagation(); // Prevent navigation when clicking contribute
+    // Contribute logic here
+    console.log(`Contribute to ${project.name}`);
+  };
 
   const getProjectIcon = (type) => {
     switch (type) {
@@ -291,7 +304,10 @@ const Projects = () => {
               whileHover={{ scale: 1.02 }}
               key={project.id}
             >
-              <Card className="card-gradient">
+              <Card 
+                className="card-gradient cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => handleProjectClick(project.id)}
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 p-3 sm:p-6">
                 {/* Project Image */}
                 <div className="relative">
@@ -299,6 +315,9 @@ const Projects = () => {
                     src={project.image} 
                     alt={project.name}
                     className="w-full h-32 sm:h-48 lg:h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      e.target.src = '/tree1.jpg'; // Fallback image
+                    }}
                   />
                   {project.verified && (
                     <Badge className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-600 text-white shadow-md text-xs">
@@ -383,15 +402,22 @@ const Projects = () => {
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
+                        <Button 
+                          className="btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent navigation
+                            setContributionAmount([50]); // Reset to default
+                            setIsLoading(false);
+                          }}
+                        >
                           <Heart className="h-4 w-4 mr-2" />
                           Contribute
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
+                      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Support {project.name}</DialogTitle>
-                          <DialogDescription>
+                          <DialogTitle className="text-lg sm:text-xl">Support {project.name}</DialogTitle>
+                          <DialogDescription className="text-sm">
                             Choose your contribution amount to help offset carbon emissions
                           </DialogDescription>
                         </DialogHeader>
@@ -417,9 +443,21 @@ const Projects = () => {
                             </div>
                           </div>
                         </div>
-                        <DialogFooter>
-                          <Button className="w-full btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3" onClick={() => router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`)}>
-                            Contribute ₹{(contributionAmount[0] * 83).toLocaleString()}
+                        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                          <Button 
+                            className="w-full btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3" 
+                            onClick={() => {
+                              setIsLoading(true);
+                              try {
+                                router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`);
+                              } catch (error) {
+                                console.error('Navigation error:', error);
+                                setIsLoading(false);
+                              }
+                            }}
+                            disabled={isLoading}
+                          >
+                            {isLoading ? 'Processing...' : `Contribute ₹${(contributionAmount[0] * 83).toLocaleString()}`}
                           </Button>
                         </DialogFooter>
                       </DialogContent>

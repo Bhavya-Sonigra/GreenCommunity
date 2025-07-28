@@ -149,6 +149,7 @@ function MobileMarketplaceView({
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const router = useRouter();
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -156,6 +157,15 @@ function MobileMarketplaceView({
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleProductClick = (productId) => {
+    router.push(`/marketplace/${productId}`);
+  };
+
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation(); // Prevent navigation when clicking add to cart
+    addToCart(product);
+  };
 
   return (
     <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-background to-accent/5 min-h-screen">
@@ -230,7 +240,11 @@ function MobileMarketplaceView({
       {/* Products List */}
       <div className="flex flex-col gap-2 sm:gap-3">
         {filteredProducts.map(product => (
-          <Card key={product.id} className="relative flex flex-row gap-2 items-center p-2 sm:p-3">
+          <Card 
+            key={product.id} 
+            className="relative flex flex-row gap-2 items-center p-2 sm:p-3 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleProductClick(product.id)}
+          >
             {product.featured && (
               <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 z-10 bg-success text-white text-[10px] sm:text-xs">Featured</Badge>
             )}
@@ -255,7 +269,12 @@ function MobileMarketplaceView({
                 )}
               </div>
             </div>
-            <Button size="icon" onClick={() => addToCart(product)} disabled={!product.inStock} className="ml-2 bg-gradient-primary hover:bg-green-700 hover:shadow-lg p-1 sm:p-2">
+            <Button 
+              size="icon" 
+              onClick={(e) => handleAddToCart(e, product)} 
+              disabled={!product.inStock} 
+              className="ml-2 bg-gradient-primary hover:bg-green-700 hover:shadow-lg p-1 sm:p-2"
+            >
               <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </Card>
@@ -282,6 +301,7 @@ function TabletMarketplaceView({
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const router = useRouter();
 
   // Use props for cart totals, only declare filteredProducts here
   const filteredProducts = products.filter(product => {
@@ -290,6 +310,15 @@ function TabletMarketplaceView({
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleProductClick = (productId) => {
+    router.push(`/marketplace/${productId}`);
+  };
+
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation(); // Prevent navigation when clicking add to cart
+    addToCart(product);
+  };
 
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 bg-gradient-to-b from-background to-accent/5 min-h-screen">
@@ -364,7 +393,11 @@ function TabletMarketplaceView({
         ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'
         : 'space-y-3 sm:space-y-4'}>
         {filteredProducts.map(product => (
-          <Card key={product.id} className={`card-gradient hover-lift ${viewMode === 'list' ? 'flex-row' : ''}`}>
+          <Card 
+            key={product.id} 
+            className={`card-gradient hover-lift cursor-pointer ${viewMode === 'list' ? 'flex-row' : ''}`}
+            onClick={() => handleProductClick(product.id)}
+          >
             
             <div className={viewMode === 'list' ? 'w-32 shrink-0' : ''}>
               <div className="relative aspect-square overflow-hidden rounded-t-lg">
@@ -418,48 +451,15 @@ function TabletMarketplaceView({
                     <Leaf className="h-4 w-4" />
                     <span className="text-sm font-medium">-{product.co2Saved}kg CO₂</span>
                   </div>
-                  {(() => {
-                    const cartItem = cartItems.find(item => item.id === product.id);
-                    if (cartItem) {
-                      return (
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center bg-gray-200 rounded-full px-2 py-1 gap-2">
-                            <button
-                              className="p-1 rounded-full hover:bg-green-200 transition"
-                              onClick={() => updateCartItemQuantity(product.id, cartItem.quantity - 1)}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </button>
-                            <span className="font-semibold w-6 text-center">{cartItem.quantity}</span>
-                            <button
-                              className="p-1 rounded-full hover:bg-green-200 transition"
-                              onClick={() => updateCartItemQuantity(product.id, cartItem.quantity + 1)}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </button>
-                          </div>
-                          <Button
-                            size="sm"
-                            onClick={() => removeFromCart(product.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white ml-2 whitespace-nowrap"
-                          >
-                            Remove from Cart
-                          </Button>
-                        </div>
-                      );
-                    }
-                    return (
-                  <Button
-                    size="sm"
-                    onClick={() => addToCart(product)}
+                  <Button 
+                    size="sm" 
+                    onClick={(e) => handleAddToCart(e, product)} 
                     disabled={!product.inStock}
-                        className="bg-black-primary hover:bg-green-700 hover:shadow-lg whitespace-nowrap"
+                    className="btn-hero text-xs"
                   >
-                      
-                    Add to Cart
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add
                   </Button>
-                    );
-                  })()}
                 </div>
               </div>
             </CardContent>
@@ -489,13 +489,21 @@ function DesktopMarketplaceView({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const router = useRouter();
 
-  // Use props for cart totals, only declare filteredProducts here
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleProductClick = (productId) => {
+    router.push(`/marketplace/${productId}`);
+  };
+
+  const handleAddToCart = (e, product) => {
+    e.stopPropagation(); // Prevent navigation when clicking add to cart
+    addToCart(product);
+  };
 
   return (
     <div className="p-6 space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
@@ -574,7 +582,11 @@ function DesktopMarketplaceView({
         ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
         : 'space-y-4'}>
         {filteredProducts.map(product => (
-          <Card key={product.id} className={`card-gradient hover-lift ${viewMode === 'list' ? 'flex-row' : ''}`}>
+          <Card 
+            key={product.id} 
+            className={`card-gradient hover-lift cursor-pointer ${viewMode === 'list' ? 'flex-row' : ''}`}
+            onClick={() => handleProductClick(product.id)}
+          >
             {product.featured && (
               <Badge className="absolute top-3 left-3 z-10 bg-success text-white">Featured</Badge>
             )}
@@ -630,39 +642,15 @@ function DesktopMarketplaceView({
                     <Leaf className="h-4 w-4" />
                     <span className="text-sm font-medium">-{product.co2Saved}kg CO₂</span>
                   </div>
-                  {(() => {
-                    const cartItem = cartItems.find(item => item.id === product.id);
-                    if (cartItem) {
-                      return (
-                        <div className="flex items-center bg-gray-200 rounded-full px-2 py-1 gap-2">
-                          <button
-                            className="p-1 rounded-full hover:bg-green-200 transition"
-                            onClick={() => updateCartItemQuantity(product.id, cartItem.quantity - 1)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </button>
-                          <span className="font-semibold w-6 text-center">{cartItem.quantity}</span>
-                          <button
-                            className="p-1 rounded-full hover:bg-green-200 transition"
-                            onClick={() => updateCartItemQuantity(product.id, cartItem.quantity + 1)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </button>
-                        </div>
-                      );
-                    }
-                    return (
-                  <Button
-                    size="sm"
-                    onClick={() => addToCart(product)}
+                  <Button 
+                    size="sm" 
+                    onClick={(e) => handleAddToCart(e, product)} 
                     disabled={!product.inStock}
-                        className="bg-gradient-primary hover:bg-green-700 hover:shadow-lg whitespace-nowrap"
+                    className="btn-hero"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Add to Cart
                   </Button>
-                    );
-                  })()}
                 </div>
               </div>
             </CardContent>

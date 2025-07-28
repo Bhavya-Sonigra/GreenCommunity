@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardSkeleton from '@/components/DashboardSkeleton';
-import MainPageSkeleton from '@/components/MainPageSkeleton';
 import { useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
