@@ -449,15 +449,15 @@ function TabletMarketplaceView({
                       );
                     }
                     return (
-                      <Button
-                        size="sm"
-                        onClick={() => addToCart(product)}
-                        disabled={!product.inStock}
+                  <Button
+                    size="sm"
+                    onClick={() => addToCart(product)}
+                    disabled={!product.inStock}
                         className="bg-black-primary hover:bg-green-700 hover:shadow-lg whitespace-nowrap"
-                      >
+                  >
                       
-                        Add to Cart
-                      </Button>
+                    Add to Cart
+                  </Button>
                     );
                   })()}
                 </div>
@@ -652,15 +652,15 @@ function DesktopMarketplaceView({
                       );
                     }
                     return (
-                      <Button
-                        size="sm"
-                        onClick={() => addToCart(product)}
-                        disabled={!product.inStock}
+                  <Button
+                    size="sm"
+                    onClick={() => addToCart(product)}
+                    disabled={!product.inStock}
                         className="bg-gradient-primary hover:bg-green-700 hover:shadow-lg whitespace-nowrap"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add to Cart
-                      </Button>
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add to Cart
+                  </Button>
                     );
                   })()}
                 </div>

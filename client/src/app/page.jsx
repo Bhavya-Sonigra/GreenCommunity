@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardSkeleton from '@/components/DashboardSkeleton';
+import MainPageSkeleton from '@/components/MainPageSkeleton';
 import { useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
@@ -87,14 +88,14 @@ const LandingPage = () => {
       role: "Community Member",
       badge: "Top Project Contributor",
       quote: "I never realized how much impact small changes could make until I used their calculator. Now our entire family is on a sustainability journey.",
-      avatar: "/man.png"
+      avatar: "/user.png"
     },
     {
       name: "Dr. Priya Patel",
       role: "Environmental Consultant",
       badge: "Urban Garden Innovator",
       quote: "The offset marketplace connected us with amazing reforestation projects. We're not just reducing emissions, we're actively restoring nature.",
-      avatar: "/woman.png"
+      avatar: "/user-icon.png"
     }
   ];
 
@@ -259,7 +260,8 @@ const LandingPage = () => {
             
             <motion.div className="flex flex-col sm:flex-row gap-4 mb-10 justify-center" variants={itemVariants}>
               <button
-                className="flex items-center justify-center px-7 py-2 rounded-full shadow-md font-bold text-white text-base"
+                onClick={() => router.push('/Signup')}
+                className="flex items-center justify-center px-7 py-2 rounded-full shadow-md font-bold text-white text-base hover:shadow-lg transition-all"
                 style={{
                   background: "linear-gradient(90deg, #07a27bff 0%)",
                   fontFamily: "'Inter', sans-serif",
@@ -271,7 +273,8 @@ const LandingPage = () => {
                 <span className="ml-2" style={{ fontSize: "20px", color: '#fff' }}>→</span>
               </button>
               <button
-                className="bg-white border border-green-400 text-green-600 rounded-full shadow-md transition px-8 py-3"
+                onClick={() => router.push('/Signup')}
+                className="bg-white border border-green-400 text-green-600 rounded-full shadow-md transition px-8 py-3 hover:shadow-lg hover:bg-green-50"
                 style={{
                   fontFamily: "'Inter', 'Poppins', 'sans-serif'",
                   fontWeight: 600,
@@ -552,12 +555,20 @@ const LandingPage = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <button className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">
-              Start My Assessment
-            </button>
-            <button className="bg-transparent border border-white text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-white hover:text-green-700 transition">
-              Explore the Marketplace →
-            </button>
+            <Link href="/Signup">
+              <button 
+                className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition cursor-pointer"
+              >
+                Start My Assessment
+              </button>
+            </Link>
+            <Link href="/marketplace">
+              <button 
+                className="bg-transparent border border-white text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-white hover:text-green-700 transition cursor-pointer"
+              >
+                Explore the Marketplace →
+              </button>
+            </Link>
           </motion.div>
           <motion.div
             className="text-sm text-white/70"
@@ -577,9 +588,7 @@ const LandingPage = () => {
           {/* Logo, description, and newsletter signup */}
           <div className="flex-1 min-w-[250px] mb-8">
             <div className="flex items-center gap-2 mb-2">
-              {/* Logo icon */}
-              <svg width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
-              <span className="font-medium text-lg text-gray-700" style={{ fontFamily: "'Inter', sans-serif" }}>GreenCommunity</span>
+              <img src="/logo.png" alt="GreenCommunity Logo" className="h-12" />
             </div>
             <p className="text-base text-gray-600 mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
               GreenCommunity is building the world's largest platform for measurable environmental impact, connecting individuals and businesses in the journey toward carbon neutrality and nature restoration.
@@ -593,7 +602,7 @@ const LandingPage = () => {
             </div>
           </div>
           {/* Footer links below signup */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 px-8">
             <div>
               <div className="font-bold mb-2 text-gray-900" style={{ fontFamily: "'Inter', sans-serif" }}>Platform</div>
               <ul className="text-sm text-gray-600 space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -634,12 +643,21 @@ const LandingPage = () => {
           <hr className="my-8 border-gray-200" />
           <div className="flex flex-col md:flex-row items-center justify-between text-sm text-gray-400" style={{ fontFamily: "'Inter', sans-serif" }}>
 
-            <div className="flex gap-4 mt-4 md:mt-0">
-              {/* Social icons (replace # with your links) */}
-              <a href="#" aria-label="Twitter"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.4.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.5 0c-2.5 0-4.5 2.01-4.5 4.5 0 .35.04.7.11 1.03C7.69 5.36 4.07 3.6 1.64.96c-.38.65-.6 1.4-.6 2.2 0 1.52.77 2.86 1.95 3.65A4.48 4.48 0 0 1 .96 6v.06c0 2.13 1.52 3.91 3.54 4.31-.37.1-.76.16-1.16.16-.28 0-.55-.03-.81-.08.55 1.72 2.16 2.97 4.07 3A9.05 9.05 0 0 1 0 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.85-6.88 12.85-12.85 0-.2 0-.39-.01-.58A9.22 9.22 0 0 0 24 4.59a9.1 9.1 0 0 1-2.6.71z" /></svg></a>
-              <a href="#" aria-label="Facebook"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 2h-3a4 4 0 0 0-4 4v3H7v4h4v8h4v-8h3l1-4h-4V6a1 1 0 0 1 1-1h3z" /></svg></a>
-              <a href="#" aria-label="LinkedIn"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
-              <a href="#" aria-label="Instagram"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="16" height="16" rx="4" /><circle cx="10" cy="10" r="4" /><path d="M18 6.5v.01" /></svg></a>
+            <div className="w-full flex flex-col items-center mb-0">
+              <div className="flex items-center gap-6">
+                <a href="#" aria-label="Twitter">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 hover:text-green-600 transition"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.4.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.5 0c-2.5 0-4.5 2.01-4.5 4.5 0 .35.04.7.11 1.03C7.69 5.36 4.07 3.6 1.64.96c-.38.65-.6 1.4-.6 2.2 0 1.52.77 2.86 1.95 3.65A4.48 4.48 0 0 1 .96 6v.06c0 2.13 1.52 3.91 3.54 4.31-.37.1-.76.16-1.16.16-.28 0-.55-.03-.81-.08.55 1.72 2.16 2.97 4.07 3A9.05 9.05 0 0 1 0 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.85-6.88 12.85-12.85 0-.2 0-.39-.01-.58A9.22 9.22 0 0 0 24 4.59a9.1 9.1 0 0 1-2.6.71z"/></svg>
+                </a>
+                <a href="#" aria-label="Facebook">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 hover:text-green-600 transition"><path d="M18 2h-3a4 4 0 0 0-4 4v3H7v4h4v8h4v-8h3l1-4h-4V6a1 1 0 0 1 1-1h3z"/></svg>
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 hover:text-green-600 transition"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                </a>
+                <a href="#" aria-label="Instagram">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 hover:text-green-600 transition"><rect x="2" y="2" width="16" height="16" rx="4"/><circle cx="10" cy="10" r="4"/><path d="M18 6.5v.01"/></svg>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -680,7 +698,7 @@ const MainPage = () => {
 
   // Show loading skeleton while checking authentication or redirecting
   if (isLoading || (user && hasRedirected)) {
-    return <DashboardSkeleton />;
+    return <LandingPage />;
   }
 
   // Show landing page for non-authenticated users
