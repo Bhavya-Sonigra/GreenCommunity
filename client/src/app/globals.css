@@ -342,4 +342,30 @@
       padding: 0 8px;
     }
   }
+
+  /* Seed meter styling for CircularProgressbar */
+  .seed-meter {
+    /* Ensure the container is properly sized */
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Style the CircularProgressbar text */
+  .seed-meter .CircularProgressbar-text {
+    dominant-baseline: central !important;
+    text-anchor: middle !important;
+    font-weight: bold;
+    fill: var(--foreground);
+  }
+
+  /* Style the CircularProgressbar path */
+  .seed-meter .CircularProgressbar-path {
+    stroke: var(--primary);
+    stroke-linecap: round;
+  }
+
+  /* Style the CircularProgressbar trail */
+  .seed-meter .CircularProgressbar-trail {
+    stroke: var(--border);
+  }
 }

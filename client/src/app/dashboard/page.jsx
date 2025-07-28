@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
 import { 
@@ -20,21 +19,16 @@ import {
   Award,
   Leaf,
   BarChart3,
-  ArrowRight,
-  Sparkles
-} from 'lucide-react';
+  ArrowRight} from 'lucide-react';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import ProfessionalProgress from '@/components/ProfessionalProgress';
+import AnimatedCircularProgress from '@/components/AnimatedCircularProgress';
 import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { Calendar as DateRangeCalendar } from 'react-date-range';
-import { addDays } from 'date-fns';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
-import { authAPI } from '@/lib/api';
 import DashboardSkeleton from '@/components/DashboardSkeleton';
 import { Calendar as CustomCalendar } from '@/components/ui/calendar';
 
@@ -274,15 +268,15 @@ const Dashboard = () => {
                         </div>
                         <div className="flex flex-col items-center justify-center min-w-[60px]">
                           <div className="w-12 h-12">
-                            <CircularProgressbar
-                              value={item.percentage}
-                              text={`${item.percentage}%`}
-                              styles={buildStyles({
-                                textSize: '24px',
-                                pathColor: '#22c55e',
-                                textColor: '#1a2e22',
-                                trailColor: '#e5e7eb',
-                              })}
+                            <AnimatedCircularProgress
+                              targetValue={item.percentage}
+                              rotation={270}
+                              textSize="22px"
+                              pathColor="#22c55e"
+                              textColor="#1a2e22"
+                              trailColor="#e5e7eb"
+                              textPosition={{ x: 50, y: 50 }}
+                              className="seed-meter" // Add a class for potential CSS customization
                             />
                           </div>
                         </div>

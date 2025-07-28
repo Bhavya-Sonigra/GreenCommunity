@@ -34,49 +34,71 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   const { name, email, password } = req.body;
 
-  const exists = await User.findOne({ email });
-  if (exists) return res.status(400).json({ message: 'Email already in use' });
-
-  const user = await User.create({ 
-    name, 
-    email, 
-    password, // Will be hashed by pre-save middleware
-    ipAddress: req.ip,
-    userAgent: req.get('User-Agent')
-  });
-
-  // Generate email verification token
-  const verificationToken = user.generateEmailVerificationToken();
-  await user.save();
-
-  // Send verification email
-  try {
-    await emailService.sendEmailVerification(user.email, verificationToken, process.env.CLIENT_URL);
-  } catch (emailError) {
-    console.error('Email sending error:', emailError);
-    // Don't fail registration if email fails
+  // Check if user exists - handle both verified and unverified accounts
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    if (existingUser.isEmailVerified) {
+      return res.status(400).json({ message: 'Email already in use' });
+    } else {
+      // User exists but email not verified - allow re-registration with cleanup
+      await User.deleteOne({ email });
+      console.log(`Cleaned up unverified account for email: ${email}`);
+    }
   }
 
-  const token = generateToken(user._id);
+  let user;
+  try {
+    user = await User.create({ 
+      name, 
+      email, 
+      password, // Will be hashed by pre-save middleware
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
 
-  // Set HTTP-only cookie for security
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  });
+    // Generate email verification code
+    const verificationCode = user.generateEmailVerificationCode();
+    await user.save();
 
-  res.status(201).json({
-    message: 'User registered successfully. Please check your email for verification.',
-    token: token,
-    user: { 
-      id: user._id, 
-      name: user.name, 
-      email: user.email,
-      isEmailVerified: user.isEmailVerified
+    // Send verification email with code
+    try {
+      await emailService.sendEmailVerificationCode(user.email, verificationCode);
+    } catch (emailError) {
+      console.error('Email sending error:', emailError);
+      // Don't fail registration if email fails - user can request resend
     }
-  });
+
+    const token = generateToken(user._id);
+
+    // Set HTTP-only cookie for security
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
+    res.status(201).json({
+      message: 'User registered successfully. Please check your email for verification.',
+      token: token,
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    // If user creation fails, clean up any partial data
+    if (user && user._id) {
+      try {
+        await User.deleteOne({ _id: user._id });
+      } catch (cleanupError) {
+        console.error('Error cleaning up user after failed registration:', cleanupError);
+      }
+    }
+    throw error; // Re-throw the original error
+  }
 });
 
 // User Login
@@ -98,14 +120,14 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    await user.incLoginAttempts();
+    await user.loginAttempts();
     // Add delay to prevent rapid brute force
     await new Promise(resolve => setTimeout(resolve, 1000));
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
   // Reset login attempts on successful login
-  await user.resetLoginAttempts();
+  await user.loginAttempts();
   
   // Update last login info
   user.lastLogin = new Date();
@@ -136,7 +158,7 @@ export const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
-// Email Verification
+// Email Verification (legacy token-based)
 export const verifyEmail = asyncHandler(async (req, res) => {
   const { token } = req.body;
 
@@ -159,6 +181,62 @@ export const verifyEmail = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Email verified successfully' });
 });
 
+// Email Verification with Code
+export const verifyEmailCode = asyncHandler(async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(400).json({ message: 'Email and verification code are required' });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid verification code' });
+  }
+
+  const isValidCode = user.verifyEmailVerificationCode(code);
+  if (!isValidCode) {
+    return res.status(400).json({ message: 'Invalid or expired verification code' });
+  }
+
+  user.isEmailVerified = true;
+  user.clearEmailVerificationCode();
+  await user.save();
+
+  res.status(200).json({ message: 'Email verified successfully' });
+});
+
+// Resend Email Verification Code
+export const resendVerificationCode = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: 'User not found' });
+  }
+
+  if (user.isEmailVerified) {
+    return res.status(400).json({ message: 'Email is already verified' });
+  }
+
+  // Generate new verification code
+  const verificationCode = user.generateEmailVerificationCode();
+  await user.save();
+
+  // Send verification email with new code
+  try {
+    await emailService.sendEmailVerificationCode(user.email, verificationCode);
+    res.status(200).json({ message: 'Verification code sent successfully' });
+  } catch (emailError) {
+    console.error('Email sending error:', emailError);
+    return res.status(500).json({ message: 'Error sending verification code' });
+  }
+});
+
 // Password Reset Request
 export const requestPasswordReset = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
@@ -174,7 +252,7 @@ export const requestPasswordReset = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'If the email exists, a verification code will be sent' });
   }
 
-  const resetCode = user.generatePasswordResetCode();
+  const resetCode = user.passwordResetCode();
   await user.save();
 
   try {
@@ -204,7 +282,7 @@ export const verifyResetCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.verifyPasswordResetCode(code);
+  const isValidCode = user.passwordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
@@ -229,13 +307,13 @@ export const updatePasswordWithCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.verifyPasswordResetCode(code);
+  const isValidCode = user.passwordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
 
   user.password = newPassword; // Will be hashed by pre-save middleware
-  user.clearPasswordResetCode();
+  user.passwordResetCode();
   await user.save();
 
   res.status(200).json({ message: 'Password updated successfully' });
@@ -324,4 +402,206 @@ export const updatePassword = asyncHandler(async (req, res) => {
   await user.save();
 
   res.status(200).json({ message: 'Password updated successfully' });
+});
+
+// Update Profile Information
+export const updateProfile = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const {
+    name,
+    email,
+    phone,
+    location,
+    bio,
+    preferredUnits,
+    firstName,
+    lastName,
+    dateOfBirth,
+    gender
+  } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if email is being changed and if it already exists
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: req.user.id } });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      user.email = email;
+      user.isEmailVerified = false; // Reset email verification if email changed
+    }
+
+    // Update basic profile fields
+    if (name) user.name = name;
+    if (phone) user.profile = { ...user.profile, phone };
+    if (bio) user.profile = { ...user.profile, bio };
+    if (firstName) user.profile = { ...user.profile, first_name: firstName };
+    if (lastName) user.profile = { ...user.profile, last_name: lastName };
+    if (dateOfBirth) user.profile = { ...user.profile, date_of_birth: new Date(dateOfBirth) };
+    if (gender) user.profile = { ...user.profile, gender };
+    
+    // Update location
+    if (location) {
+      const locationParts = location.split(',').map(part => part.trim());
+      user.profile = {
+        ...user.profile,
+        location: {
+          city: locationParts[0] || '',
+          state: locationParts[1] || '',
+          country: locationParts[2] || ''
+        }
+      };
+    }
+
+    // Update preferred units (could be stored in user preferences or profile)
+    if (preferredUnits) {
+      user.profile = { ...user.profile, preferredUnits };
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profile: user.profile,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+});
+
+// Update Notification Preferences
+export const updateNotificationPreferences = asyncHandler(async (req, res) => {
+  const {
+    emailUpdates,
+    challengeReminders,
+    weeklyReports,
+    communityActivity,
+    marketingEmails,
+    mobilePush,
+    socialActivity
+  } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Initialize notification preferences if they don't exist
+    if (!user.profile.notificationPreferences) {
+      user.profile.notificationPreferences = {};
+    }
+
+    // Update notification preferences
+    const notificationPreferences = {
+      emailUpdates: emailUpdates !== undefined ? emailUpdates : user.profile.notificationPreferences.emailUpdates,
+      challengeReminders: challengeReminders !== undefined ? challengeReminders : user.profile.notificationPreferences.challengeReminders,
+      weeklyReports: weeklyReports !== undefined ? weeklyReports : user.profile.notificationPreferences.weeklyReports,
+      communityActivity: communityActivity !== undefined ? communityActivity : user.profile.notificationPreferences.communityActivity,
+      marketingEmails: marketingEmails !== undefined ? marketingEmails : user.profile.notificationPreferences.marketingEmails,
+      mobilePush: mobilePush !== undefined ? mobilePush : user.profile.notificationPreferences.mobilePush,
+      socialActivity: socialActivity !== undefined ? socialActivity : user.profile.notificationPreferences.socialActivity
+    };
+
+    user.profile.notificationPreferences = notificationPreferences;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Notification preferences updated successfully',
+      notificationPreferences
+    });
+  } catch (error) {
+    console.error('Notification preferences update error:', error);
+    res.status(500).json({ message: 'Error updating notification preferences' });
+  }
+});
+
+// Update App Preferences
+export const updateAppPreferences = asyncHandler(async (req, res) => {
+  const {
+    theme,
+    language,
+    currency,
+    units,
+    privacy,
+    dataSharing
+  } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Initialize app preferences if they don't exist
+    if (!user.profile.appPreferences) {
+      user.profile.appPreferences = {};
+    }
+
+    // Update app preferences
+    const appPreferences = {
+      theme: theme !== undefined ? theme : user.profile.appPreferences.theme || 'light',
+      language: language !== undefined ? language : user.profile.appPreferences.language || 'en',
+      currency: currency !== undefined ? currency : user.profile.appPreferences.currency || 'usd',
+      units: units !== undefined ? units : user.profile.appPreferences.units || 'metric',
+      privacy: privacy !== undefined ? privacy : user.profile.appPreferences.privacy || 'public',
+      dataSharing: dataSharing !== undefined ? dataSharing : user.profile.appPreferences.dataSharing || false
+    };
+
+    user.profile.appPreferences = appPreferences;
+    await user.save();
+
+    res.status(200).json({
+      message: 'App preferences updated successfully',
+      appPreferences
+    });
+  } catch (error) {
+    console.error('App preferences update error:', error);
+    res.status(500).json({ message: 'Error updating app preferences' });
+  }
+});
+
+// Get User Profile and Settings
+export const getUserSettings = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profile: user.profile,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt,
+        marketplace_activity: user.marketplace_activity
+      }
+    });
+  } catch (error) {
+    console.error('Get user settings error:', error);
+    res.status(500).json({ message: 'Error fetching user settings' });
+  }
 });

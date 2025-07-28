@@ -259,6 +259,7 @@ const LandingPage = () => {
             </motion.p>
             
             <motion.div className="flex flex-col sm:flex-row gap-4 mb-10 justify-center" variants={itemVariants}>
+              <Link href = "/login">
               <button
                 onClick={() => router.push('/Signup')}
                 className="flex items-center justify-center px-7 py-2 rounded-full shadow-md font-bold text-white text-base hover:shadow-lg transition-all"
@@ -272,6 +273,8 @@ const LandingPage = () => {
                 Calculate My Carbon Footprint
                 <span className="ml-2" style={{ fontSize: "20px", color: '#fff' }}>→</span>
               </button>
+              </Link>
+              <Link href = "/login">
               <button
                 onClick={() => router.push('/Signup')}
                 className="bg-white border border-green-400 text-green-600 rounded-full shadow-md transition px-8 py-3 hover:shadow-lg hover:bg-green-50"
@@ -280,9 +283,11 @@ const LandingPage = () => {
                   fontWeight: 600,
                   fontSize: "16px"
                 }}
+
               >
                 Join the Community
               </button>
+              </Link>
             </motion.div>
             <motion.div className="text-center text-gray-500 text-sm mb-4" variants={itemVariants}>
               Trusted by environmentally conscious individuals and forward-thinking businesses

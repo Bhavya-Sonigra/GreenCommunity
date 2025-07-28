@@ -69,6 +69,8 @@ function isExpectedError(error) {
   const expectedMessages = [
     'Invalid email',
     'Invalid credentials',
+    'Invalid token',
+    'Token expired',
     'Access denied',
     'Service not found',
     'Too many attempts',
@@ -134,6 +136,53 @@ export const authAPI = {
     return apiRequest('/api/auth/update-password', {
       method: 'POST',
       body: JSON.stringify({ newPassword }),
+    });
+  },
+
+  verifyEmailCode: async (email, code) => {
+    return apiRequest('/api/auth/verify-email-code', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+  },
+
+  resendVerificationCode: async (email) => {
+    return apiRequest('/api/auth/resend-verification-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  // Settings API methods
+  getUserSettings: async () => {
+    return apiRequest('/api/auth/settings');
+  },
+
+  updateProfile: async (profileData) => {
+    return apiRequest('/api/auth/update-profile', {
+      method: 'POST',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  updateNotificationPreferences: async (notifications) => {
+    return apiRequest('/api/auth/update-notifications', {
+      method: 'POST',
+      body: JSON.stringify(notifications),
+    });
+  },
+
+  updateAppPreferences: async (preferences) => {
+    return apiRequest('/api/auth/update-preferences', {
+      method: 'POST',
+      body: JSON.stringify(preferences),
+    });
+  },
+
+  changePassword: async (passwordData) => {
+    return apiRequest('/api/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(passwordData),
     });
   },
 

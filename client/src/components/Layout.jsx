@@ -58,8 +58,8 @@ export default function Layout({ children }) {
       // Clear user data and localStorage token
       clearUser();
       
-      // Redirect to login page immediately
-      router.replace('/login');
+      // Redirect to home page immediately
+      router.replace('/');
       
       console.log('✅ Logged out successfully');
     } catch (error) {

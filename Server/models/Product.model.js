@@ -188,9 +188,15 @@ const productSchema = new mongoose.Schema({
     minlength: [10, 'Description must be at least 10 characters'],
     maxlength: [2000, 'Description cannot exceed 2000 characters']
   },
+  category_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: [true, 'Category is required'],
+    index: true
+  },
   category: {
     type: String,
-    required: [true, 'Category is required'],
+    required: [true, 'Category name is required'],
     enum: {
       values: ['solar', 'reusable', 'zero_waste', 'local', 'organic', 'eco_fashion', 'green_tech'],
       message: 'Category must be one of: solar, reusable, zero_waste, local, organic, eco_fashion, green_tech'

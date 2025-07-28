@@ -5,7 +5,9 @@ import rateLimit from 'express-rate-limit';
 import { 
   registerUser, 
   loginUser, 
-  verifyEmail, 
+  verifyEmail,
+  verifyEmailCode,
+  resendVerificationCode, 
   requestPasswordReset, 
   resetPassword, 
   getCurrentUser, 
@@ -13,7 +15,11 @@ import {
   changePassword,
   verifyResetCode,
   updatePasswordWithCode,
-  updatePassword
+  updatePassword,
+  updateProfile,
+  updateNotificationPreferences,
+  updateAppPreferences,
+  getUserSettings
 } from '../controllers/auth.controller.js';
 import { 
   validateRegister, 
@@ -60,6 +66,8 @@ router.post('/logout', logout);
 
 // Email Verification
 router.post('/verify-email', verifyEmail);
+router.post('/verify-email-code', verifyEmailCode);
+router.post('/resend-verification-code', resendVerificationCode);
 
 // Password Reset
 router.post('/forgot-password', forgotPasswordLimiter, validatePasswordResetRequest, requestPasswordReset);
@@ -71,6 +79,12 @@ router.post('/update-password-with-code', validateUpdatePasswordWithCode, update
 router.get('/me', authenticate, getCurrentUser);
 router.post('/change-password', authenticate, changePassword);
 router.post('/update-password', authenticate, validateUpdatePassword, updatePassword);
+
+// Settings Routes
+router.get('/settings', authenticate, getUserSettings);
+router.post('/update-profile', authenticate, updateProfile);
+router.post('/update-notifications', authenticate, updateNotificationPreferences);
+router.post('/update-preferences', authenticate, updateAppPreferences);
 
 // Google OAuth - Start login flow
 router.get('/google', passport.authenticate('google', {
