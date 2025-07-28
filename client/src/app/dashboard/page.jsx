@@ -129,8 +129,24 @@ const Dashboard = () => {
       {/* Enhanced Header */}
       <div className="space-y-3 sm:space-y-4 md:space-y-5 animate-fade-in">
         <div>
+<<<<<<< HEAD
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gradient">{t(greetingKey)}, {name}!</h1>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Here's your environmental impact overview</p>
+=======
+          <h1 className="text-2xl sm:text-4xl font-bold text-gradient">{t(greetingKey)}, {name}!</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <p className="text-base sm:text-lg text-muted-foreground">Here's your environmental impact overview</p>
+            {user?.userInfo?.location && (
+              <div className="flex items-center gap-2 text-sm sm:text-base text-muted-foreground">
+                <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{user.userInfo.location}</span>
+              </div>
+            )}
+          </div>
+>>>>>>> ee1f1ea8974e1469148cf91ec66970e7d3f4afce
         </div>
       </div>
 

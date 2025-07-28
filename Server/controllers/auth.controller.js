@@ -1,5 +1,6 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import User from '../models/User.model.js';
+import { UserInfo, initializeUserInfoModel } from '../models/UserInfo.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
@@ -33,7 +34,27 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   const { name, email, password } = req.body;
+  const exists = await User.findOne({ email });
+  if (exists) return res.status(400).json({ message: 'Email already in use' });
 
+  const user = await User.create({ 
+    name, 
+    email, 
+    password, // Will be hashed by pre-save middleware
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent')
+  });
+
+  // Generate email verification token
+  const verificationToken = user.emailVerificationToken();
+  await user.save();
+
+  // Send verification email
+  try {
+    await emailService.sendEmailVerification(user.email, verificationToken, process.env.CLIENT_URL);
+  } catch (emailError) {
+    console.error('Email sending error:', emailError);
+    // Don't fail registration if email fails
   // Check if user exists - handle both verified and unverified accounts
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -99,7 +120,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     }
     throw error; // Re-throw the original error
   }
-});
+}});
 
 // User Login
 export const loginUser = asyncHandler(async (req, res) => {
@@ -350,7 +371,14 @@ export const resetPassword = asyncHandler(async (req, res) => {
 // Get current user
 export const getCurrentUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
-  res.status(200).json({ user });
+  
+  // Include Google authentication status
+  const userResponse = {
+    ...user.toObject(),
+    isGoogleAuth: !!user.googleId
+  };
+  
+  res.status(200).json({ user: userResponse });
 });
 
 // Logout (client-side token removal)
@@ -421,63 +449,96 @@ export const updateProfile = asyncHandler(async (req, res) => {
     firstName,
     lastName,
     dateOfBirth,
-    gender
+    gender,
+    profession
   } = req.body;
 
   try {
+    // Initialize UserInfo model if not already done
+    await initializeUserInfoModel();
+    
     const user = await User.findById(req.user.id);
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if email is being changed and if it already exists
-    if (email && email !== user.email) {
+    // Check if user is authenticated via Google - prevent email updates
+    if (email && email !== user.email && user.googleId) {
+      return res.status(400).json({ 
+        message: 'Email cannot be changed for Google-authenticated accounts',
+        code: 'GOOGLE_EMAIL_READONLY'
+      });
+    }
+
+    // Check if email is being changed and if it already exists (for non-Google users)
+    if (email && email !== user.email && !user.googleId) {
       const emailExists = await User.findOne({ email, _id: { $ne: req.user.id } });
       if (emailExists) {
         return res.status(400).json({ message: 'Email already in use' });
       }
       user.email = email;
       user.isEmailVerified = false; // Reset email verification if email changed
+      await user.save();
     }
 
-    // Update basic profile fields
-    if (name) user.name = name;
-    if (phone) user.profile = { ...user.profile, phone };
-    if (bio) user.profile = { ...user.profile, bio };
-    if (firstName) user.profile = { ...user.profile, first_name: firstName };
-    if (lastName) user.profile = { ...user.profile, last_name: lastName };
-    if (dateOfBirth) user.profile = { ...user.profile, date_of_birth: new Date(dateOfBirth) };
-    if (gender) user.profile = { ...user.profile, gender };
+    // Update name in auth database if provided
+    if (name && name !== user.name) {
+      user.name = name;
+      await user.save();
+    }
+
+    // Prepare UserInfo update data
+    const userInfoUpdate = {};
     
-    // Update location
+    if (name) userInfoUpdate.name = name;
+    if (phone) userInfoUpdate.phone = phone;
+    if (bio) userInfoUpdate.bio = bio;
+    if (profession) userInfoUpdate.profession = profession;
+    if (dateOfBirth) userInfoUpdate.dateOfBirth = new Date(dateOfBirth);
+    if (gender) userInfoUpdate.gender = gender.toLowerCase();
+    
+    // Handle location update
     if (location) {
       const locationParts = location.split(',').map(part => part.trim());
-      user.profile = {
-        ...user.profile,
-        location: {
-          city: locationParts[0] || '',
-          state: locationParts[1] || '',
-          country: locationParts[2] || ''
-        }
+      userInfoUpdate.location = {
+        city: locationParts[0] || '',
+        state: locationParts[1] || '',
+        country: locationParts[2] || ''
       };
     }
 
-    // Update preferred units (could be stored in user preferences or profile)
+    // Handle preferences
     if (preferredUnits) {
-      user.profile = { ...user.profile, preferredUnits };
+      userInfoUpdate['preferences.units'] = preferredUnits;
     }
 
-    await user.save();
+    // Update or create UserInfo record
+    const userInfo = await UserInfo.createOrUpdate(req.user.id, userInfoUpdate);
 
+    // Get the updated user data for response
+    const updatedUser = await User.findById(req.user.id).select('-password');
+    
     res.status(200).json({
       message: 'Profile updated successfully',
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        profile: user.profile,
-        isEmailVerified: user.isEmailVerified
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isEmailVerified: updatedUser.isEmailVerified,
+        googleId: updatedUser.googleId,
+        isGoogleAuth: !!updatedUser.googleId,
+        userInfo: {
+          name: userInfo.name,
+          phone: userInfo.phone,
+          bio: userInfo.bio,
+          location: userInfo.location,
+          profession: userInfo.profession,
+          dateOfBirth: userInfo.dateOfBirth,
+          gender: userInfo.gender,
+          preferences: userInfo.preferences,
+          profileCompletion: userInfo.profileCompletion
+        }
       }
     });
   } catch (error) {
@@ -583,11 +644,17 @@ export const updateAppPreferences = asyncHandler(async (req, res) => {
 // Get User Profile and Settings
 export const getUserSettings = asyncHandler(async (req, res) => {
   try {
+    // Initialize UserInfo model if not already done
+    await initializeUserInfoModel();
+    
     const user = await User.findById(req.user.id).select('-password');
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Fetch user info from separate database
+    const userInfo = await UserInfo.findByUserId(req.user.id);
 
     res.status(200).json({
       user: {
@@ -597,7 +664,22 @@ export const getUserSettings = asyncHandler(async (req, res) => {
         profile: user.profile,
         isEmailVerified: user.isEmailVerified,
         createdAt: user.createdAt,
-        marketplace_activity: user.marketplace_activity
+        marketplace_activity: user.marketplace_activity,
+        googleId: user.googleId, // Include Google ID to determine authentication method
+        isGoogleAuth: !!user.googleId, // Boolean flag for easier frontend use
+        userInfo: userInfo ? {
+          name: userInfo.name,
+          phone: userInfo.phone,
+          bio: userInfo.bio,
+          location: userInfo.location,
+          profession: userInfo.profession,
+          dateOfBirth: userInfo.dateOfBirth,
+          gender: userInfo.gender,
+          preferences: userInfo.preferences,
+          notifications: userInfo.notifications,
+          profileCompletion: userInfo.profileCompletion,
+          formattedLocation: userInfo.getFormattedLocation()
+        } : null
       }
     });
   } catch (error) {

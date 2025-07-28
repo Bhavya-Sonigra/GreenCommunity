@@ -49,6 +49,8 @@ const Settings = () => {
     joinDate: '',
     preferredUnits: 'metric'
   });
+  
+  const [isGoogleAuth, setIsGoogleAuth] = useState(false);
 
   const [notifications, setNotifications] = useState({
     emailUpdates: true,
@@ -80,6 +82,9 @@ const Settings = () => {
       setIsLoading(true);
       const response = await authAPI.getUserSettings();
       const userData = response.user;
+      
+      // Check if user is authenticated via Google
+      setIsGoogleAuth(userData.isGoogleAuth || false);
       
       // Update profile data
       setProfileData({
@@ -129,17 +134,40 @@ const Settings = () => {
   const saveProfileSettings = async () => {
     try {
       setIsSaving(true);
+      
+      // Parse location string into components
+      const parseLocation = (locationString) => {
+        if (!locationString || !locationString.trim()) {
+          return { city: '', state: '', country: '', raw: '' };
+        }
+        
+        const parts = locationString.split(',').map(part => part.trim());
+        let city = '', state = '', country = '';
+        
+        if (parts.length === 1) {
+          city = parts[0];
+        } else if (parts.length === 2) {
+          city = parts[0];
+          country = parts[1];
+        } else if (parts.length >= 3) {
+          city = parts[0];
+          state = parts[1];
+          country = parts[2];
+        }
+        
+        return { city, state, country, raw: locationString };
+      };
+      
+      const locationData = parseLocation(profileData.location);
+      
       const response = await authAPI.updateProfile({
         name: profileData.name,
-        email: profileData.email,
+        email: isGoogleAuth ? undefined : profileData.email, // Don't send email for Google users
         profile: {
           phone: profileData.phone,
           bio: profileData.bio,
           preferredUnits: profileData.preferredUnits,
-          location: {
-            // Parse location string into components
-            raw: profileData.location
-          }
+          location: locationData
         }
       });
       
@@ -148,7 +176,13 @@ const Settings = () => {
       toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
+      
+      // Handle specific Google auth email error
+      if (error.response?.data?.code === 'GOOGLE_EMAIL_READONLY') {
+        toast.error('Email cannot be changed for Google-authenticated accounts');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to update profile');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -289,8 +323,15 @@ const Settings = () => {
                         type="email"
                         value={profileData.email}
                         onChange={(e) => handleProfileUpdate('email', e.target.value)}
-                        className="mt-1"
+                        disabled={isGoogleAuth}
+                        className={`mt-1 ${isGoogleAuth ? 'opacity-60 cursor-not-allowed' : ''}`}
                       />
+                      {isGoogleAuth && (
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <Mail className="h-3 w-3" />
+                          Email cannot be changed for Google-authenticated accounts
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="phone">{t('Phone Number')}</Label>
@@ -573,7 +614,7 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-              <Button className="btn-hero">
+              <Button className="btn-hero" onClick={saveAppPreferences}>
                 <Save className="h-4 w-4 mr-2" />
                 {t('Save Preferences')}
               </Button>

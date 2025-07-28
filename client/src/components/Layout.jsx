@@ -29,8 +29,8 @@ export default function Layout({ children }) {
   const router = useRouter();
   const isAuthenticated = !!user;
   const name = user?.name || 'Guest';
-  const city = user?.city || 'Unknown';
-  const country = user?.country || 'Location';
+  const city = user?.userInfo?.location?.city || 'Unknown';
+  const country = user?.userInfo?.location?.country || 'Location';
   const monthlyGoal = isAuthenticated ? 75 : 0;
   const pathname = usePathname();
   const isMobile = useMediaQuery({ maxWidth: 767 });
