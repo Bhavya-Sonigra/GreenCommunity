@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,9 +27,38 @@ import {
   Map,
   List,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  Globe
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Leaflet components to avoid SSR issues
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { 
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-gray-100 animate-pulse rounded-lg" />
+});
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { 
+  ssr: false,
+  loading: () => null
+});
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
+  ssr: false,
+  loading: () => null
+});
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { 
+  ssr: false,
+  loading: () => null
+});
+
+// Import Leaflet CSS only on client side
+if (typeof window !== 'undefined') {
+  try {
+    require('leaflet/dist/leaflet.css');
+  } catch (error) {
+    console.warn('Failed to load Leaflet CSS:', error);
+  }
+}
 
 const Projects = () => {
   const [viewMode, setViewMode] = useState('list');
@@ -38,7 +67,55 @@ const Projects = () => {
   const [selectedType, setSelectedType] = useState('all');
   const [contributionAmount, setContributionAmount] = useState([50]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [hoveredProject, setHoveredProject] = useState(null);
   const router = useRouter();
+
+  // Add error boundary
+  useEffect(() => {
+    try {
+      // Component initialization
+    } catch (err) {
+      setError(err);
+      console.error('Projects page error:', err);
+    }
+  }, []);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-md w-full space-y-6 text-center">
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-foreground">Something went wrong</h2>
+              <p className="text-muted-foreground">We're sorry, but something unexpected happened. Please try again.</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full bg-background border border-border text-foreground font-medium py-3 px-6 rounded-md hover:bg-accent transition-colors"
+            >
+              Go to Homepage
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const regions = [
     { value: 'all', label: 'All Regions' },
@@ -66,6 +143,7 @@ const Projects = () => {
       type: 'forestry',
       region: 'south-america',
       image: "/tree1.jpg",
+      coordinates: [-60.0, -3.0], // Brazil coordinates
       description: 'Large-scale reforestation project protecting and restoring 50,000 hectares of Amazon rainforest',
       co2Removed: 125000,
       co2PerRupee: 0.00036,  // Adjusted for INR (0.03/83)
@@ -90,6 +168,7 @@ const Projects = () => {
       type: 'renewable',
       region: 'north-america',
       image: "/tree2.jpg",
+      coordinates: [-97.0, 31.0], // Texas coordinates
       description: 'Clean energy generation through wind turbines, providing renewable power to 25,000 homes',
       co2Removed: 75000,
       co2PerRupee: 0.00027, // Adjusted for INR (0.022/83)
@@ -114,6 +193,7 @@ const Projects = () => {
       type: 'water',
       region: 'north-america',
       image: "/tree3.jpg",
+      coordinates: [-120.0, 36.0], // California coordinates
       description: 'Restoring underwater kelp forests to sequester carbon and support marine ecosystems',
       co2Removed: 45000,
       co2PerRupee: 0.00047, // Adjusted for INR (0.039/83)
@@ -138,6 +218,7 @@ const Projects = () => {
       type: 'renewable',
       region: 'africa',
       image: "/tree4.jpg",
+      coordinates: [37.0, 1.0], // Kenya coordinates
       description: 'Community-owned solar installation providing clean energy access to rural villages',
       co2Removed: 32000,
       co2PerRupee: 0.0003, // Adjusted for INR (0.025/83)
@@ -162,6 +243,7 @@ const Projects = () => {
       type: 'forestry',
       region: 'asia',
       image: "/tree5.jpg",
+      coordinates: [121.0, 13.0], // Philippines coordinates
       description: 'Protecting and restoring mangrove ecosystems crucial for coastal communities and carbon storage',
       co2Removed: 85000,
       co2PerRupee: 0.00041, // Adjusted for INR (0.034/83)
@@ -222,267 +304,544 @@ const Projects = () => {
   };
 
   const calculateImpact = (amount) => {
-    return ((amount * 83) * 0.00036).toFixed(1); // Average CO2 per rupee (adjusted for INR)
+    try {
+      return ((amount * 83) * 0.00036).toFixed(1); // Average CO2 per rupee (adjusted for INR)
+    } catch (err) {
+      console.error('Error calculating impact:', err);
+      return '0.0';
+    }
   };
 
-  return (
-    <div className="p-3 sm:p-6 space-y-3 sm:space-y-6 bg-gradient-to-b from-background to-accent/5 min-h-screen">
-      {/* Header */}
-      <div className="space-y-1 sm:space-y-2">
-        <h1 className="text-xl sm:text-3xl font-bold text-gradient">Carbon Offset Projects</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">Support verified projects that remove CO₂ from the atmosphere</p>
-      </div>
+  // Map View Component
+  const MapView = () => {
+    const filteredMapProjects = filteredProjects.filter(project => project.coordinates);
+    const [mapError, setMapError] = useState(false);
+    const [mapLoaded, setMapLoaded] = useState(false);
+    const [hoveredProject, setHoveredProject] = useState(null);
+    
+    // Custom marker icon
+    const createCustomIcon = (type) => {
+      if (typeof window === 'undefined') return null;
+      
+      try {
+        const L = require('leaflet');
+        
+        const getMarkerColor = (type) => {
+          switch (type) {
+            case 'forestry': return '#10B981';
+            case 'renewable': return '#3B82F6';
+            case 'water': return '#06B6D4';
+            case 'agriculture': return '#F59E0B';
+            default: return '#10B981';
+          }
+        };
 
-      {/* Search and Filters */}
-      <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search projects..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm"
-          />
+        return L.divIcon({
+          html: `
+            <div style="
+              width: 20px; 
+              height: 20px; 
+              background-color: ${getMarkerColor(type)}; 
+              border: 3px solid white; 
+              border-radius: 50%; 
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              position: relative;
+            ">
+              <div style="
+                width: 8px; 
+                height: 8px; 
+                background-color: white; 
+                border-radius: 50%; 
+                position: absolute; 
+                top: 6px; 
+                left: 6px;
+              "></div>
+            </div>
+          `,
+          className: 'custom-marker',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+      } catch (error) {
+        console.error('Error creating custom icon:', error);
+        setMapError(true);
+        return null;
+      }
+    };
+
+    // Fallback map view when Leaflet fails
+    if (mapError) {
+      return (
+        <div className="h-[700px] sm:h-[800px] lg:h-[900px] rounded-lg border-2 border-primary/20 bg-gradient-to-b from-amber-100 via-orange-50 to-yellow-100 relative overflow-hidden">
+          {/* Simple world map background */}
+          <div className="absolute inset-0 opacity-30">
+            <div className="w-full h-full bg-gradient-to-br from-amber-200 via-orange-100 to-yellow-200"></div>
+          </div>
+          
+          {/* Project markers */}
+          {filteredMapProjects.map((project, index) => {
+            const [lng, lat] = project.coordinates;
+            const left = ((lng + 180) / 360) * 100;
+            const top = ((90 - lat) / 180) * 100;
+            
+            const getPinStyle = (type) => {
+              switch (type) {
+                case 'forestry': 
+                  return 'text-green-500 text-2xl';
+                case 'renewable':
+                  return 'text-blue-500 text-2xl';
+                case 'water':
+                  return 'text-cyan-500 text-2xl';
+                case 'agriculture':
+                  return 'text-yellow-500 text-2xl';
+                default:
+                  return 'text-green-500 text-2xl';
+              }
+            };
+            
+            return (
+              <motion.div
+                key={project.id}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-10"
+                style={{ left: `${left}%`, top: `${top}%` }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleProjectClick(project.id)}
+              >
+                <div className={`${getPinStyle(project.type)} group-hover:scale-125 transition-transform duration-200 drop-shadow-lg`}>
+                  📍
+                </div>
+              </motion.div>
+            );
+          })}
+          
+          {/* Map controls */}
+          <div className="absolute top-4 right-4 z-20">
+            {/* Removed List View button */}
+          </div>
+          
+          {/* Map title */}
+          <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 border-2 border-gray-200 shadow-xl z-20">
+            <div className="flex items-center gap-3">
+              <Globe className="h-7 w-7 text-primary" />
+              <div>
+                <div className="font-semibold text-lg">Global Projects</div>
+                <div className="text-sm text-gray-600">{filteredMapProjects.length} active projects</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-full sm:w-40 text-sm">
-              <SelectValue placeholder="Region" />
-            </SelectTrigger>
-            <SelectContent>
-              {regions.map(region => (
-                <SelectItem key={region.value} value={region.value}>
-                  {region.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-full sm:w-40 text-sm">
-              <SelectValue placeholder="Project Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {projectTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="flex gap-1 sm:gap-2 mt-1 sm:mt-0">
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="text-xs sm:text-sm px-2 sm:px-3"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('map')}
-              className="text-xs sm:text-sm px-2 sm:px-3"
-            >
-              <Map className="h-4 w-4" />
-            </Button>
+      );
+    }
+
+    return (
+      <div className="relative h-[700px] sm:h-[800px] lg:h-[900px] rounded-lg border-2 border-primary/20 overflow-hidden">
+        <MapContainer
+          center={[20, 0]}
+          zoom={2}
+          minZoom={1}
+          maxZoom={18}
+          zoomControl={false}
+          scrollWheelZoom={false}
+          doubleClickZoom={false}
+          dragging={false}
+          style={{ height: '100%', width: '100%' }}
+          className="z-0"
+          whenCreated={() => {
+            setMapLoaded(true);
+          }}
+          whenReady={() => {
+            setMapLoaded(true);
+          }}
+        >
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution=""
+          />
+          
+          {filteredMapProjects.map((project, index) => {
+            const [lng, lat] = project.coordinates;
+            const customIcon = createCustomIcon(project.type);
+            
+            return (
+              <Marker
+                key={project.id}
+                position={[lat, lng]}
+                icon={customIcon}
+                eventHandlers={{
+                  click: () => handleProjectClick(project.id),
+                  mouseover: (e) => {
+                    e.target.openPopup();
+                    setHoveredProject(project.id);
+                  },
+                  mouseout: (e) => {
+                    e.target.closePopup();
+                    setHoveredProject(null);
+                  },
+                }}
+              >
+                <Popup autoPan={false} closeButton={false}>
+                  <div className="p-3 min-w-[250px] cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => handleProjectClick(project.id)}>
+                    <div className="font-semibold text-primary mb-2 text-base">{project.name}</div>
+                    <div className="text-gray-600 mb-3 text-sm flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {project.location}
+                    </div>
+                    <div className="space-y-2 mb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-green-600 font-medium text-sm">
+                          {project.co2Removed.toLocaleString()} tons CO₂
+                        </div>
+                        <Badge className="text-xs">
+                          {projectTypes.find(t => t.value === project.type)?.label || project.type}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{project.contributors.toLocaleString()} contributors</span>
+                        <span>{project.timeRemaining} remaining</span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 border-t pt-2">
+                      Click to view full details →
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
+
+        {/* Map Controls */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-30">
+          {/* Removed List View button */}
+        </div>
+
+        {/* Map Legend */}
+        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 border-2 border-gray-200 shadow-xl z-30">
+          <div className="text-2xl">📍</div>
+        </div>
+
+        {/* Map Title */}
+        <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 border-2 border-gray-200 shadow-xl z-30">
+          <div className="flex items-center gap-3">
+            <Globe className="h-7 w-7 text-primary" />
+            <div>
+              <div className="font-semibold text-lg">Global Projects</div>
+              <div className="text-sm text-gray-600">{filteredMapProjects.length} active projects</div>
+            </div>
           </div>
         </div>
       </div>
+    );
+  };
 
-      {/* Projects List */}
-      <div className="space-y-3 sm:space-y-6">
-        {filteredProjects.map((project, index) => {
-          const Icon = getProjectIcon(project.type);
-          const fundingPercentage = (project.currentFunding / project.totalFunding) * 100;
-          
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              key={project.id}
-            >
-              <Card 
-                className="card-gradient cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => handleProjectClick(project.id)}
+  try {
+    return (
+      <div className="p-2 sm:p-4 space-y-2 sm:space-y-4 bg-gradient-to-b from-background to-accent/5 min-h-screen">
+        {/* Header */}
+        <div className="space-y-1">
+          <h1 className="text-lg sm:text-2xl font-bold text-gradient">Carbon Offset Projects</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Support verified projects that remove CO₂ from the atmosphere</p>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 text-sm"
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+            <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+              <SelectTrigger className="w-full sm:w-36 text-sm">
+                <SelectValue placeholder="Select Region" />
+              </SelectTrigger>
+              <SelectContent>
+                {regions.map((region) => (
+                  <SelectItem key={region.value} value={region.value}>
+                    {region.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className="w-full sm:w-36 text-sm">
+                <SelectValue placeholder="Select Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {projectTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* View Mode Toggle */}
+            <div className="flex gap-1 p-1 bg-muted rounded-lg">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-8 px-3"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 p-3 sm:p-6">
-                {/* Project Image */}
-                <div className="relative">
-                  <img 
-                    src={project.image} 
-                    alt={project.name}
-                    className="w-full h-32 sm:h-48 lg:h-full object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.src = '/tree1.jpg'; // Fallback image
-                    }}
-                  />
-                  {project.verified && (
-                    <Badge className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-green-600 text-white shadow-md text-xs">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Verified
-                    </Badge>
-                  )}
-                </div>
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'map' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('map')}
+                className="h-8 px-3"
+              >
+                <Map className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
 
-                {/* Project Details */}
-                <div className="sm:col-span-1 lg:col-span-2 space-y-2 sm:space-y-4">
-                  <div>
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <h3 className="text-base sm:text-xl font-bold text-foreground">{project.name}</h3>
-                      <div className="flex gap-1 sm:gap-2 flex-wrap">
-                        {project.certifications.map(cert => (
-                          <Badge key={cert} variant="outline" className="text-[10px] sm:text-xs">
-                            <Award className="h-3 w-3 mr-1" />
-                            {cert}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span className="text-xs sm:text-sm">{project.location}</span>
-                      </div>
-                      <Badge className={`${getTypeColor(project.type)} text-xs`}>
-                        <Icon className="h-3 w-3 mr-1" />
-                        {projectTypes.find(t => t.value === project.type)?.label}
-                      </Badge>
-                    </div>
-                    
-                    <p className="text-xs sm:text-sm text-muted-foreground">{project.description}</p>
-                  </div>
+        {/* Content */}
+        {viewMode === 'map' ? (
+          <div className="relative flex-1">
+            <MapView />
+          </div>
+        ) : (
+          <div className="space-y-3 sm:space-y-6">
+            {filteredProjects.map((project, index) => {
+              const IconComponent = getProjectIcon(project.type);
+              const fundingPercentage = (project.currentFunding / project.totalFunding) * 100;
+              
+              return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="cursor-pointer"
+                  onClick={() => handleProjectClick(project.id)}
+                >
+                  <Card className="hover:shadow-lg transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                        {/* Project Image */}
+                        <div className="relative w-full sm:w-96 h-64 sm:h-80 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10">
+                          <img
+                            src={project.image}
+                            alt={project.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = '/tree1.jpg'; // Fallback image
+                            }}
+                          />
+                          {project.verified && (
+                            <div className="absolute top-2 right-2">
+                              <Badge className="bg-green-600 shadow-md">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Verified
+                              </Badge>
+                            </div>
+                          )}
+                          {project.featured && (
+                            <div className="absolute top-2 left-2">
+                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                <Award className="h-3 w-3 mr-1" />
+                                Featured
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
 
-                  {/* Metrics */}
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4">
-                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
-                      <div className="text-base sm:text-lg font-bold text-foreground">
-                        {(project.co2Removed / 1000).toFixed(0)}k
-                      </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground">tons CO₂</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
-                      <div className="text-base sm:text-lg font-bold text-foreground">
-                        {project.contributors.toLocaleString()}
-                      </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground">contributors</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
-                      <div className="text-base sm:text-lg font-bold text-foreground">
-                        ₹{project.co2PerRupee}
-                      </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground">CO₂/rupee</div>
-                    </div>
-                    <div className="text-center p-2 sm:p-3 bg-accent/20 rounded-lg">
-                      <div className="text-base sm:text-lg font-bold text-foreground">
-                        {project.timeRemaining}
-                      </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground">remaining</div>
-                    </div>
-                  </div>
-
-                  {/* Funding Progress */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-xs sm:text-sm text-muted-foreground">Funding Progress</span>
-                      <span className="font-medium text-xs sm:text-sm">
-                        ₹{(project.currentFunding/10000000).toFixed(1)}Cr / ₹{(project.totalFunding/10000000).toFixed(1)}Cr
-                      </span>
-                    </div>
-                    <Progress value={fundingPercentage} className="h-2 sm:h-3 progress-eco" />
-                    <div className="text-xs sm:text-sm text-muted-foreground">
-                      {fundingPercentage.toFixed(0)}% funded
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          className="btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent navigation
-                            setContributionAmount([50]); // Reset to default
-                            setIsLoading(false);
-                          }}
-                        >
-                          <Heart className="h-4 w-4 mr-2" />
-                          Contribute
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle className="text-lg sm:text-xl">Support {project.name}</DialogTitle>
-                          <DialogDescription className="text-sm">
-                            Choose your contribution amount to help offset carbon emissions
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
+                        {/* Project Info */}
+                        <div className="flex-1 space-y-3 sm:space-y-4">
                           <div>
-                            <Label className="text-xs sm:text-sm">Contribution Amount: ₹{(contributionAmount[0] * 83).toLocaleString()}</Label>
-                            <Slider
-                              value={contributionAmount}
-                              onValueChange={setContributionAmount}
-                              max={50000}
-                              min={1000}
-                              step={1000}
-                              className="mt-2"
-                            />
-                          </div>
-                          <div className="p-3 sm:p-4 bg-primary/10 rounded-lg">
-                            <div className="text-center">
-                              <div className="text-xs sm:text-sm text-muted-foreground">Your Impact</div>
-                              <div className="text-xl sm:text-2xl font-bold text-primary">
-                                {calculateImpact(contributionAmount[0])} tons CO₂
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-1">
+                                  {project.name}
+                                </h3>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                                  <MapPin className="h-4 w-4" />
+                                  {project.location}
+                                </div>
                               </div>
-                              <div className="text-xs sm:text-sm text-muted-foreground">will be offset</div>
+                              <Badge className={getTypeColor(project.type)}>
+                                <IconComponent className="h-3 w-3 mr-1" />
+                                {projectTypes.find(t => t.value === project.type)?.label || project.type}
+                              </Badge>
+                            </div>
+                            <p className="text-sm sm:text-base text-muted-foreground">
+                              {project.description}
+                            </p>
+                          </div>
+
+                          {/* Project Stats */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                            <div className="text-center">
+                              <div className="text-lg sm:text-xl font-bold text-primary">
+                                {project.co2Removed.toLocaleString()}
+                              </div>
+                              <div className="text-xs sm:text-sm text-muted-foreground">tons CO₂</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg sm:text-xl font-bold text-primary">
+                                {project.contributors.toLocaleString()}
+                              </div>
+                              <div className="text-xs sm:text-sm text-muted-foreground">contributors</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg sm:text-xl font-bold text-primary">
+                                {project.timeRemaining}
+                              </div>
+                              <div className="text-xs sm:text-sm text-muted-foreground">remaining</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg sm:text-xl font-bold text-primary">
+                                ₹{(project.co2PerRupee * 1000000).toFixed(2)}
+                              </div>
+                              <div className="text-xs sm:text-sm text-muted-foreground">per ton</div>
                             </div>
                           </div>
-                        </div>
-                        <DialogFooter className="flex flex-col sm:flex-row gap-2">
-                          <Button 
-                            className="w-full btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3" 
-                            onClick={() => {
-                              setIsLoading(true);
-                              try {
-                                router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                setIsLoading(false);
-                              }
-                            }}
-                            disabled={isLoading}
-                          >
-                            {isLoading ? 'Processing...' : `Contribute ₹${(contributionAmount[0] * 83).toLocaleString()}`}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                    <Button variant="outline" className="text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
-                      Learn More
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        )
-      })}
-      </div>
 
-      {filteredProjects.length === 0 && (
-        <div className="text-center py-8 sm:py-12">
-          <div className="text-muted-foreground text-sm sm:text-lg">No projects found</div>
-          <p className="text-muted-foreground text-xs sm:text-base">Try adjusting your search or filters</p>
+                          {/* Funding Progress */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-xs sm:text-sm text-muted-foreground">Funding Progress</span>
+                              <span className="font-medium text-xs sm:text-sm">
+                                ₹{(project.currentFunding/10000000).toFixed(1)}Cr / ₹{(project.totalFunding/10000000).toFixed(1)}Cr
+                              </span>
+                            </div>
+                            <Progress value={fundingPercentage} className="h-2 sm:h-3 progress-eco" />
+                            <div className="text-xs sm:text-sm text-muted-foreground">
+                              {fundingPercentage.toFixed(0)}% funded
+                            </div>
+                          </div>
+
+                          {/* Action Button */}
+                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  className="btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3"
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent navigation
+                                    setContributionAmount([50]); // Reset to default
+                                    setIsLoading(false);
+                                  }}
+                                >
+                                  <Heart className="h-4 w-4 mr-2" />
+                                  Contribute
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle className="text-lg sm:text-xl">Support {project.name}</DialogTitle>
+                                  <DialogDescription className="text-sm">
+                                    Choose your contribution amount to help offset carbon emissions
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                  <div>
+                                    <Label className="text-xs sm:text-sm">Contribution Amount: ₹{(contributionAmount[0] * 83).toLocaleString()}</Label>
+                                    <Slider
+                                      value={contributionAmount}
+                                      onValueChange={setContributionAmount}
+                                      max={50000}
+                                      min={1000}
+                                      step={1000}
+                                      className="mt-2"
+                                    />
+                                  </div>
+                                  <div className="p-3 sm:p-4 bg-primary/10 rounded-lg">
+                                    <div className="text-center">
+                                      <div className="text-xs sm:text-sm text-muted-foreground">Your Impact</div>
+                                      <div className="text-xl sm:text-2xl font-bold text-primary">
+                                        {calculateImpact(contributionAmount[0])} tons CO₂
+                                      </div>
+                                      <div className="text-xs sm:text-sm text-muted-foreground">will be offset</div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                                  <Button 
+                                    className="w-full btn-hero text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3" 
+                                    onClick={() => {
+                                      setIsLoading(true);
+                                      try {
+                                        router.push(`/payment?project=${encodeURIComponent(project.name)}&amount=${contributionAmount[0] * 83}`);
+                                      } catch (error) {
+                                        console.error('Navigation error:', error);
+                                        setIsLoading(false);
+                                      }
+                                    }}
+                                    disabled={isLoading}
+                                  >
+                                    {isLoading ? 'Processing...' : `Contribute ₹${(contributionAmount[0] * 83).toLocaleString()}`}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                            <Button variant="outline" className="text-xs sm:text-base px-3 sm:px-5 py-2 sm:py-3">
+                              Learn More
+                              <ArrowRight className="h-4 w-4 ml-2" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {filteredProjects.length === 0 && (
+          <div className="text-center py-8 sm:py-12">
+            <div className="text-muted-foreground text-sm sm:text-lg">No projects found</div>
+            <p className="text-muted-foreground text-xs sm:text-base">Try adjusting your search or filters</p>
+          </div>
+        )}
+      </div>
+    );
+  } catch (err) {
+    console.error('Error rendering Projects component:', err);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-md w-full space-y-6 text-center">
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-foreground">Something went wrong</h2>
+              <p className="text-muted-foreground">We're sorry, but something unexpected happened. Please try again.</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-primary text-white font-semibold py-3 px-6 rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full bg-background border border-border text-foreground font-medium py-3 px-6 rounded-md hover:bg-accent transition-colors"
+            >
+              Go to Homepage
+            </button>
+          </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
 };
 
 export default Projects;
