@@ -61,7 +61,14 @@ if (typeof window !== 'undefined') {
 }
 
 const Projects = () => {
-  const [viewMode, setViewMode] = useState('list');
+  const [viewMode, setViewMode] = useState(() => {
+    // Initialize from localStorage if available, otherwise default to 'list'
+    if (typeof window !== 'undefined') {
+      const savedViewMode = localStorage.getItem('projectsViewMode');
+      return savedViewMode || 'list';
+    }
+    return 'list';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
@@ -275,6 +282,14 @@ const Projects = () => {
 
   const handleProjectClick = (projectId) => {
     router.push(`/projects/${projectId}`);
+  };
+
+  const handleViewModeChange = (newViewMode) => {
+    setViewMode(newViewMode);
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('projectsViewMode', newViewMode);
+    }
   };
 
   const handleContribute = (e, project) => {
@@ -517,10 +532,7 @@ const Projects = () => {
           {/* Removed List View button */}
         </div>
 
-        {/* Map Legend */}
-        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 border-2 border-gray-200 shadow-xl z-30">
-          <div className="text-2xl">📍</div>
-        </div>
+
 
         {/* Map Title */}
         <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 border-2 border-gray-200 shadow-xl z-30">
@@ -586,7 +598,7 @@ const Projects = () => {
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode('list')}
+                onClick={() => handleViewModeChange('list')}
                 className="h-8 px-3"
               >
                 <List className="h-4 w-4" />
@@ -594,7 +606,7 @@ const Projects = () => {
               <Button
                 variant={viewMode === 'map' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode('map')}
+                onClick={() => handleViewModeChange('map')}
                 className="h-8 px-3"
               >
                 <Map className="h-4 w-4" />

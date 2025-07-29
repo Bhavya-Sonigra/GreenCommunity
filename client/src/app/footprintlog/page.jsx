@@ -31,14 +31,99 @@ const FootprintLog = () => {
   const [unit, setUnit] = useState('');
   const [calculatedEmissions, setCalculatedEmissions] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  
+  // Additional details based on activity type
+  const [fuelType, setFuelType] = useState('');
+  const [passengers, setPassengers] = useState('1');
+  const [flightClass, setFlightClass] = useState('');
+  const [energySource, setEnergySource] = useState('');
+  const [foodType, setFoodType] = useState('');
 
   const activityTypes = [
-    { value: 'transport-car', label: 'Car Travel', icon: Car, unit: 'miles', factor: 0.4 },
-    { value: 'transport-flight', label: 'Flight', icon: Plane, unit: 'miles', factor: 0.2 },
-    { value: 'energy-electricity', label: 'Electricity', icon: Home, unit: 'kWh', factor: 0.5 },
-    { value: 'energy-gas', label: 'Natural Gas', icon: Home, unit: 'therms', factor: 5.3 },
-    { value: 'food-meat', label: 'Meat Consumption', icon: Utensils, unit: 'lbs', factor: 6.5 },
-    { value: 'food-dairy', label: 'Dairy Products', icon: Utensils, unit: 'lbs', factor: 3.2 },
+    { 
+      value: 'transport-car', 
+      label: 'Car Travel', 
+      icon: Car, 
+      unit: 'miles', 
+      factor: 0.4,
+      requiresFuelType: true,
+      requiresPassengers: true
+    },
+    { 
+      value: 'transport-flight', 
+      label: 'Flight', 
+      icon: Plane, 
+      unit: 'miles', 
+      factor: 0.2,
+      requiresFlightClass: true,
+      requiresPassengers: true
+    },
+    { 
+      value: 'energy-electricity', 
+      label: 'Electricity', 
+      icon: Home, 
+      unit: 'kWh', 
+      factor: 0.5,
+      requiresEnergySource: true
+    },
+    { 
+      value: 'energy-gas', 
+      label: 'Natural Gas', 
+      icon: Home, 
+      unit: 'therms', 
+      factor: 5.3
+    },
+    { 
+      value: 'food-meat', 
+      label: 'Meat Consumption', 
+      icon: Utensils, 
+      unit: 'lbs', 
+      factor: 6.5,
+      requiresFoodType: true
+    },
+    { 
+      value: 'food-dairy', 
+      label: 'Dairy Products', 
+      icon: Utensils, 
+      unit: 'lbs', 
+      factor: 3.2,
+      requiresFoodType: true
+    },
+  ];
+
+  // Fuel type options
+  const fuelTypes = [
+    { value: 'petrol', label: 'Petrol/Gasoline', factor: 1.0 },
+    { value: 'diesel', label: 'Diesel', factor: 1.2 },
+    { value: 'cng', label: 'CNG', factor: 0.7 },
+    { value: 'electric', label: 'Electric', factor: 0.3 },
+    { value: 'hybrid', label: 'Hybrid', factor: 0.6 },
+  ];
+
+  // Flight class options
+  const flightClasses = [
+    { value: 'economy', label: 'Economy', factor: 1.0 },
+    { value: 'business', label: 'Business', factor: 2.5 },
+    { value: 'first', label: 'First Class', factor: 4.0 },
+  ];
+
+  // Energy source options
+  const energySources = [
+    { value: 'grid', label: 'Grid Electricity', factor: 1.0 },
+    { value: 'solar', label: 'Solar Power', factor: 0.1 },
+    { value: 'wind', label: 'Wind Power', factor: 0.1 },
+    { value: 'hydro', label: 'Hydroelectric', factor: 0.2 },
+  ];
+
+  // Food type options
+  const foodTypes = [
+    { value: 'beef', label: 'Beef', factor: 1.5 },
+    { value: 'pork', label: 'Pork', factor: 1.0 },
+    { value: 'chicken', label: 'Chicken', factor: 0.6 },
+    { value: 'fish', label: 'Fish', factor: 0.5 },
+    { value: 'milk', label: 'Milk', factor: 1.0 },
+    { value: 'cheese', label: 'Cheese', factor: 1.2 },
+    { value: 'yogurt', label: 'Yogurt', factor: 0.8 },
   ];
 
   // Move recentEntries to state
@@ -52,8 +137,35 @@ const FootprintLog = () => {
   const calculateEmissions = () => {
     const selectedActivity = activityTypes.find(type => type.value === activityType);
     if (selectedActivity && quantity) {
-      const emissions = parseFloat(quantity) * selectedActivity.factor;
-      setCalculatedEmissions(emissions);
+      let baseEmissions = parseFloat(quantity) * selectedActivity.factor;
+      
+      // Apply additional factors based on activity type
+      if (selectedActivity.requiresFuelType && fuelType) {
+        const fuelFactor = fuelTypes.find(f => f.value === fuelType)?.factor || 1.0;
+        baseEmissions *= fuelFactor;
+      }
+      
+      if (selectedActivity.requiresFlightClass && flightClass) {
+        const classFactor = flightClasses.find(f => f.value === flightClass)?.factor || 1.0;
+        baseEmissions *= classFactor;
+      }
+      
+      if (selectedActivity.requiresEnergySource && energySource) {
+        const energyFactor = energySources.find(e => e.value === energySource)?.factor || 1.0;
+        baseEmissions *= energyFactor;
+      }
+      
+      if (selectedActivity.requiresFoodType && foodType) {
+        const foodFactor = foodTypes.find(f => f.value === foodType)?.factor || 1.0;
+        baseEmissions *= foodFactor;
+      }
+      
+      // Divide by number of passengers for shared transport
+      if (selectedActivity.requiresPassengers && parseInt(passengers) > 1) {
+        baseEmissions /= parseInt(passengers);
+      }
+      
+      setCalculatedEmissions(baseEmissions);
       setShowResult(true);
     }
   };
@@ -66,22 +178,53 @@ const FootprintLog = () => {
   const handleAddToLog = () => {
     const selectedActivity = activityTypes.find(type => type.value === activityType);
     if (!selectedActivity || !quantity) return;
+    
+    // Create detailed activity description
+    let activityDescription = selectedActivity.label;
+    if (activityType === 'transport-car' && fuelType) {
+      const fuelLabel = fuelTypes.find(f => f.value === fuelType)?.label;
+      activityDescription = `${fuelLabel} Car Travel`;
+    } else if (activityType === 'transport-flight' && flightClass) {
+      const classLabel = flightClasses.find(f => f.value === flightClass)?.label;
+      activityDescription = `${classLabel} Flight`;
+    } else if (activityType === 'energy-electricity' && energySource) {
+      const sourceLabel = energySources.find(e => e.value === energySource)?.label;
+      activityDescription = `${sourceLabel} Usage`;
+    } else if ((activityType === 'food-meat' || activityType === 'food-dairy') && foodType) {
+      const foodLabel = foodTypes.find(f => f.value === foodType)?.label;
+      activityDescription = `${foodLabel} Consumption`;
+    }
+    
     setEntries([
       {
         id: Date.now(),
         date: format(selectedDate, "yyyy-MM-dd"),
-        activity: selectedActivity.label,
+        activity: activityDescription,
         type: selectedActivity.label.split(' ')[0],
         amount: quantity,
         unit: selectedActivity.unit,
         co2: calculatedEmissions,
         icon: selectedActivity.icon,
+        details: {
+          fuelType,
+          passengers,
+          flightClass,
+          energySource,
+          foodType,
+        }
       },
       ...entries,
     ]);
+    
+    // Reset form
     setShowResult(false);
     setActivityType('');
     setQuantity('');
+    setFuelType('');
+    setPassengers('1');
+    setFlightClass('');
+    setEnergySource('');
+    setFoodType('');
   };
 
   const weeklyTotal = entries
@@ -200,6 +343,108 @@ const FootprintLog = () => {
                 </div>
               )}
 
+              {/* Fuel Type for Car Travel */}
+              {activityType === 'transport-car' && (
+                <div>
+                  <Label className="text-sm sm:text-base">Fuel Type</Label>
+                  <Select value={fuelType} onValueChange={setFuelType}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select fuel type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fuelTypes.map((fuel) => (
+                        <SelectItem key={fuel.value} value={fuel.value}>
+                          {fuel.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Flight Class for Air Travel */}
+              {activityType === 'transport-flight' && (
+                <div>
+                  <Label className="text-sm sm:text-base">Flight Class</Label>
+                  <Select value={flightClass} onValueChange={setFlightClass}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select flight class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {flightClasses.map((classType) => (
+                        <SelectItem key={classType.value} value={classType.value}>
+                          {classType.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Energy Source for Electricity */}
+              {activityType === 'energy-electricity' && (
+                <div>
+                  <Label className="text-sm sm:text-base">Energy Source</Label>
+                  <Select value={energySource} onValueChange={setEnergySource}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select energy source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {energySources.map((source) => (
+                        <SelectItem key={source.value} value={source.value}>
+                          {source.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Food Type for Food Consumption */}
+              {(activityType === 'food-meat' || activityType === 'food-dairy') && (
+                <div>
+                  <Label className="text-sm sm:text-base">Food Type</Label>
+                  <Select value={foodType} onValueChange={setFoodType}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select food type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {foodTypes.map((food) => (
+                        <SelectItem key={food.value} value={food.value}>
+                          {food.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Number of Passengers for Transport */}
+              {(activityType === 'transport-car' || activityType === 'transport-flight') && (
+                <div>
+                  <Label className="text-sm sm:text-base">Number of Passengers</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="1"
+                    value={passengers}
+                    onChange={(e) => {
+                      setPassengers(e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (isNaN(value) || value < 1) {
+                        setPassengers('1');
+                      }
+                    }}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Emissions will be divided by the number of passengers
+                  </p>
+                </div>
+              )}
+
               {/* Date */}
               <div>
                 <Label className="text-sm sm:text-base">Date</Label>
@@ -231,7 +476,14 @@ const FootprintLog = () => {
               {/* Calculate Button */}
               <Button 
                 onClick={calculateEmissions}
-                disabled={!activityType || !quantity}
+                disabled={
+                  !activityType || 
+                  !quantity || 
+                  (activityType === 'transport-car' && !fuelType) ||
+                  (activityType === 'transport-flight' && !flightClass) ||
+                  (activityType === 'energy-electricity' && !energySource) ||
+                  ((activityType === 'food-meat' || activityType === 'food-dairy') && !foodType)
+                }
                 className="w-full btn-hero text-sm sm:text-base"
               >
                 <Calculator className="h-4 w-4 mr-2" />
