@@ -404,6 +404,14 @@ export const changePassword = asyncHandler(async (req, res) => {
 
   const user = await User.findById(req.user.id);
   
+  // Check if user is authenticated via Google - prevent password changes
+  if (user.googleId) {
+    return res.status(400).json({ 
+      message: 'Password cannot be changed for Google-authenticated accounts',
+      code: 'GOOGLE_PASSWORD_READONLY'
+    });
+  }
+  
   const isMatch = await user.comparePassword(currentPassword);
   if (!isMatch) {
     return res.status(401).json({ message: 'Current password is incorrect' });
@@ -497,7 +505,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     
     // Handle location update
     if (location) {
-      const locationParts = location.split(',').map(part => part.trim());
+      const locationParts = location.split(',').map(part => part.trim()).filter(part => part.length > 0);
       userInfoUpdate.location = {
         city: locationParts[0] || '',
         state: locationParts[1] || '',

@@ -677,7 +677,12 @@ const Settings = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="outline" className="justify-start" onClick={() => setShowChangePassword((v) => !v)}>
+                <Button 
+                  variant="outline" 
+                  className={`justify-start ${isGoogleAuth ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  onClick={() => !isGoogleAuth && setShowChangePassword((v) => !v)}
+                  disabled={isGoogleAuth}
+                >
                   <Shield className="h-4 w-4 mr-2" />
                   {t('Change Password')}
                 </Button>
