@@ -34,7 +34,7 @@ export default function Layout({ children }) {
   const monthlyGoal = isAuthenticated ? 75 : 0;
   const pathname = usePathname();
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1023 });
+  const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1024 });
   
   // Don't render the layout if logging out to prevent flash
   if (isLoggingOut) {
@@ -80,19 +80,71 @@ export default function Layout({ children }) {
       <header className="sticky top-0 z-50 bg-white border-b border-border/30 shadow-sm">
         <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-16 md:h-20 relative">
           {/* Logo and Navigation */}
-          {isMobile ? (
+          {isMobile || isTablet ? (
             <>
               {/* Hamburger menu for sidebar */}
               <Button variant="ghost" size="icon" className="p-2 sm:p-3 z-10" onClick={() => setSidebarOpen(true)}>
                 <Menu className="h-8 w-8 sm:h-10 sm:w-10" />
               </Button>
-              {/* Centered logo */}
+              {/* Centered logo with reduced width to prevent overlap */}
               <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
                 <img
                   src="/logo.png"
                   alt="GreenCommunity Logo"
-                  className="h-10 w-auto sm:h-12 sm:w-auto max-w-[140px] sm:max-w-[160px] object-contain"
+                  className="h-12 w-auto sm:h-14 sm:w-auto max-w-[140px] sm:max-w-[160px] object-contain"
                 />
+              </div>
+              {/* User Avatar for mobile/tablet - positioned on right with proper spacing */}
+              <div className="flex items-center ml-auto">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="focus:outline-none">
+                      <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-3 border-primary/30 hover:border-primary/60 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <AvatarImage src={user?.photo || ""} alt={name} />
+                        <AvatarFallback className="bg-gradient-primary text-black font-bold text-xs sm:text-sm">
+                          <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 sm:w-60 p-4 flex flex-col gap-3" align="end">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-2 border-primary/30">
+                        <AvatarImage src={user?.photo || ""} alt={name} />
+                        <AvatarFallback className="bg-gradient-primary text-black font-bold text-xs sm:text-sm">
+                          <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-semibold text-xs sm:text-sm text-foreground">{name}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">{city}, {country}</div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 mt-2">
+                      <Link href="/settings">
+                        <Button variant="outline" className="w-full text-xs sm:text-sm h-8 sm:h-9">Settings</Button>
+                      </Link>
+                      <Button 
+                        variant="destructive" 
+                        className="w-full flex items-center gap-2 text-xs sm:text-sm h-8 sm:h-9 bg-red-600 hover:bg-red-700 text-white" 
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                      >
+                        {isLoggingOut ? (
+                          <>
+                            <div className="h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Logging out...
+                          </>
+                        ) : (
+                          <>
+                            <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
+                            Log out
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </>
           ) : (
@@ -100,12 +152,12 @@ export default function Layout({ children }) {
               <img
                 src="/logo.png"
                 alt="GreenCommunity Logo"
-                className="h-12 w-auto md:h-16 lg:h-14 max-w-[180px] md:max-w-[280px] lg:max-w-[220px] object-contain"
+                className="h-14 w-auto md:h-18 lg:h-16 max-w-[200px] md:max-w-[300px] lg:max-w-[240px] object-contain"
               />
             </div>
           )}
           {/* Navigation Buttons (desktop only) */}
-          {!isMobile && (
+          {!isMobile && !isTablet && (
             <nav className="hidden lg:flex gap-0.5 md:gap-1 lg:gap-2 ml-2 md:ml-4 lg:ml-6">
               {sidebarItems.map((item) => (
                 <Link
@@ -124,7 +176,7 @@ export default function Layout({ children }) {
             </nav>
           )}
           {/* User Info and Profile (desktop only) */}
-          {!isMobile && (
+          {!isMobile && !isTablet && (
             <div className="flex items-center gap-1 md:gap-2 lg:gap-2">
               <div className="hidden lg:flex flex-col items-end">
                 <span className="text-xs md:text-sm font-semibold text-foreground">{name}</span>
@@ -172,7 +224,7 @@ export default function Layout({ children }) {
                     </Link>
                     <Button 
                       variant="destructive" 
-                      className="w-full flex items-center gap-2 text-xs md:text-sm lg:text-sm h-8 md:h-9 lg:h-10" 
+                      className="w-full flex items-center gap-2 text-xs md:text-sm lg:text-sm h-8 md:h-9 lg:h-10 bg-red-600 hover:bg-red-700 text-white" 
                       onClick={handleLogout}
                       disabled={isLoggingOut}
                     >
@@ -193,8 +245,8 @@ export default function Layout({ children }) {
               </Popover>
             </div>
           )}
-          {/* Sidebar for mobile */}
-          {isMobile && (
+          {/* Sidebar for mobile and tablet */}
+          {(isMobile || isTablet) && (
             <>
               {/* Sidebar Drawer */}
               <div>
@@ -221,17 +273,10 @@ export default function Layout({ children }) {
                       </Link>
                     ))}
                   </nav>
-                  <div className="mt-auto p-4 md:p-6 border-t flex flex-col items-center">
-                    <Avatar className="h-14 w-14 md:h-16 md:w-16 border-3 border-primary/30 mb-3">
-                      <AvatarImage src={user?.photo || ""} alt={name} />
-                      <AvatarFallback className="bg-gradient-primary text-black font-bold text-base md:text-lg">
-                        <User className="h-5 w-5 md:h-6 md:w-6" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm md:text-base text-muted-foreground">{name}</span>
+                  <div className="mt-auto p-4 md:p-6 border-t">
                     <Button 
                       variant="destructive" 
-                      className="w-full flex items-center gap-2 mt-3 text-sm md:text-base" 
+                      className="w-full flex items-center gap-2 text-sm md:text-base bg-red-600 hover:bg-red-700 text-white" 
                       onClick={handleLogout}
                       disabled={isLoggingOut}
                     >
