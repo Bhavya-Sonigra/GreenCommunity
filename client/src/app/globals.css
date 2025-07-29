@@ -375,4 +375,45 @@
   .seed-meter .CircularProgressbar-trail {
     stroke: var(--border);
   }
+
+  /* Map Mobile Responsive Styles */
+  .map-popup .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .map-popup .leaflet-popup-content {
+    margin: 0;
+    padding: 0;
+  }
+
+  .map-popup .leaflet-popup-tip {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Mobile-specific map adjustments */
+  @media (max-width: 640px) {
+    .map-popup .leaflet-popup-content-wrapper {
+      max-width: 280px;
+      min-width: 200px;
+    }
+    
+    .map-popup .leaflet-popup-content {
+      font-size: 12px;
+    }
+  }
+
+  /* Ensure map controls are touch-friendly on mobile */
+  @media (max-width: 768px) {
+    .leaflet-control-zoom a {
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      font-size: 18px;
+    }
+    
+    .leaflet-control-zoom {
+      margin: 10px;
+    }
+  }
 }
