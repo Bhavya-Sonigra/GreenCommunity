@@ -4,7 +4,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { Card } from '@/components/ui/card';
 
-export const ProjectCardSkeleton = () => {
+const ProjectCardSkeleton = () => {
   return (
     <Card className="card-gradient p-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -40,3 +40,5 @@ export const ProjectCardSkeleton = () => {
     </Card>
   );
 };
+
+export default ProjectCardSkeleton;

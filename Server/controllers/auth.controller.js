@@ -34,27 +34,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 
   const { name, email, password } = req.body;
-  const exists = await User.findOne({ email });
-  if (exists) return res.status(400).json({ message: 'Email already in use' });
 
-  const user = await User.create({ 
-    name, 
-    email, 
-    password, // Will be hashed by pre-save middleware
-    ipAddress: req.ip,
-    userAgent: req.get('User-Agent')
-  });
-
-  // Generate email verification token
-  const verificationToken = user.emailVerificationToken();
-  await user.save();
-
-  // Send verification email
-  try {
-    await emailService.sendEmailVerification(user.email, verificationToken, process.env.CLIENT_URL);
-  } catch (emailError) {
-    console.error('Email sending error:', emailError);
-    // Don't fail registration if email fails
   // Check if user exists - handle both verified and unverified accounts
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -120,7 +100,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     }
     throw error; // Re-throw the original error
   }
-}});
+});
 
 // User Login
 export const loginUser = asyncHandler(async (req, res) => {
@@ -141,14 +121,14 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    await user.loginAttempts();
+    await user.incLoginAttempts();
     // Add delay to prevent rapid brute force
     await new Promise(resolve => setTimeout(resolve, 1000));
     return res.status(401).json({ message: 'Invalid credentials.' });
   }
 
   // Reset login attempts on successful login
-  await user.loginAttempts();
+  await user.resetLoginAttempts();
   
   // Update last login info
   user.lastLogin = new Date();
@@ -273,7 +253,7 @@ export const requestPasswordReset = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: 'If the email exists, a verification code will be sent' });
   }
 
-  const resetCode = user.passwordResetCode();
+  const resetCode = user.generatePasswordResetCode();
   await user.save();
 
   try {
@@ -303,7 +283,7 @@ export const verifyResetCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.passwordResetCode(code);
+  const isValidCode = user.verifyPasswordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
@@ -328,13 +308,13 @@ export const updatePasswordWithCode = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Invalid verification code' });
   }
 
-  const isValidCode = user.passwordResetCode(code);
+  const isValidCode = user.verifyPasswordResetCode(code);
   if (!isValidCode) {
     return res.status(400).json({ message: 'Invalid or expired verification code' });
   }
 
   user.password = newPassword; // Will be hashed by pre-save middleware
-  user.passwordResetCode();
+  user.clearPasswordResetCode();
   await user.save();
 
   res.status(200).json({ message: 'Password updated successfully' });
@@ -372,10 +352,30 @@ export const resetPassword = asyncHandler(async (req, res) => {
 export const getCurrentUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   
-  // Include Google authentication status
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Fetch user info from separate database
+  const userInfo = await UserInfo.findByUserId(req.user.id);
+  
+  // Include Google authentication status and UserInfo data
   const userResponse = {
     ...user.toObject(),
-    isGoogleAuth: !!user.googleId
+    isGoogleAuth: !!user.googleId,
+    userInfo: userInfo ? {
+      name: userInfo.name,
+      phone: userInfo.phone,
+      bio: userInfo.bio,
+      location: userInfo.location,
+      profession: userInfo.profession,
+      dateOfBirth: userInfo.dateOfBirth,
+      gender: userInfo.gender,
+      preferences: userInfo.preferences,
+      notifications: userInfo.notifications,
+      profileCompletion: userInfo.profileCompletion,
+      formattedLocation: userInfo.getFormattedLocation()
+    } : null
   };
   
   res.status(200).json({ user: userResponse });
@@ -454,9 +454,6 @@ export const updateProfile = asyncHandler(async (req, res) => {
   } = req.body;
 
   try {
-    // Initialize UserInfo model if not already done
-    await initializeUserInfoModel();
-    
     const user = await User.findById(req.user.id);
     
     if (!user) {
@@ -566,24 +563,25 @@ export const updateNotificationPreferences = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Initialize notification preferences if they don't exist
-    if (!user.profile.notificationPreferences) {
-      user.profile.notificationPreferences = {};
-    }
+    // Get current userInfo or create default notifications object
+    let userInfo = await UserInfo.findByUserId(req.user.id);
+    let currentNotifications = userInfo?.notifications || {};
 
-    // Update notification preferences
+    // Update notification preferences using UserInfo model
     const notificationPreferences = {
-      emailUpdates: emailUpdates !== undefined ? emailUpdates : user.profile.notificationPreferences.emailUpdates,
-      challengeReminders: challengeReminders !== undefined ? challengeReminders : user.profile.notificationPreferences.challengeReminders,
-      weeklyReports: weeklyReports !== undefined ? weeklyReports : user.profile.notificationPreferences.weeklyReports,
-      communityActivity: communityActivity !== undefined ? communityActivity : user.profile.notificationPreferences.communityActivity,
-      marketingEmails: marketingEmails !== undefined ? marketingEmails : user.profile.notificationPreferences.marketingEmails,
-      mobilePush: mobilePush !== undefined ? mobilePush : user.profile.notificationPreferences.mobilePush,
-      socialActivity: socialActivity !== undefined ? socialActivity : user.profile.notificationPreferences.socialActivity
+      emailUpdates: emailUpdates !== undefined ? emailUpdates : currentNotifications.emailUpdates !== undefined ? currentNotifications.emailUpdates : true,
+      challengeReminders: challengeReminders !== undefined ? challengeReminders : currentNotifications.challengeReminders !== undefined ? currentNotifications.challengeReminders : true,
+      weeklyReports: weeklyReports !== undefined ? weeklyReports : currentNotifications.weeklyReports !== undefined ? currentNotifications.weeklyReports : true,
+      communityActivity: communityActivity !== undefined ? communityActivity : currentNotifications.communityActivity !== undefined ? currentNotifications.communityActivity : false,
+      marketingEmails: marketingEmails !== undefined ? marketingEmails : currentNotifications.marketingEmails !== undefined ? currentNotifications.marketingEmails : false,
+      mobilePush: mobilePush !== undefined ? mobilePush : currentNotifications.mobilePush !== undefined ? currentNotifications.mobilePush : true,
+      socialActivity: socialActivity !== undefined ? socialActivity : currentNotifications.socialActivity !== undefined ? currentNotifications.socialActivity : true
     };
 
-    user.profile.notificationPreferences = notificationPreferences;
-    await user.save();
+    // Update or create UserInfo record with notification preferences
+    const updatedUserInfo = await UserInfo.createOrUpdate(req.user.id, {
+      notifications: notificationPreferences
+    });
 
     res.status(200).json({
       message: 'Notification preferences updated successfully',
@@ -613,23 +611,24 @@ export const updateAppPreferences = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Initialize app preferences if they don't exist
-    if (!user.profile.appPreferences) {
-      user.profile.appPreferences = {};
-    }
+    // Get current userInfo or create default preferences object
+    let userInfo = await UserInfo.findByUserId(req.user.id);
+    let currentPreferences = userInfo?.preferences || {};
 
-    // Update app preferences
+    // Update app preferences using UserInfo model
     const appPreferences = {
-      theme: theme !== undefined ? theme : user.profile.appPreferences.theme || 'light',
-      language: language !== undefined ? language : user.profile.appPreferences.language || 'en',
-      currency: currency !== undefined ? currency : user.profile.appPreferences.currency || 'usd',
-      units: units !== undefined ? units : user.profile.appPreferences.units || 'metric',
-      privacy: privacy !== undefined ? privacy : user.profile.appPreferences.privacy || 'public',
-      dataSharing: dataSharing !== undefined ? dataSharing : user.profile.appPreferences.dataSharing || false
+      theme: theme !== undefined ? theme : currentPreferences.theme || 'light',
+      language: language !== undefined ? language : currentPreferences.language || 'en',
+      currency: currency !== undefined ? currency : currentPreferences.currency || 'usd',
+      units: units !== undefined ? units : currentPreferences.units || 'metric',
+      privacy: privacy !== undefined ? privacy : currentPreferences.privacy || 'public',
+      dataSharing: dataSharing !== undefined ? dataSharing : currentPreferences.dataSharing || false
     };
 
-    user.profile.appPreferences = appPreferences;
-    await user.save();
+    // Update or create UserInfo record with app preferences
+    const updatedUserInfo = await UserInfo.createOrUpdate(req.user.id, {
+      preferences: appPreferences
+    });
 
     res.status(200).json({
       message: 'App preferences updated successfully',
@@ -644,9 +643,6 @@ export const updateAppPreferences = asyncHandler(async (req, res) => {
 // Get User Profile and Settings
 export const getUserSettings = asyncHandler(async (req, res) => {
   try {
-    // Initialize UserInfo model if not already done
-    await initializeUserInfoModel();
-    
     const user = await User.findById(req.user.id).select('-password');
     
     if (!user) {

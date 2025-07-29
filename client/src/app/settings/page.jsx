@@ -86,25 +86,31 @@ const Settings = () => {
       // Check if user is authenticated via Google
       setIsGoogleAuth(userData.isGoogleAuth || false);
       
-      // Update profile data
+      // Update profile data - use userInfo from backend response
       setProfileData({
         name: userData.name || '',
         email: userData.email || '',
-        phone: userData.profile?.phone || '',
-        location: userData.profile?.location ? 
-          `${userData.profile.location.city || ''}, ${userData.profile.location.state || ''}, ${userData.profile.location.country || ''}`.replace(/^, |, $/g, '') : '',
-        bio: userData.profile?.bio || '',
+        phone: userData.userInfo?.phone || userData.profile?.phone || '',
+        location: userData.userInfo?.location ? 
+          `${userData.userInfo.location.city || ''}, ${userData.userInfo.location.state || ''}, ${userData.userInfo.location.country || ''}`.replace(/^, |, $/g, '') : 
+          (userData.profile?.location ? 
+            `${userData.profile.location.city || ''}, ${userData.profile.location.state || ''}, ${userData.profile.location.country || ''}`.replace(/^, |, $/g, '') : ''),
+        bio: userData.userInfo?.bio || userData.profile?.bio || '',
         joinDate: userData.createdAt || '',
-        preferredUnits: userData.profile?.preferredUnits || 'metric'
+        preferredUnits: userData.userInfo?.preferences?.units || userData.profile?.preferredUnits || 'metric'
       });
 
-      // Update notifications
-      if (userData.profile?.notificationPreferences) {
+      // Update notifications - use userInfo notifications or fallback to profile
+      if (userData.userInfo?.notifications) {
+        setNotifications(userData.userInfo.notifications);
+      } else if (userData.profile?.notificationPreferences) {
         setNotifications(userData.profile.notificationPreferences);
       }
 
-      // Update app preferences
-      if (userData.profile?.appPreferences) {
+      // Update app preferences - use userInfo preferences or fallback to profile
+      if (userData.userInfo?.preferences) {
+        setPreferences(userData.userInfo.preferences);
+      } else if (userData.profile?.appPreferences) {
         setPreferences(userData.profile.appPreferences);
       }
     } catch (error) {
@@ -163,12 +169,10 @@ const Settings = () => {
       const response = await authAPI.updateProfile({
         name: profileData.name,
         email: isGoogleAuth ? undefined : profileData.email, // Don't send email for Google users
-        profile: {
-          phone: profileData.phone,
-          bio: profileData.bio,
-          preferredUnits: profileData.preferredUnits,
-          location: locationData
-        }
+        phone: profileData.phone,
+        bio: profileData.bio,
+        preferredUnits: profileData.preferredUnits,
+        location: profileData.location
       });
       
       // Update user context
@@ -373,8 +377,8 @@ const Settings = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Metric">{t('Metric Units')}</SelectItem>
-                        <SelectItem value="Imperial">{t('Imperial Units')}</SelectItem>
+                        <SelectItem value="metric">{t('Metric Units')}</SelectItem>
+                        <SelectItem value="imperial">{t('Imperial Units')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -402,7 +406,9 @@ const Settings = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('Member Since')}</span>
-                      <span className="font-medium">{new Date(profileData.joinDate).toLocaleDateString()}</span>
+                      <span className="font-medium">
+                        {profileData.joinDate ? new Date(profileData.joinDate).toLocaleDateString() : 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('Total Eco Points')}</span>

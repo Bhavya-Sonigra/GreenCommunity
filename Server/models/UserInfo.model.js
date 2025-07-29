@@ -102,6 +102,10 @@ const userInfoSchema = new mongoose.Schema({
       type: String,
       enum: ['light', 'dark', 'system'],
       default: 'light'
+    },
+    dataSharing: {
+      type: Boolean,
+      default: false
     }
   },
   
@@ -182,10 +186,10 @@ userInfoSchema.pre('save', function(next) {
 // Methods to format location display
 userInfoSchema.methods.getFormattedLocation = function() {
   const parts = [];
-  if (this.location?.city) parts.push(this.location.city);
-  if (this.location?.state) parts.push(this.location.state);
-  if (this.location?.country) parts.push(this.location.country);
-  return parts.join(', ') || 'Location not specified';
+  if (this.location?.city && this.location.city.trim()) parts.push(this.location.city.trim());
+  if (this.location?.state && this.location.state.trim()) parts.push(this.location.state.trim());
+  if (this.location?.country && this.location.country.trim()) parts.push(this.location.country.trim());
+  return parts.length > 0 ? parts.join(', ') : 'Location not specified';
 };
 
 userInfoSchema.methods.updateLastActive = function() {
@@ -212,11 +216,18 @@ userInfoSchema.statics.createOrUpdate = function(userId, updateData) {
 
 // Create UserInfo model using the USER_INFO database connection
 let UserInfo;
+let isInitialized = false;
 
 const initializeUserInfoModel = async () => {
+  // Return existing model if already initialized
+  if (UserInfo && isInitialized) {
+    return UserInfo;
+  }
+  
   try {
     const userInfoConnection = await getConnection('USER_INFO_DB');
     UserInfo = userInfoConnection.model('UserInfo', userInfoSchema);
+    isInitialized = true;
     console.log('✅ UserInfo model initialized with USER_INFO database');
     return UserInfo;
   } catch (error) {
@@ -225,8 +236,10 @@ const initializeUserInfoModel = async () => {
   }
 };
 
-// Initialize the model
-initializeUserInfoModel();
+// Initialize the model only once
+if (!isInitialized) {
+  initializeUserInfoModel();
+}
 
 export { UserInfo, initializeUserInfoModel };
 export default UserInfo;
