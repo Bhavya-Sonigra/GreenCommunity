@@ -24,6 +24,8 @@ import {
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+import ProtectedLayout from '@/components/ProtectedLayout';
+
 const FootprintLog = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activityType, setActivityType] = useState('');
@@ -564,4 +566,10 @@ const FootprintLog = () => {
   );
 };
 
-export default FootprintLog;
+export default function FootprintLogPage() {
+  return (
+    <ProtectedLayout>
+      <FootprintLog />
+    </ProtectedLayout>
+  );
+}

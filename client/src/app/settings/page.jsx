@@ -25,7 +25,8 @@ import {
   Trash2,
   Save,
   Upload,
-  Loader2
+  Loader2,
+  QrCode
 } from 'lucide-react';
 import { usePreferences } from "@/context/PreferencesContext";
 import { useTranslation } from "@/context/PreferencesContext";
@@ -33,9 +34,11 @@ import { authAPI } from '@/lib/api';
 import { useUser } from '@/context/UserContext';
 import toast from 'react-hot-toast';
 
+import ProtectedLayout from '@/components/ProtectedLayout';
+
 const Settings = () => {
   const { t } = useTranslation();
-  const { user, updateUser } = useUser();
+  const { user, updateUser, refreshUser, isLoading: userLoading } = useUser();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -71,10 +74,18 @@ const Settings = () => {
   });
   const [passwordMessage, setPasswordMessage] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [show2FADialog, setShow2FADialog] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
 
-  // Load user settings on component mount
+  // Load user settings on component mount - direct approach
   useEffect(() => {
-    loadUserSettings();
+    const initializeSettings = async () => {
+      // Always try to load settings directly
+      await loadUserSettings();
+    };
+    
+    initializeSettings();
   }, []);
 
   const loadUserSettings = async () => {
@@ -92,9 +103,13 @@ const Settings = () => {
         email: userData.email || '',
         phone: userData.userInfo?.phone || userData.profile?.phone || '',
         location: userData.userInfo?.location ? 
-          `${userData.userInfo.location.city || ''}, ${userData.userInfo.location.state || ''}, ${userData.userInfo.location.country || ''}`.replace(/^, |, $/g, '') : 
+          [userData.userInfo.location.city, userData.userInfo.location.state, userData.userInfo.location.country]
+            .filter(part => part && part.trim())
+            .join(', ') : 
           (userData.profile?.location ? 
-            `${userData.profile.location.city || ''}, ${userData.profile.location.state || ''}, ${userData.profile.location.country || ''}`.replace(/^, |, $/g, '') : ''),
+            [userData.profile.location.city, userData.profile.location.state, userData.profile.location.country]
+              .filter(part => part && part.trim())
+              .join(', ') : ''),
         bio: userData.userInfo?.bio || userData.profile?.bio || '',
         joinDate: userData.createdAt || '',
         preferredUnits: userData.userInfo?.preferences?.units || userData.profile?.preferredUnits || 'metric'
@@ -175,9 +190,12 @@ const Settings = () => {
         location: profileData.location
       });
       
-      // Update user context
+      // Update user context with fresh data from server
       updateUser(response.user);
       toast.success('Profile updated successfully!');
+      
+      // Refresh user data to ensure we have the latest information including formatted location
+      await refreshUser();
     } catch (error) {
       console.error('Error updating profile:', error);
       
@@ -251,8 +269,67 @@ const Settings = () => {
     }
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setIsSaving(true);
+      const response = await authAPI.uploadAvatar(file);
+      updateUser(response.user); // Update user context with new avatar URL
+      toast.success('Profile picture updated!');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error(error.message || 'Failed to upload profile picture');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const exportData = () => {
     alert('Your data export has been prepared and will be sent to your email.');
+  };
+
+  const handle2FASetup = async () => {
+    try {
+      const { qrCodeUrl } = await authAPI.generate2FASecret();
+      setQrCodeUrl(qrCodeUrl);
+      setShow2FADialog(true);
+    } catch (error) {
+      toast.error('Failed to generate 2FA secret');
+    }
+  };
+
+  const handle2FAVerify = async () => {
+    try {
+      const response = await authAPI.verify2FAToken(twoFactorCode);
+      toast.success(response.message || '2FA enabled successfully!');
+
+      // Manually update the user context after successful verification
+      if (user) {
+        const updatedUser = { ...user, twoFactorEnabled: true };
+        updateUser(updatedUser);
+      }
+
+      setShow2FADialog(false);
+    } catch (error) {
+      toast.error('Invalid 2FA token');
+    }
+  };
+
+  const handle2FADisable = async () => {
+    try {
+      const response = await authAPI.disable2FA();
+      toast.success(response.message || '2FA disabled successfully');
+      
+      // Manually update the user context after successful disable
+      if (user) {
+        const updatedUser = { ...user, twoFactorEnabled: false };
+        updateUser(updatedUser);
+      }
+    } catch (error) {
+      toast.error('Failed to disable 2FA');
+    }
   };
 
   const deleteAccount = () => {
@@ -261,10 +338,10 @@ const Settings = () => {
     }
   };
 
-  if (preferences.privacy === 'private') {
+  if (userLoading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
-        {t('profile_private')}
+        Loading user data...
       </div>
     );
   }
@@ -296,15 +373,32 @@ const Settings = () => {
                 <CardContent className="space-y-6">
                   <div className="flex items-center gap-6">
                     <Avatar className="h-20 w-20">
-                      <AvatarImage src="" alt="Profile" />
+                      <AvatarImage src={user?.userInfo?.avatar?.url || null} alt="Profile" />
                       <AvatarFallback className="bg-gradient-primary text-white text-xl font-semibold">
-                        AJ
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="space-y-2">
-                      <Button variant="outline" size="sm">
-                        <Camera className="h-4 w-4 mr-2" />
-                        {t('Change Photo')}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                        id="avatar-upload"
+                        disabled={isSaving}
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => document.getElementById('avatar-upload')?.click()}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Camera className="h-4 w-4 mr-2" />
+                        )}
+                        {isSaving ? 'Uploading...' : t('Change Photo')}
                       </Button>
                       <p className="text-sm text-muted-foreground">{t('Max Size 5mb')}</p>
                     </div>
@@ -531,7 +625,7 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <SettingsIcon className="h-5 w-5" />
-                {t('app_preferences')}
+                {t('App Preferences')}
               </CardTitle>
               <CardDescription>{t('customize_ecoaction_experience')}</CardDescription>
             </CardHeader>
@@ -595,7 +689,7 @@ const Settings = () => {
                 <div className="space-y-4">
                   <div>
                     <Label>{t('Profile Visibility')}</Label>
-                    <Select value={preferences.privacy} onValueChange={(value) => handlePreferenceChange('Privacy', value)}>
+                    <Select value={preferences.privacy} onValueChange={(value) => handlePreferenceChange('privacy', value)}>
                       <SelectTrigger className="mt-1">
                         <SelectValue />
                       </SelectTrigger>
@@ -686,10 +780,17 @@ const Settings = () => {
                   <Shield className="h-4 w-4 mr-2" />
                   {t('Change Password')}
                 </Button>
-                <Button variant="outline" className="justify-start">
-                  <Phone className="h-4 w-4 mr-2" />
-                  {t('Two Factor Authentication')}
-                </Button>
+                {user?.twoFactorEnabled ? (
+                  <Button variant="outline" className="justify-start" onClick={handle2FADisable}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    {t('Disable 2FA')}
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="justify-start" onClick={handle2FASetup}>
+                    <QrCode className="h-4 w-4 mr-2" />
+                    {t('Enable 2FA')}
+                  </Button>
+                )}
                 <Button variant="outline" className="justify-start">
                   <Mail className="h-4 w-4 mr-2" />
                   {t('Login Notifications')}
@@ -736,8 +837,35 @@ const Settings = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {show2FADialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-xl font-bold mb-4">Enable Two-Factor Authentication</h2>
+            <p className="mb-4">Scan the QR code with your authenticator app and enter the code below to verify.</p>
+            <img src={qrCodeUrl} alt="2FA QR Code" className="mx-auto mb-4" />
+            <Input
+              type="text"
+              value={twoFactorCode}
+              onChange={(e) => setTwoFactorCode(e.target.value)}
+              placeholder="Enter 2FA code"
+              className="mb-4"
+            />
+            <div className="flex justify-end gap-4">
+              <Button variant="outline" onClick={() => setShow2FADialog(false)}>Cancel</Button>
+              <Button onClick={handle2FAVerify}>Verify</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Settings;
+export default function SettingsPage() {
+  return (
+    <ProtectedLayout>
+      <Settings />
+    </ProtectedLayout>
+  );
+}

@@ -1,0 +1,38 @@
+services:
+  # Server (Backend API)
+  server:
+    build:
+      context: ./Server
+      dockerfile: Dockerfile
+    container_name: green-community-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./Server/.env
+    networks:
+      - green-community-network
+    volumes:
+      - ./Server:/usr/src/app
+      - /usr/src/app/node_modules
+
+  # Client (Frontend)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: green-community-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://server:5000
+    depends_on:
+      - server
+    networks:
+      - green-community-network
+
+networks:
+  green-community-network:
+    driver: bridge

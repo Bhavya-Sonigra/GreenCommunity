@@ -1,5 +1,14 @@
-// API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// API Configuration - Handle both development and container environments
+const API_BASE_URL = (() => {
+  // In browser, use the current host's API or fallback to localhost
+  if (typeof window !== 'undefined') {
+    // Client-side: Use relative path for API calls (handled by Next.js rewrites)
+    return '';
+  }
+  
+  // Server-side: Use environment variable or default
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+})();
 
 // Create a configured fetch function
 const apiRequest = async (endpoint, options = {}) => {
@@ -54,7 +63,7 @@ const apiRequest = async (endpoint, options = {}) => {
       throw new Error('Network error. Please check your connection and try again.');
     }
     
-    // Only log truly unexpected errors to console
+    // Only log truly unexpected errors to console (not user-facing validation errors)
     if (!isExpectedError(error)) {
       console.error('Unexpected API error:', error);
     }
@@ -77,7 +86,16 @@ function isExpectedError(error) {
     'Network error',
     'Server response error',
     'Email already in use',
-    'Passwords do not match'
+    'Passwords do not match',
+    'Invalid 2FA code',
+    'Invalid 2FA token',
+    'Invalid verification code',
+    'Invalid or expired verification code',
+    'Current password is incorrect',
+    'Wrong password',
+    'Wrong email',
+    'User not found',
+    'Account locked'
   ];
   
   return expectedMessages.some(msg => error.message.includes(msg));
@@ -188,6 +206,64 @@ export const authAPI = {
 
   googleLogin: () => {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
+  },
+
+  uploadAvatar: async (file) => {
+    const url = `${API_BASE_URL}/api/avatar/upload`;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        // Don't set Content-Type for FormData - let browser set it
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+      throw new Error(errorData.message || 'Failed to upload image');
+    }
+
+    return await response.json();
+  },
+
+  deleteAvatar: async () => {
+    return apiRequest('/api/avatar', {
+      method: 'DELETE',
+    });
+  },
+
+  // Two-Factor Authentication methods
+  generate2FASecret: async () => {
+    return apiRequest('/api/auth/2fa/generate', {
+      method: 'POST',
+    });
+  },
+
+  verify2FAToken: async (token) => {
+    return apiRequest('/api/auth/2fa/verify', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  disable2FA: async () => {
+    return apiRequest('/api/auth/2fa/disable', {
+      method: 'POST',
+    });
+  },
+
+  verify2FALogin: async (tempToken, token) => {
+    return apiRequest('/api/auth/2fa/verify-login', {
+      method: 'POST',
+      body: JSON.stringify({ tempToken, token }),
+    });
   },
 };
 

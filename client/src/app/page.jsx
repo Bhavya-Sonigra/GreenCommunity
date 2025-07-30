@@ -154,12 +154,12 @@ const LandingPage = () => {
           {/* Right: Sign In and Sign Up Buttons */}
           <div className="flex gap-2 sm:gap-3 md:gap-4">
             <Link href="/login">
-              <button className="border border-green-600 text-green-600 hover:bg-green-50 font-semibold px-3 sm:px-5 md:px-6 py-2 md:py-3 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200 hover:underline text-sm sm:text-base md:text-lg" style={{fontFamily: "'Inter', sans-serif"}}>
+              <button className="border border-green-600 text-green-600 hover:bg-green-50 font-semibold px-3 sm:px-4 md:px-5 py-1.5 md:py-2 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200 hover:underline text-sm sm:text-base md:text-base" style={{fontFamily: "'Inter', sans-serif"}}>
                 Sign In
               </button>
             </Link>
             <Link href="/Signup">
-              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 sm:px-6 md:px-8 py-2 md:py-3 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200 hover:underline text-sm sm:text-base md:text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 sm:px-4 md:px-5 py-1.5 md:py-2 rounded-full shadow transition-all transform hover:scale-105 hover:shadow-lg duration-200 hover:underline text-sm sm:text-base md:text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Sign Up
               </button>
             </Link>
@@ -317,7 +317,7 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="w-full bg-white py-16 sm:py-36 md:py-40 relative z-10">
+      <section className="w-full bg-white py-12 sm:py-16 md:py-20 relative z-10">
         <div className="absolute inset-0 bg-white z-0"></div>
         <motion.div
           className="relative z-10"
@@ -336,11 +336,11 @@ const LandingPage = () => {
             {/* Using a map to simplify and animate each feature card */}
             {features.slice(0, 4).map((feature, index) => (
               <motion.div key={index} className="flex flex-col items-start" variants={itemVariants}>
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-md bg-green-600 flex items-center justify-center mb-2 md:mb-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-md bg-green-600 flex items-center justify-center mb-2">
                   <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <div className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2">{feature.title}</div>
-                <div className="text-sm md:text-base text-gray-600 mb-2 md:mb-3">
+                <div className="text-base md:text-lg font-semibold text-gray-900 mb-1">{feature.title}</div>
+                <div className="text-sm md:text-base text-gray-600 mb-2">
                   {feature.description}
                 </div>
                 <a href="#" className="text-green-600 font-medium hover:underline flex items-center gap-1 mt-1 text-sm md:text-base">Learn more <span>&rarr;</span></a>
@@ -361,7 +361,7 @@ const LandingPage = () => {
             transition={{ duration: 0.5 }}
           >
             <h3 className="text-base sm:text-lg md:text-xl font-semibold text-green-600 mb-2 md:mb-3">Drive Real Change</h3>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800 px-4 md:px-8">A Community Platform for Climate Action</h2>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-800">A Community Platform for Climate Action</h2>
           </motion.div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10 max-w-6xl mx-auto">
             {/* Left Column - Community Engagement */}

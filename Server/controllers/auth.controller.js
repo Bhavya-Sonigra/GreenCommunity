@@ -7,6 +7,10 @@ import crypto from 'node:crypto';
 import { validationResult } from 'express-validator';
 import emailService from '../services/email.service.js';
 import { generateJwtId, hashData, calculateDelay } from '../utils/security.js';
+import { upload, deleteImage, cloudinary } from '../config/cloudinary.js';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
+import { isTestingMode } from '../config/testing.js';
 
 
 // Generate JWT token with additional security
@@ -130,6 +134,18 @@ export const loginUser = asyncHandler(async (req, res) => {
   // Reset login attempts on successful login
   await user.resetLoginAttempts();
   
+  // Check if 2FA is enabled for this user
+  if (user.twoFactorEnabled) {
+    // Store temporary login data (don't generate final token yet)
+    const tempToken = generateToken(user._id, 'temp-2fa');
+    
+    return res.status(200).json({
+      requires2FA: true,
+      tempToken: tempToken,
+      message: 'Please enter your 2FA code'
+    });
+  }
+  
   // Update last login info
   user.lastLogin = new Date();
   user.ipAddress = req.ip;
@@ -154,7 +170,8 @@ export const loginUser = asyncHandler(async (req, res) => {
       name: user.name, 
       email: user.email,
       isEmailVerified: user.isEmailVerified,
-      role: user.role
+      role: user.role,
+      twoFactorEnabled: user.twoFactorEnabled
     }
   });
 });
@@ -367,6 +384,7 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
       name: userInfo.name,
       phone: userInfo.phone,
       bio: userInfo.bio,
+      avatar: userInfo.avatar,
       location: userInfo.location,
       profession: userInfo.profession,
       dateOfBirth: userInfo.dateOfBirth,
@@ -537,6 +555,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
           name: userInfo.name,
           phone: userInfo.phone,
           bio: userInfo.bio,
+          avatar: userInfo.avatar,
           location: userInfo.location,
           profession: userInfo.profession,
           dateOfBirth: userInfo.dateOfBirth,
@@ -675,6 +694,7 @@ export const getUserSettings = asyncHandler(async (req, res) => {
           name: userInfo.name,
           phone: userInfo.phone,
           bio: userInfo.bio,
+          avatar: userInfo.avatar,
           location: userInfo.location,
           profession: userInfo.profession,
           dateOfBirth: userInfo.dateOfBirth,
@@ -690,4 +710,147 @@ export const getUserSettings = asyncHandler(async (req, res) => {
     console.error('Get user settings error:', error);
     res.status(500).json({ message: 'Error fetching user settings' });
   }
+});
+
+// Two-Factor Authentication Functions
+export const generate2FASecret = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    const secret = speakeasy.generateSecret({ name: `GreenCommunity:${user.email}` });
+    user.twoFactorSecret = secret.base32;
+    user.twoFactorEnabled = false; // It should be false until verified
+    await user.save();
+
+    // Generate QR code URL that Google Authenticator understands
+    const otpauthUrl = speakeasy.otpauthURL({
+      secret: secret.base32,
+      label: `GreenCommunity:${user.email}`,
+      issuer: 'GreenCommunity',
+      encoding: 'base32'
+    });
+
+    QRCode.toDataURL(otpauthUrl, (err, data_url) => {
+      if (err) {
+        console.error('QR Code Generation Error:', err);
+        return res.status(500).json({ message: 'Error generating QR code' });
+      }
+      res.json({ qrCodeUrl: data_url });
+    });
+});
+
+export const verify2FAToken = asyncHandler(async (req, res) => {
+    const { token } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    const verified = speakeasy.totp.verify({
+        secret: user.twoFactorSecret,
+        encoding: 'base32',
+        token: token
+    });
+
+    if (verified) {
+        user.twoFactorEnabled = true;
+        await user.save();
+        res.json({ message: '2FA enabled successfully' });
+    } else {
+        res.status(400).json({ message: 'Invalid 2FA token' });
+    }
+});
+
+export const disable2FA = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.twoFactorEnabled = false;
+    user.twoFactorSecret = undefined;
+    await user.save();
+
+    res.json({ message: '2FA disabled successfully' });
+});
+
+// Verify 2FA during login
+export const verify2FALogin = asyncHandler(async (req, res) => {
+    const { tempToken, token } = req.body;
+    
+    if (!tempToken || !token) {
+        return res.status(400).json({ message: 'Temporary token and 2FA code are required' });
+    }
+    
+    try {
+        // Verify the temporary token
+        const decoded = jwt.verify(tempToken, process.env.JWT_SECRET);
+        
+        if (decoded.role !== 'temp-2fa' && decoded.role !== 'temp-2fa-google') {
+            return res.status(401).json({ message: 'Invalid temporary token' });
+        }
+        
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Handle testing mode for Google OAuth users
+        if (decoded.role === 'temp-2fa-google' && isTestingMode()) {
+            // In testing mode, accept specific test codes for Google OAuth users
+            const testCodes = ['123456', '000000', '111111', '999999'];
+            if (!testCodes.includes(token)) {
+                return res.status(400).json({ message: `Invalid test code. Valid codes: ${testCodes.join(', ')}` });
+            }
+            // Skip TOTP verification for testing
+        } else {
+            // Normal 2FA verification
+            const verified = speakeasy.totp.verify({
+                secret: user.twoFactorSecret,
+                encoding: 'base32',
+                token: token
+            });
+            
+            if (!verified) {
+                return res.status(400).json({ message: 'Invalid 2FA code' });
+            }
+        }
+        
+        // Update last login info
+        user.lastLogin = new Date();
+        user.ipAddress = req.ip;
+        user.userAgent = req.get('User-Agent');
+        await user.save();
+        
+        // Generate final token
+        const finalToken = generateToken(user._id);
+        
+        // Set HTTP-only cookie for security
+        res.cookie('authToken', finalToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+        
+        res.status(200).json({
+            message: 'Login successful',
+            token: finalToken,
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email,
+                isEmailVerified: user.isEmailVerified,
+                role: user.role,
+                twoFactorEnabled: user.twoFactorEnabled
+            }
+        });
+        
+    } catch (error) {
+        console.error('2FA verification error:', error);
+        return res.status(401).json({ message: 'Invalid or expired temporary token' });
+    }
 });

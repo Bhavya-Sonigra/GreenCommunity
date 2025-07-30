@@ -10,6 +10,7 @@ import './config/passport.js';
 import { connectAllDatabases } from './config/databases.js';
 import authRoutes from './routes/auth.routes.js';
 import marketplaceRoutes from './routes/marketplace.routes.js';
+import avatarRoutes from './routes/avatar.routes.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -101,6 +102,7 @@ app.use(passport.session());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/avatar', avatarRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

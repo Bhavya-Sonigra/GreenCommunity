@@ -31,6 +31,7 @@ import 'react-date-range/dist/theme/default.css';
 import { usePreferences, useTranslation } from "@/context/PreferencesContext";
 import DashboardSkeleton from '@/components/DashboardSkeleton';
 import { Calendar as CustomCalendar } from '@/components/ui/calendar';
+import Link from 'next/link';
 
 const translations = {
   en: {
@@ -70,6 +71,8 @@ const getGreetingKey = () => {
   if (hour < 18) return 'greeting_afternoon';
   return 'greeting_evening';
 };
+
+import ProtectedLayout from '@/components/ProtectedLayout';
 
 const Dashboard = () => {
   const { user, isLoading } = useUser();
@@ -129,8 +132,8 @@ const Dashboard = () => {
       {/* Enhanced Header */}
       <div className="space-y-3 sm:space-y-4 md:space-y-5 animate-fade-in">
         <div>
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gradient">{t(greetingKey)}, {name}!</h1>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <h1 className="text-2xl sm:text-4xl md:text-4xl font-bold text-gradient mb-1">{t(greetingKey)}, {name}!</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Here's your environmental impact overview</p>
             {(user?.userInfo?.formattedLocation || user?.userInfo?.location) && (
               <div className="flex items-center gap-2 text-sm sm:text-base text-muted-foreground">
@@ -402,22 +405,28 @@ const Dashboard = () => {
                 </CardTitle>
                 <CardDescription className="text-sm md:text-base">Track your impact today</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4 md:space-y-5 p-4 md:p-6">
-                <Button className="w-full justify-start h-12 sm:h-14 md:h-16 text-base sm:text-lg md:text-xl font-semibold btn-professional group">
-                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
-                  Log Activity
-                  <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button className="w-full justify-start h-12 sm:h-14 md:h-16 text-base sm:text-lg md:text-xl font-semibold btn-professional group">
-                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
-                  Offset Emissions
-                  <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button className="w-full justify-start h-12 sm:h-14 md:h-16 text-base sm:text-lg md:text-xl font-semibold btn-professional group">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
-                  Join Challenge
-                  <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ml-auto group-hover:translate-x-1 transition-transform" />
-                </Button>
+              <CardContent className="space-y-3 sm:space-y-4 md:space-y-4 p-3 md:p-4">
+                <Link href="/footprintlog" className="block">
+                  <Button className="w-full justify-start h-12 sm:h-14 md:h-16 text-base sm:text-lg md:text-xl font-semibold btn-professional group">
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
+                    Log Activity
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ml-auto group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Link href="/projects" className="block">
+                  <Button className="w-full justify-start h-12 sm:h-14 md:h-16 text-base sm:text-lg md:text-xl font-semibold btn-professional group">
+                    <Zap className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
+                    Offset Emissions
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ml-auto group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Link href="/community" className="block">
+                  <Button className="w-full justify-start h-12 sm:h-14 md:h-16 text-base sm:text-lg md:text-xl font-semibold btn-professional group">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mr-2 sm:mr-3 group-hover:scale-110 transition-transform" />
+                    Join Challenge
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ml-auto group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
@@ -473,4 +482,10 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default function DashboardPage() {
+  return (
+    <ProtectedLayout>
+      <Dashboard />
+    </ProtectedLayout>
+  );
+}

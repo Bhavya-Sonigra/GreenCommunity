@@ -15,6 +15,42 @@ export function UserProvider({ children }) {
   const updateUser = (userData) => {
     setUser(userData);
     setIsLoading(false);
+    
+    // Persist user data to localStorage for better session management
+    if (typeof window !== 'undefined' && userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+  };
+
+  const loginAndSetUser = async (loginFunction) => {
+    const response = await loginFunction();
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+      await refreshUser();
+    }
+    return response;
+  };
+  
+  // Function to refresh user data
+  const refreshUser = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+    
+    try {
+      setIsLoading(true);
+      const data = await authAPI.getCurrentUser();
+      setUser(data.user);
+      
+      // Update localStorage with fresh data
+      if (data.user) {
+        localStorage.setItem('userData', JSON.stringify(data.user));
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.warn('Failed to refresh user data:', error);
+      setIsLoading(false);
+    }
   };
   
   // Function to clear user on logout
@@ -23,6 +59,7 @@ export function UserProvider({ children }) {
     setIsLoading(false);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
+      localStorage.removeItem('userData');
       // Clear any other user-related data from localStorage if needed
       // localStorage.removeItem('userPreferences');
     }
@@ -55,6 +92,18 @@ export function UserProvider({ children }) {
       }
       
       if (!token) {
+        // Check if we have cached user data
+        const cachedUserData = localStorage.getItem('userData');
+        if (cachedUserData) {
+          try {
+            const userData = JSON.parse(cachedUserData);
+            setUser(userData);
+            setIsLoading(false);
+            return;
+          } catch (e) {
+            localStorage.removeItem('userData');
+          }
+        }
         setUser(null);
         setIsLoading(false);
         return;
@@ -63,6 +112,12 @@ export function UserProvider({ children }) {
       try {
         const data = await authAPI.getCurrentUser();
         setUser(data.user); // The API returns { user: userData }
+        
+        // Also update localStorage with fresh data
+        if (data.user) {
+          localStorage.setItem('userData', JSON.stringify(data.user));
+        }
+        
         setIsLoading(false);
       } catch (error) {
         // Silently handle authentication errors to avoid console spam
@@ -76,6 +131,7 @@ export function UserProvider({ children }) {
             error.message?.includes('401') ||
             error.message?.includes('403')) {
           localStorage.removeItem('token');
+          localStorage.removeItem('userData');
         }
         setUser(null);
         setIsLoading(false);
@@ -85,7 +141,7 @@ export function UserProvider({ children }) {
   }, [isClient]);
 
   return (
-    <UserContext.Provider value={{ user, updateUser, clearUser, isLoading }}>
+    <UserContext.Provider value={{ user, updateUser, loginAndSetUser, refreshUser, clearUser, isLoading }}>
       {children}
     </UserContext.Provider>
   );
