@@ -126,12 +126,12 @@ const Projects = () => {
 
   const regions = [
     { value: 'all', label: 'All Regions' },
-    { value: 'north-america', label: 'North America' },
-    { value: 'south-america', label: 'South America' },
-    { value: 'europe', label: 'Europe' },
-    { value: 'africa', label: 'Africa' },
-    { value: 'asia', label: 'Asia' },
-    { value: 'oceania', label: 'Oceania' },
+    { value: 'north-india', label: 'North India' },
+    { value: 'south-india', label: 'South India' },
+    { value: 'west-india', label: 'West India' },
+    { value: 'east-india', label: 'East India' },
+    { value: 'central-india', label: 'Central India' },
+    { value: 'northeast-india', label: 'Northeast India' },
   ];
 
   const projectTypes = [
@@ -145,127 +145,127 @@ const Projects = () => {
   const projects = [
     {
       id: 1,
-      name: 'Amazon Rainforest Restoration',
-      location: 'Brazil, South America',
+      name: 'Sundarbans Mangrove Restoration',
+      location: 'West Bengal, India',
       type: 'forestry',
-      region: 'south-america',
+      region: 'east-india',
       image: "/tree1.jpg",
-      coordinates: [-60.0, -3.0], // Brazil coordinates
-      description: 'Large-scale reforestation project protecting and restoring 50,000 hectares of Amazon rainforest',
-      co2Removed: 125000,
-      co2PerRupee: 0.00036,  // Adjusted for INR (0.03/83)
-      totalFunding: 207500000, // 2.5M USD * 83
-      currentFunding: 155625000, // 1.875M USD * 83,
-      contributors: 15420,
-      timeRemaining: '8 months',
+      coordinates: [88.6, 22.2], // Sundarbans coordinates
+      description: 'Large-scale mangrove restoration project in the Sundarbans, protecting vital ecosystems.',
+      co2Removed: 142000,
+      co2PerRupee: 0.0005,  // Adjusted
+      totalFunding: 165000000, // Example funding
+      currentFunding: 123750000, // Example current funding
+      contributors: 15230,
+      timeRemaining: '9 months',
       verified: true,
       certifications: ['Gold Standard', 'VCS'],
       featured: false,
       benefits: [
         'Biodiversity protection',
-        'Indigenous community support',
-        'Soil conservation',
-        'Water cycle regulation'
+        'Community support',
+        'Coastal protection',
+        'Fisheries development'
       ]
     },
     {
       id: 2,
-      name: 'Wind Farm Development',
-      location: 'Texas, USA',
+      name: 'Solar Power Expansion',
+      location: 'Rajasthan, India',
       type: 'renewable',
-      region: 'north-america',
+      region: 'west-india',
       image: "/tree2.jpg",
-      coordinates: [-97.0, 31.0], // Texas coordinates
-      description: 'Clean energy generation through wind turbines, providing renewable power to 25,000 homes',
-      co2Removed: 75000,
-      co2PerRupee: 0.00027, // Adjusted for INR (0.022/83)
-      totalFunding: 415000000, // 5M USD * 83
-      currentFunding: 265600000, // 3.2M USD * 83,
-      contributors: 8765,
-      timeRemaining: '12 months',
+      coordinates: [73.5, 26.9], // Rajasthan coordinates
+      description: 'Installing solar panels for renewable energy generation across Rajasthan.',
+      co2Removed: 98000,
+      co2PerRupee: 0.00034, // Adjusted
+      totalFunding: 430000000, // Example funding
+      currentFunding: 280000000, // Example current funding
+      contributors: 9250,
+      timeRemaining: '15 months',
       verified: true,
-      certifications: ['CDM', 'ACR'],
-      featured: false,
+      certifications: ['MNRE', 'SECI'],
+      featured: true,
       benefits: [
-        'Clean energy generation',
+        'Clean energy',
         'Job creation',
         'Energy independence',
-        'Community investment'
+        'Infrastructure improvement'
       ]
     },
     {
       id: 3,
-      name: 'Ocean Kelp Forest Restoration',
-      location: 'California, USA',
+      name: 'Ganga Water Conservation',
+      location: 'Uttar Pradesh, India',
       type: 'water',
-      region: 'north-america',
+      region: 'north-india',
       image: "/tree3.jpg",
-      coordinates: [-120.0, 36.0], // California coordinates
-      description: 'Restoring underwater kelp forests to sequester carbon and support marine ecosystems',
-      co2Removed: 45000,
-      co2PerRupee: 0.00047, // Adjusted for INR (0.039/83)
-      totalFunding: 66400000, // 800K USD * 83
-      currentFunding: 43160000, // 520K USD * 83,
-      contributors: 3240,
-      timeRemaining: '6 months',
+      coordinates: [81.0, 26.8], // Ganga coordinates
+      description: 'Conserving water resources and improving water quality in the Ganga basin.',
+      co2Removed: 50000,
+      co2PerRupee: 0.00042, // Adjusted
+      totalFunding: 76000000, // Example funding
+      currentFunding: 48200000, // Example current funding
+      contributors: 3400,
+      timeRemaining: '7 months',
       verified: true,
-      certifications: ['VCS', 'CAR'],
-      featured: true,
+      certifications: ['NMCG', 'CPCB'],
+      featured: false,
       benefits: [
-        'Marine biodiversity',
-        'Carbon sequestration',
-        'Fisheries support',
-        'Coastal protection'
+        'Water conservation',
+        'Wildlife habitat',
+        'Tourism development',
+        'Pollution reduction'
       ]
     },
     {
       id: 4,
-      name: 'Solar Energy Cooperative',
-      location: 'Kenya, Africa',
+      name: 'Wind Energy Farms',
+      location: 'Tamil Nadu, India',
       type: 'renewable',
-      region: 'africa',
+      region: 'south-india',
       image: "/tree4.jpg",
-      coordinates: [37.0, 1.0], // Kenya coordinates
-      description: 'Community-owned solar installation providing clean energy access to rural villages',
-      co2Removed: 32000,
-      co2PerRupee: 0.0003, // Adjusted for INR (0.025/83)
-      totalFunding: 37350000, // 450K USD * 83
-      currentFunding: 23655000, // 285K USD * 83,
-      contributors: 1890,
-      timeRemaining: '4 months',
+      coordinates: [78.7, 10.8], // Tamil Nadu coordinates
+      description: 'Developing wind farms to harness clean energy in Tamil Nadu.',
+      co2Removed: 60000,
+      co2PerRupee: 0.00031, // Adjusted
+      totalFunding: 39000000, // Example funding
+      currentFunding: 25500000, // Example current funding
+      contributors: 1990,
+      timeRemaining: '5 months',
       verified: true,
-      certifications: ['Gold Standard'],
+      certifications: ['CEIG', 'MoEFCC'],
       featured: false,
       benefits: [
-        'Energy access',
-        'Women empowerment',
-        'Education support',
-        'Healthcare improvement'
+        'Energy production',
+        'Employment opportunities',
+        'Local business growth',
+        'Environmental sustainability'
       ]
     },
     {
       id: 5,
-      name: 'Mangrove Conservation',
-      location: 'Philippines, Asia',
+      name: 'Tropical Savanna Conservation',
+      location: 'Chhattisgarh, India',
       type: 'forestry',
-      region: 'asia',
+      region: 'central-india',
       image: "/tree5.jpg",
-      coordinates: [121.0, 13.0], // Philippines coordinates
-      description: 'Protecting and restoring mangrove ecosystems crucial for coastal communities and carbon storage',
+      coordinates: [82.0, 21.7], // Chhattisgarh coordinates
+      description: 'Protecting and restoring tropical savanna ecosystems in Chhattisgarh.',
       co2Removed: 85000,
-      co2PerRupee: 0.00041, // Adjusted for INR (0.034/83)
-      totalFunding: 99600000, // 1.2M USD * 83
-      currentFunding: 74700000, // 900K USD * 83,
-      contributors: 6750,
-      timeRemaining: '10 months',
+      co2PerRupee: 0.00044, // Adjusted
+      totalFunding: 102000000, // Example funding
+      currentFunding: 76500000, // Example current funding
+      contributors: 6890,
+      timeRemaining: '11 months',
       verified: true,
-      certifications: ['VCS', 'CCBS'],
+      certifications: ['WWF', 'Govt of India'],
       featured: true,
       benefits: [
-        'Coastal protection',
-        'Fisheries enhancement',
-        'Storm surge reduction',
-        'Community livelihoods'
+        'Biodiversity conservation',
+        'Carbon storage',
+        'Community livelihoods',
+        'Climate resilience'
       ]
     }
   ];

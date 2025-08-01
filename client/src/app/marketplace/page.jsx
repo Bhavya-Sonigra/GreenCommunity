@@ -42,13 +42,13 @@ const products = [
   {
     id: 1,
     name: 'Bamboo Toothbrush Set',
-    price: 24.99,
-    originalPrice: 29.99,
+price: 150, // ₹150 (based on Indian marketplace pricing)
+    originalPrice: 399, // ₹399 
     rating: 4.8,
     reviews: 156,
     image: '/marketplace/1.jpeg',
     category: 'personal-care',
-    vendor: 'EcoLife',
+    vendor: 'EcoLife India',
     vendorType: 'Certified',
     tags: ['Plastic-Free', 'Biodegradable', 'Organic'],
     co2Saved: 0.5,
@@ -58,8 +58,8 @@ const products = [
   },
   {
     id: 2,
-    name: 'Reusable Water Bottle',
-    price: 34.99,
+    name: 'Reusable Steel Water Bottle',
+price: 350, // ₹350 (based on Indian marketplace pricing)
     rating: 4.9,
     reviews: 298,
     image: '/marketplace/2.jpeg',
@@ -68,19 +68,19 @@ const products = [
     vendorType: 'Local',
     tags: ['BPA-Free', 'Recycled Steel', 'Lifetime Warranty'],
     co2Saved: 2.1,
-    description: 'Insulated stainless steel water bottle, 32oz',
+    description: 'Insulated stainless steel water bottle, 1L capacity',
     inStock: true,
     featured: false
   },
   {
     id: 3,
     name: 'Organic Cotton Tote Bag',
-    price: 18.99,
+price: 200, // ₹200 (based on Indian marketplace pricing)
     rating: 4.7,
     reviews: 87,
     image: '/marketplace/3.jpeg',
     category: 'clothing',
-    vendor: 'FairTrade Co',
+    vendor: 'FairTrade India',
     vendorType: 'Nonprofit',
     tags: ['Fair Trade', 'Organic Cotton', 'Reusable'],
     co2Saved: 1.2,
@@ -90,25 +90,25 @@ const products = [
   },
   {
     id: 4,
-    name: 'Solar Power Bank',
-    price: 49.99,
-    originalPrice: 64.99,
+    name: 'Solar Power Bank 10000mAh',
+price: 700, // ₹700 (based on Indian marketplace pricing)
+    originalPrice: 1699, // ₹1699
     rating: 4.6,
     reviews: 134,
     image: '/marketplace/4.jpeg',
     category: 'tech',
-    vendor: 'SolarTech',
+    vendor: 'SolarTech India',
     vendorType: 'Certified',
     tags: ['Solar Powered', 'Waterproof', '10000mAh'],
     co2Saved: 3.8,
-    description: 'Portable solar charger with wireless charging',
+    description: 'Portable solar charger with wireless charging capability',
     inStock: false,
     featured: false
   },
   {
     id: 5,
-    name: 'Compost Bin Kit',
-    price: 89.99,
+    name: 'Home Compost Bin Kit',
+price: 950, // ₹950 (based on Indian marketplace pricing)
     rating: 4.9,
     reviews: 203,
     image: '/marketplace/5.jpeg',
@@ -117,23 +117,23 @@ const products = [
     vendorType: 'Local',
     tags: ['Composting', 'Recycled Materials', 'Easy Setup'],
     co2Saved: 12.5,
-    description: 'Complete home composting system',
+    description: 'Complete home composting system with instructions',
     inStock: true,
     featured: true
   },
   {
     id: 6,
     name: 'Beeswax Food Wraps',
-    price: 22.99,
+price: 220, // ₹220 (based on Indian marketplace pricing)
     rating: 4.8,
     reviews: 167,
     image: '/marketplace/6.jpeg',
     category: 'food-drink',
-    vendor: 'BeePure',
+    vendor: 'BeePure India',
     vendorType: 'Certified',
     tags: ['Plastic-Free', 'Reusable', 'Natural Beeswax'],
     co2Saved: 0.8,
-    description: 'Set of 6 reusable food storage wraps',
+    description: 'Set of 6 reusable food storage wraps made from natural beeswax',
     inStock: true,
     featured: false
   }
@@ -201,7 +201,7 @@ function MobileMarketplaceView({
                       <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded" />
                       <div className="flex-1">
                         <div className="font-medium text-xs">{item.name}</div>
-                        <div className="text-muted-foreground text-xs">₹{(item.price * USD_TO_INR).toFixed(2)}</div>
+                        <div className="text-muted-foreground text-xs">₹{item.price}</div>
                       </div>
                       <div className="text-xs">Qty: {item.quantity}</div>
                     </div>
@@ -252,7 +252,7 @@ function MobileMarketplaceView({
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-xs text-foreground leading-tight">{product.name}</h3>
-                <span className="font-bold text-xs text-foreground">₹{(product.price * USD_TO_INR).toFixed(0)}</span>
+                        <span className="font-bold text-xs text-foreground">₹{product.price}</span>
               </div>
               <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
               <div className="flex items-center gap-1">
@@ -352,7 +352,7 @@ function TabletMarketplaceView({
                       <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
                       <div className="flex-1">
                         <div className="font-medium text-sm">{item.name}</div>
-                        <div className="text-muted-foreground text-xs">₹{(item.price * USD_TO_INR).toFixed(2)}</div>
+                        <div className="text-muted-foreground text-xs">₹{item.price}</div>
                       </div>
                       <div className="text-sm">Qty: {item.quantity}</div>
                     </div>
@@ -419,7 +419,7 @@ function TabletMarketplaceView({
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-foreground leading-tight text-sm sm:text-base">{product.name}</h3>
                     <div className="text-right shrink-0">
-                      <div className="font-bold text-foreground text-sm sm:text-base">₹{(product.price * USD_TO_INR).toFixed(2)}</div>
+                      <div className="font-bold text-foreground text-sm sm:text-base">₹{product.price}</div>
                     </div>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">{product.description}</p>
@@ -539,7 +539,7 @@ function DesktopMarketplaceView({
                       <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
                       <div className="flex-1">
                         <div className="font-medium text-sm">{item.name}</div>
-                        <div className="text-muted-foreground text-xs">₹{(item.price * USD_TO_INR).toFixed(2)}</div>
+                        <div className="text-muted-foreground text-xs">₹{item.price}</div>
                       </div>
                       <div className="text-sm">Qty: {item.quantity}</div>
                     </div>
@@ -610,7 +610,7 @@ function DesktopMarketplaceView({
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-foreground leading-tight">{product.name}</h3>
                     <div className="text-right shrink-0">
-                      <div className="font-bold text-foreground">₹{(product.price * USD_TO_INR).toFixed(2)}</div>
+                      <div className="font-bold text-foreground">₹{product.price}</div>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
@@ -687,7 +687,7 @@ const Marketplace = () => {
   };
 
   const getTotalCartItems = () => cartItems.reduce((total, item) => total + item.quantity, 0);
-  const getTotalCartValue = () => cartItems.reduce((total, item) => total + (item.price * USD_TO_INR * item.quantity), 0);
+  const getTotalCartValue = () => cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
   const removeFromCart = (productId) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
