@@ -30,8 +30,8 @@ const products = [
   {
     id: 1,
     name: 'Bamboo Toothbrush Set',
-    price: 24.99,
-    originalPrice: 29.99,
+    price: 300,
+    originalPrice: 399,
     rating: 4.8,
     reviews: 156,
     image: '/marketplace/1.jpeg',
@@ -68,7 +68,7 @@ const products = [
   {
     id: 2,
     name: 'Reusable Water Bottle',
-    price: 34.99,
+    price: 350,
     rating: 4.9,
     reviews: 298,
     image: '/marketplace/2.jpeg',
@@ -105,7 +105,7 @@ const products = [
   {
     id: 3,
     name: 'Organic Cotton Tote Bag',
-    price: 18.99,
+    price: 200,
     rating: 4.7,
     reviews: 87,
     image: '/marketplace/3.jpeg',
@@ -139,48 +139,48 @@ const products = [
       'Free Shipping': 'Orders over ₹2000'
     }
   },
-  {
-    id: 4,
-    name: 'Solar Power Bank',
-    price: 49.99,
-    originalPrice: 64.99,
-    rating: 4.6,
-    reviews: 134,
-    image: '/marketplace/4.jpeg',
-    category: 'tech',
-    vendor: 'SolarTech',
-    vendorType: 'Certified',
-    tags: ['Solar Powered', 'Fast Charging', 'Waterproof'],
-    co2Saved: 3.5,
-    description: 'Portable solar charger with 10000mAh capacity',
-    inStock: true,
-    featured: false,
-    detailedDescription: 'Never run out of power with our solar-powered portable charger. This 10000mAh power bank features a built-in solar panel for eco-friendly charging and includes fast-charging technology. Perfect for outdoor adventures, camping trips, or emergency situations.',
-    specifications: {
-      'Capacity': '10000mAh',
-      'Solar Panel': 'Built-in 2W solar panel',
-      'Output': '5V/2.1A',
-      'Input': 'Micro USB, USB-C',
-      'Charging Time': '6-8 hours (solar), 3-4 hours (USB)',
-      'Waterproof': 'IPX4 rating'
-    },
-    benefits: [
-      'Renewable solar charging',
-      'Reduces reliance on grid power',
-      'Emergency backup power',
-      'Portable and lightweight',
-      'Waterproof for outdoor use'
-    ],
-    shipping: {
-      'Standard': '3-5 business days',
-      'Express': '1-2 business days',
-      'Free Shipping': 'Orders over ₹2000'
-    }
-  },
+  // {
+  //   id: 4,
+  //   name: 'Solar Power Bank',
+  //   price: 700,
+  //   originalPrice: 1699,
+  //   rating: 4.6,
+  //   reviews: 134,
+  //   image: '/marketplace/4.jpeg',
+  //   category: 'tech',
+  //   vendor: 'SolarTech',
+  //   vendorType: 'Certified',
+  //   tags: ['Solar Powered', 'Fast Charging', 'Waterproof'],
+  //   co2Saved: 3.5,
+  //   description: 'Portable solar charger with 10000mAh capacity',
+  //   inStock: true,
+  //   featured: false,
+  //   detailedDescription: 'Never run out of power with our solar-powered portable charger. This 10000mAh power bank features a built-in solar panel for eco-friendly charging and includes fast-charging technology. Perfect for outdoor adventures, camping trips, or emergency situations.',
+  //   specifications: {
+  //     'Capacity': '10000mAh',
+  //     'Solar Panel': 'Built-in 2W solar panel',
+  //     'Output': '5V/2.1A',
+  //     'Input': 'Micro USB, USB-C',
+  //     'Charging Time': '6-8 hours (solar), 3-4 hours (USB)',
+  //     'Waterproof': 'IPX4 rating'
+  //   },
+  //   benefits: [
+  //     'Renewable solar charging',
+  //     'Reduces reliance on grid power',
+  //     'Emergency backup power',
+  //     'Portable and lightweight',
+  //     'Waterproof for outdoor use'
+  //   ],
+  //   shipping: {
+  //     'Standard': '3-5 business days',
+  //     'Express': '1-2 business days',
+  //     'Free Shipping': 'Orders over ₹2000'
+  //   }
+  // },
   {
     id: 5,
     name: 'Beeswax Food Wraps',
-    price: 22.99,
+    price: 220,
     rating: 4.5,
     reviews: 203,
     image: '/marketplace/5.jpeg',
@@ -217,7 +217,7 @@ const products = [
   {
     id: 6,
     name: 'Bamboo Cutlery Set',
-    price: 15.99,
+    price: 950,
     rating: 4.4,
     reviews: 89,
     image: '/marketplace/6.jpeg',
@@ -256,9 +256,7 @@ const products = [
 const ProductDetail = () => {
   const params = useParams();
   const router = useRouter();
-  const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const productId = parseInt(params.id);
   const product = products.find(p => p.id === productId);
@@ -278,19 +276,6 @@ const ProductDetail = () => {
     );
   }
 
-  const handleAddToCart = () => {
-    if (quantity <= 0) {
-      return; // Don't add to cart if quantity is 0 or less
-    }
-    
-    setIsAddingToCart(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsAddingToCart(false);
-      // Here you would typically add to cart state management
-      console.log(`Added ${quantity} ${product.name} to cart`);
-    }, 1000);
-  };
 
   const images = [product.image]; // In a real app, you'd have multiple images
 
@@ -389,11 +374,11 @@ const ProductDetail = () => {
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-foreground">
-                    ₹{(product.price * USD_TO_INR).toFixed(0)}
+                    ₹{product.price}
                   </span>
                   {product.originalPrice && (
                     <span className="text-lg text-muted-foreground line-through">
-                      ₹{(product.originalPrice * USD_TO_INR).toFixed(0)}
+                      ₹{product.originalPrice}
                     </span>
                   )}
                 </div>
@@ -425,55 +410,18 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Quantity Selector */}
+            {/* Stock Status */}
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Quantity</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border rounded-lg">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(Math.max(0, quantity - 1))}
-                    className="h-10 w-10"
-                    disabled={quantity <= 0}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="px-4 py-2 min-w-[60px] text-center font-medium">
-                    {quantity}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="h-10 w-10"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <span className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-foreground mb-2">Availability</h3>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                  product.inStock 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
                   {product.inStock ? 'In Stock' : 'Out of Stock'}
                 </span>
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button 
-                className="flex-1 btn-hero"
-                onClick={handleAddToCart}
-                disabled={!product.inStock || isAddingToCart || quantity <= 0}
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                {isAddingToCart ? 'Adding...' : quantity <= 0 ? 'Select Quantity' : 'Add to Cart'}
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                disabled={quantity <= 0}
-              >
-                Buy Now
-              </Button>
             </div>
 
             {/* Vendor Info */}
@@ -606,26 +554,14 @@ const ProductDetail = () => {
                             <span className="text-xs font-medium">{relatedProduct.rating}</span>
                           </div>
                           <span className="font-bold text-foreground text-sm">
-                            ₹{(relatedProduct.price * USD_TO_INR).toFixed(0)}
+                            ₹{relatedProduct.price}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-center">
                           <div className="flex items-center gap-1 text-green-600">
                             <Leaf className="h-3 w-3" />
                             <span className="text-xs">-{relatedProduct.co2Saved}kg CO₂</span>
                           </div>
-                          <Button 
-                            size="sm" 
-                            className="btn-hero text-xs px-2 py-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Add to cart logic here
-                              console.log(`Added ${relatedProduct.name} to cart`);
-                            }}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Add
-                          </Button>
                         </div>
                       </div>
                     </CardContent>

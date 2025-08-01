@@ -100,7 +100,7 @@ const Dashboard = () => {
 
   // Mock data - in a real app, this would come from an API
   const currentFootprint = 2.4; // tons CO2 per month
-  const targetFootprint = 2.0;
+  const targetFootprint = 20.0;
   const dailyEmissions = [1.2, 2.1, 1.8, 2.5, 1.9, 2.3, 1.7]; // Last 7 days
   const weeklyTotal = dailyEmissions.reduce((a, b) => a + b, 0);
 
@@ -220,7 +220,7 @@ const Dashboard = () => {
                   <AnimatedCounter end={goalProgress} />%
                 </div>
                 <div className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                  Target: {targetFootprint} tons/month
+                  Target: {targetFootprint} Kg/month
                 </div>
                 <ProfessionalProgress value={goalProgress} />
               </div>
