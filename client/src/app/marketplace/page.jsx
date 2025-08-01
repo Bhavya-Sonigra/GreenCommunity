@@ -9,13 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { 
-  Search, 
-  Filter, 
-  ShoppingCart, 
-  Star, 
-  Leaf, 
-  Recycle, 
+import {
+  Search,
+  Filter,
+  ShoppingCart,
+  Star,
+  Leaf,
+  Recycle,
   Award,
   MapPin,
   Plus,
@@ -42,8 +42,8 @@ const products = [
   {
     id: 1,
     name: 'Bamboo Toothbrush Set',
-price: 150, // ₹150 (based on Indian marketplace pricing)
-    originalPrice: 399, // ₹399 
+    price: 300, // ₹400 (based on Indian marketplace pricing)
+    originalPrice: 399, // ₹399
     rating: 4.8,
     reviews: 156,
     image: '/marketplace/1.jpeg',
@@ -59,7 +59,7 @@ price: 150, // ₹150 (based on Indian marketplace pricing)
   {
     id: 2,
     name: 'Reusable Steel Water Bottle',
-price: 350, // ₹350 (based on Indian marketplace pricing)
+    price: 350, // ₹350 (based on Indian marketplace pricing)
     rating: 4.9,
     reviews: 298,
     image: '/marketplace/2.jpeg',
@@ -75,7 +75,7 @@ price: 350, // ₹350 (based on Indian marketplace pricing)
   {
     id: 3,
     name: 'Organic Cotton Tote Bag',
-price: 200, // ₹200 (based on Indian marketplace pricing)
+    price: 700, // ₹200 (based on Indian marketplace pricing)
     rating: 4.7,
     reviews: 87,
     image: '/marketplace/3.jpeg',
@@ -91,7 +91,7 @@ price: 200, // ₹200 (based on Indian marketplace pricing)
   {
     id: 4,
     name: 'Solar Power Bank 10000mAh',
-price: 700, // ₹700 (based on Indian marketplace pricing)
+    price: 700, // ₹700 (based on Indian marketplace pricing)
     originalPrice: 1699, // ₹1699
     rating: 4.6,
     reviews: 134,
@@ -108,7 +108,7 @@ price: 700, // ₹700 (based on Indian marketplace pricing)
   {
     id: 5,
     name: 'Home Compost Bin Kit',
-price: 950, // ₹950 (based on Indian marketplace pricing)
+    price: 950, // ₹950 (based on Indian marketplace pricing)
     rating: 4.9,
     reviews: 203,
     image: '/marketplace/5.jpeg',
@@ -124,7 +124,7 @@ price: 950, // ₹950 (based on Indian marketplace pricing)
   {
     id: 6,
     name: 'Beeswax Food Wraps',
-price: 220, // ₹220 (based on Indian marketplace pricing)
+    price: 220, // ₹220 (based on Indian marketplace pricing)
     rating: 4.8,
     reviews: 167,
     image: '/marketplace/6.jpeg',
@@ -139,13 +139,13 @@ price: 220, // ₹220 (based on Indian marketplace pricing)
   }
 ];
 
-function MobileMarketplaceView({ 
-  cartItems, 
-  addToCart, 
+function MobileMarketplaceView({
+  cartItems,
+  addToCart,
   removeFromCart,
   updateCartItemQuantity,
-  getTotalCartItems, 
-  getTotalCartValue 
+  getTotalCartItems,
+  getTotalCartValue
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -240,8 +240,8 @@ function MobileMarketplaceView({
       {/* Products List */}
       <div className="flex flex-col gap-2 sm:gap-3">
         {filteredProducts.map(product => (
-          <Card 
-            key={product.id} 
+          <Card
+            key={product.id}
             className="relative flex flex-row gap-2 items-center p-2 sm:p-3 cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => handleProductClick(product.id)}
           >
@@ -252,7 +252,7 @@ function MobileMarketplaceView({
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-xs text-foreground leading-tight">{product.name}</h3>
-                        <span className="font-bold text-xs text-foreground">₹{product.price}</span>
+                <span className="font-bold text-xs text-foreground">₹{product.price}</span>
               </div>
               <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
               <div className="flex items-center gap-1">
@@ -269,10 +269,10 @@ function MobileMarketplaceView({
                 )}
               </div>
             </div>
-            <Button 
-              size="icon" 
-              onClick={(e) => handleAddToCart(e, product)} 
-              disabled={!product.inStock} 
+            <Button
+              size="icon"
+              onClick={(e) => handleAddToCart(e, product)}
+              disabled={!product.inStock}
               className="ml-2 bg-gradient-primary hover:bg-green-700 hover:shadow-lg p-1 sm:p-2"
             >
               <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -393,12 +393,12 @@ function TabletMarketplaceView({
         ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'
         : 'space-y-3 sm:space-y-4'}>
         {filteredProducts.map(product => (
-          <Card 
-            key={product.id} 
+          <Card
+            key={product.id}
             className={`card-gradient hover-lift cursor-pointer ${viewMode === 'list' ? 'flex-row' : ''}`}
             onClick={() => handleProductClick(product.id)}
           >
-            
+
             <div className={viewMode === 'list' ? 'w-32 shrink-0' : ''}>
               <div className="relative aspect-square overflow-hidden rounded-t-lg">
                 <img
@@ -451,9 +451,9 @@ function TabletMarketplaceView({
                     <Leaf className="h-4 w-4" />
                     <span className="text-sm font-medium">-{product.co2Saved}kg CO₂</span>
                   </div>
-                  <Button 
-                    size="sm" 
-                    onClick={(e) => handleAddToCart(e, product)} 
+                  <Button
+                    size="sm"
+                    onClick={(e) => handleAddToCart(e, product)}
                     disabled={!product.inStock}
                     className="btn-hero text-xs"
                   >
@@ -582,8 +582,8 @@ function DesktopMarketplaceView({
         ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
         : 'space-y-4'}>
         {filteredProducts.map(product => (
-          <Card 
-            key={product.id} 
+          <Card
+            key={product.id}
             className={`card-gradient hover-lift cursor-pointer ${viewMode === 'list' ? 'flex-row' : ''}`}
             onClick={() => handleProductClick(product.id)}
           >
@@ -642,9 +642,9 @@ function DesktopMarketplaceView({
                     <Leaf className="h-4 w-4" />
                     <span className="text-sm font-medium">-{product.co2Saved}kg CO₂</span>
                   </div>
-                  <Button 
-                    size="sm" 
-                    onClick={(e) => handleAddToCart(e, product)} 
+                  <Button
+                    size="sm"
+                    onClick={(e) => handleAddToCart(e, product)}
                     disabled={!product.inStock}
                     className="btn-hero"
                   >
@@ -676,8 +676,8 @@ const Marketplace = () => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       if (existingItem) {
-        return prevItems.map(item => 
-          item.id === product.id 
+        return prevItems.map(item =>
+          item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -694,8 +694,8 @@ const Marketplace = () => {
   };
 
   const updateCartItemQuantity = (productId, quantity) => {
-    setCartItems(prevItems => 
-      prevItems.map(item => 
+    setCartItems(prevItems =>
+      prevItems.map(item =>
         item.id === productId
           ? { ...item, quantity: Math.max(0, quantity) }
           : item
