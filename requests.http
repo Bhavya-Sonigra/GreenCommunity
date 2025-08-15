@@ -1,0 +1,408 @@
+# ======================
+# GreenCommunity Auth API Testing
+# ======================
+# Make sure to create `rest-client.env.json` in your workspace root
+# Environment Variables: {{baseUrl}} = http://localhost:5000
+
+# ======================
+# 🏥 HEALTH CHECK
+# ======================
+@baseUrl = http://localhost:5000
+@authToken = 
+@userToken = 
+@userId = 
+@userEmail = 
+@twoFactorSecret = 
+
+GET {{baseUrl}}/api/auth/health
+Accept: application/json
+
+###
+
+# ======================
+# 👤 USER REGISTRATION & VERIFICATION
+# ======================
+
+# 1️⃣ Register New User
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "testuser@example.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+> {% client.global.set("userToken", response.body.token) %}
+> {% client.global.set("userId", response.body.user.id) %}
+> {% client.global.set("userEmail", response.body.user.email) %}
+
+###
+
+# 2️⃣ Verify Email with Code (check your email for verification code)
+POST {{baseUrl}}/api/auth/verify-email-code
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "code": "123456"
+}
+
+###
+
+# 3️⃣ Resend Verification Code
+POST {{baseUrl}}/api/auth/resend-verification-code
+Content-Type: application/json
+
+{
+  "email": "{{userEmail}}"
+}
+
+###
+
+# 4️⃣ Verify Email (alternative method)
+POST {{baseUrl}}/api/auth/verify-email
+Content-Type: application/json
+
+{
+  "token": "email-verification-token-here"
+}
+
+###
+
+# ======================
+# 🔐 USER LOGIN & LOGOUT
+# ======================
+
+# 5️⃣ User Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Password123!"
+}
+
+> {% client.global.set("authToken", response.body.token) %}
+> {% client.global.set("userId", response.body.user.id) %}
+
+###
+
+# 6️⃣ User Logout
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+# ======================
+# 🔄 PASSWORD RESET FLOW
+# ======================
+
+# 7️⃣ Request Password Reset
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com"
+}
+
+###
+
+# 8️⃣ Verify Reset Code
+POST {{baseUrl}}/api/auth/verify-reset-code
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "code": "123456"
+}
+
+###
+
+# 9️⃣ Update Password with Code
+POST {{baseUrl}}/api/auth/update-password-with-code
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "code": "123456",
+  "newPassword": "NewPassword123!"
+}
+
+###
+
+# 🔟 Reset Password (alternative method)
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "password-reset-token-here",
+  "password": "NewPassword123!"
+}
+
+###
+
+# ======================
+# 👤 USER PROFILE & SETTINGS
+# ======================
+
+# 1️⃣1️⃣ Get Current User
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+# 1️⃣2️⃣ Change Password (Authenticated)
+POST {{baseUrl}}/api/auth/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Password123!",
+  "newPassword": "NewPassword123!"
+}
+
+###
+
+# 1️⃣3️⃣ Update Password (Authenticated)
+POST {{baseUrl}}/api/auth/update-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "NewPassword123!",
+  "newPassword": "UpdatedPassword123!"
+}
+
+###
+
+# 1️⃣4️⃣ Update User Profile
+POST {{baseUrl}}/api/auth/update-profile
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Test User",
+  "phone": "+1234567890",
+  "dateOfBirth": "1990-01-01",
+  "location": "New York, USA",
+  "bio": "Updated bio for test user"
+}
+
+###
+
+# 1️⃣5️⃣ Get User Settings
+GET {{baseUrl}}/api/auth/settings
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+# 1️⃣6️⃣ Update Notification Preferences
+POST {{baseUrl}}/api/auth/update-notifications
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "emailNotifications": {
+    "marketing": false,
+    "updates": true,
+    "security": true
+  },
+  "pushNotifications": {
+    "enabled": true,
+    "marketing": false,
+    "updates": true,
+    "security": true
+  },
+  "smsNotifications": {
+    "enabled": false,
+    "security": true
+  }
+}
+
+###
+
+# 1️⃣7️⃣ Update App Preferences
+POST {{baseUrl}}/api/auth/update-preferences
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "language": "en",
+  "timezone": "America/New_York",
+  "currency": "USD",
+  "theme": "dark",
+  "accessibility": {
+    "reduceMotion": false,
+    "highContrast": false,
+    "fontSize": "medium"
+  },
+  "privacy": {
+    "profileVisibility": "public",
+    "showActivity": true,
+    "allowMessaging": true
+  }
+}
+
+###
+
+# ======================
+# 🔐 TWO-FACTOR AUTHENTICATION (2FA)
+# ======================
+
+# 1️⃣8️⃣ Generate 2FA Secret
+POST {{baseUrl}}/api/auth/2fa/generate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+> {% client.global.set("twoFactorSecret", response.body.secret) %}
+
+###
+
+# 1️⃣9️⃣ Verify 2FA Token (Enable 2FA)
+POST {{baseUrl}}/api/auth/2fa/verify
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "token": "123456"
+}
+
+###
+
+# 2️⃣0️⃣ Verify 2FA for Login
+POST {{baseUrl}}/api/auth/2fa/verify-login
+Content-Type: application/json
+
+{
+  "tempToken": "temporary-2fa-token-here",
+  "code": "123456"
+}
+
+> {% client.global.set("authToken", response.body.token) %}
+
+###
+
+# 2️⃣1️⃣ Disable 2FA
+POST {{baseUrl}}/api/auth/2fa/disable
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "password": "UpdatedPassword123!"
+}
+
+###
+
+# ======================
+# 🌐 OAUTH - GOOGLE LOGIN
+# ======================
+
+# 2️⃣2️⃣ Start Google OAuth Login (Open in browser)
+# GET {{baseUrl}}/api/auth/google
+
+# Note: Google OAuth requires browser interaction
+# 1. Visit: http://localhost:5000/api/auth/google
+# 2. Complete Google login in browser
+# 3. You'll be redirected to callback URL with token
+
+###
+
+# 2️⃣3️⃣ Google OAuth Callback (Handled automatically by browser)
+# GET {{baseUrl}}/api/auth/google/callback
+
+# This endpoint is called automatically after Google login
+# The token will be provided in the redirect URL
+
+###
+
+# 2️⃣4️⃣ OAuth Failure Handler
+GET {{baseUrl}}/api/auth/failure
+Accept: application/json
+
+###
+
+# ======================
+# 🧪 TEST SCENARIOS
+# ======================
+
+# Test Invalid Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "invalid@example.com",
+  "password": "wrongpassword"
+}
+
+###
+
+# Test Registration with Existing Email
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Duplicate User",
+  "email": "testuser@example.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+###
+
+# Test Invalid Email Format
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "invalid-email",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+###
+
+# Test Weak Password
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "weakpass@example.com",
+  "password": "123",
+  "confirmPassword": "123"
+}
+
+###
+
+# Test Unauthorized Access
+GET {{baseUrl}}/api/auth/me
+Accept: application/json
+
+###
+
+# Test Rate Limiting (Login) - Run this multiple times quickly
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "wrongpassword"
+}
+
+###
+
+# Test Rate Limiting (Forgot Password) - Run this multiple times quickly
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com"
+}
+
+###

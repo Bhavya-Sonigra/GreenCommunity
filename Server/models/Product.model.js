@@ -465,6 +465,14 @@ productSchema.statics.searchProducts = function(searchOptions = {}) {
 // Function to get Product model with marketplace database connection
 const getProductModel = async () => {
   const marketplaceConnection = await getConnection('MARKETPLACE_DB');
+  
+  // Ensure User model is also registered on this connection for populate to work
+  if (!marketplaceConnection.models.User) {
+    const User = await import('./User.model.js');
+    const userSchema = User.default.schema;
+    marketplaceConnection.model('User', userSchema);
+  }
+  
   return marketplaceConnection.model('Product', productSchema);
 };
 

@@ -144,7 +144,6 @@ const userInfoSchema = new mongoose.Schema({
 });
 
 // Indexes for performance
-userInfoSchema.index({ userId: 1 }, { unique: true });
 userInfoSchema.index({ 'location.city': 1, 'location.country': 1 });
 userInfoSchema.index({ lastActive: -1 });
 userInfoSchema.index({ createdAt: -1 });

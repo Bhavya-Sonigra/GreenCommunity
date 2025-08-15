@@ -1,4 +1,5 @@
 import FootprintLog from "../models/FootprintLog.model.js";
+import "../models/User.model.js"; // Ensure User model is registered
 import ipcc from "../lib/ipccEmissionCalculator.js";
 
 // Create a new footprint log with IPCC-verified calculation

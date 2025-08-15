@@ -389,7 +389,6 @@ userSchema.methods.clearEmailVerificationCode = function() {
 };
 
 // Indexes for performance optimization
-userSchema.index({ email: 1 }); // Unique index already exists
 userSchema.index({ 'marketplace_profile.is_seller': 1 });
 userSchema.index({ 'marketplace_profile.seller_status': 1 });
 userSchema.index({ 'marketplace_profile.seller_rating.average': -1 });
