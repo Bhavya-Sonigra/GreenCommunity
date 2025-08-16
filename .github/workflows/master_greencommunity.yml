@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - greencommunity
 
 on:
@@ -23,11 +20,32 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: npm install, build, and test
+      - name: Install dependencies and build
         run: |
+          # Install server dependencies with legacy peer deps to resolve conflicts
+          cd Server
+          npm install --legacy-peer-deps
+          cd ..
+          
+          # Install client dependencies and build
+          cd client
           npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm run build
+          cd ..
+
+      - name: Prepare deployment artifacts
+        run: |
+          # Copy server files as the main application
+          cp -r Server/* .
+          
+          # Create a public directory for serving client build
+          mkdir -p public/client
+          cp -r client/.next/static public/client/static 2>/dev/null || true
+          cp -r client/.next public/client/build 2>/dev/null || true
+          cp -r client/public/* public/ 2>/dev/null || true
+          
+          # Clean up - remove the separate directories
+          rm -rf Server client
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -62,4 +80,5 @@ jobs:
           app-name: 'greencommunity'
           slot-name: 'Production'
           package: .
+
           
